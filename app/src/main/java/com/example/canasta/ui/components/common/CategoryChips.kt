@@ -1,0 +1,67 @@
+package com.example.canasta.ui.components.common
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.canasta.ui.theme.CanastaTheme
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryChips(categories: List<String>) {
+    var selectedCategories by remember { mutableStateOf(setOf<String>()) }
+
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        items(categories) { category ->
+            val isSelected = selectedCategories.contains(category)
+            FilterChip(
+                selected = isSelected,
+                onClick = {
+                    selectedCategories = if (isSelected) {
+                        selectedCategories - category
+                    } else {
+                        selectedCategories + category
+                    }
+                },
+                label = { Text(category) },
+                leadingIcon = if (isSelected) {
+                    {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon"
+                        )
+                    }
+                } else {
+                    null
+                }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CategoryChipsPreview() {
+    CanastaTheme {
+        CategoryChips(listOf("Lácteos", "Carnes", "Verduras", "Frutas", "Panadería"))
+    }
+}
