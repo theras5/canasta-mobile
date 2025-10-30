@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -19,10 +21,18 @@ import com.example.canasta.ui.components.common.CategoryChips
 import com.example.canasta.ui.components.common.ProductsSearchBar
 import com.example.canasta.ui.components.products.ProductList
 import com.example.canasta.ui.theme.CanastaTheme
+import com.example.canasta.ui.theme.Primary
+import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.ui.theme.Titles
+import com.example.canasta.ui.theme.Background
+import com.example.canasta.ui.theme.Warnings
+import com.example.canasta.ui.theme.Errors
+import com.example.canasta.ui.theme.Success
 
 
 @Composable
 fun LoginScreen() {
+    val isLoginMode = remember { mutableStateOf(false) }
     AppScaffold (bottomBar = {BottomNavBar()}){ innerPadding ->
         Box(
             modifier = Modifier
@@ -53,34 +63,33 @@ fun LoginScreen() {
                     Spacer(modifier = Modifier.height(16.dp))
                     // Título
                     Text(
-                        text = "Crear Cuenta",
+                        text = if (isLoginMode.value) "Iniciar Sesión" else "Crear Cuenta",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Titles
                     )
                     // Subtítulo
                     Text(
-                        text = "Únete a Canasta y organiza tus compras",
+                        text = if (isLoginMode.value) "Accede a tu cuenta de Canasta" else "Únete a Canasta y organiza tus compras",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     // Campos de texto
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    if (!isLoginMode.value) {
                         OutlinedTextField(
                             value = "",
                             onValueChange = {},
                             label = { Text("Nombre") },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(top = 2.dp),
                         )
                         OutlinedTextField(
                             value = "",
                             onValueChange = {},
                             label = { Text("Apellido") },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(top = 8.dp),
                         )
                     }
                     OutlinedTextField(
@@ -94,7 +103,14 @@ fun LoginScreen() {
                     OutlinedTextField(
                         value = "",
                         onValueChange = {},
-                        label = { Text("Contraseña (mínimo 6 caracteres)") },
+                        label = {
+                            Text(
+                                "Contraseña (mínimo 6 caracteres)",
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp),
@@ -104,24 +120,42 @@ fun LoginScreen() {
                     // Botón crear cuenta
                     Button(
                         onClick = {},
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
                     ) {
-                        Text("CREAR CUENTA")
+                        Text(if (isLoginMode.value) "INICIAR SESIÓN" else "CREAR CUENTA")
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     // Link iniciar sesión
-                    Text(
-                        text = "¿Ya tienes cuenta?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Iniciar sesión",
-                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .padding(top = 4.dp)
-                            .clickable { /* Navegar a login */ }
-                    )
+                    if (isLoginMode.value) {
+                        Text(
+                            text = "¿No tienes cuenta?",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Registrarse",
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
+                            color = Secondary,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .clickable { isLoginMode.value = false }
+                        )
+                    } else {
+                        Text(
+                            text = "¿Ya tienes cuenta?",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Iniciar sesión",
+                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
+                            color = Secondary,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .clickable { isLoginMode.value = true }
+                        )
+                    }
                 }
             }
         }
