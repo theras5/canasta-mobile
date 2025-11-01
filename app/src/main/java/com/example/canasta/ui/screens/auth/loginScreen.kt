@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.R
@@ -33,6 +34,7 @@ import com.example.canasta.ui.theme.Success
 @Composable
 fun LoginScreen() {
     val isLoginMode = remember { mutableStateOf(false) }
+    val isVerified = remember { mutableStateOf(true) }
     AppScaffold (bottomBar = {BottomNavBar()}){ innerPadding ->
         Box(
             modifier = Modifier
@@ -61,100 +63,190 @@ fun LoginScreen() {
                         modifier = Modifier.size(72.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Título
-                    Text(
-                        text = if (isLoginMode.value) "Iniciar Sesión" else "Crear Cuenta",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Titles
-                    )
-                    // Subtítulo
-                    Text(
-                        text = if (isLoginMode.value) "Accede a tu cuenta de Canasta" else "Únete a Canasta y organiza tus compras",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    // Campos de texto
-                    if (!isLoginMode.value) {
-                        OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
-                            label = { Text("Nombre") },
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(top = 2.dp),
-                        )
-                        OutlinedTextField(
-                            value = "",
-                            onValueChange = {},
-                            label = { Text("Apellido") },
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(top = 8.dp),
-                        )
-                    }
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = { Text("Correo electrónico") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp)
-                    )
-                    OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
-                        label = {
-                            Text(
-                                "Contraseña (mínimo 6 caracteres)",
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        visualTransformation = PasswordVisualTransformation()
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    // Botón crear cuenta
-                    Button(
-                        onClick = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Primary)
-                    ) {
-                        Text(if (isLoginMode.value) "INICIAR SESIÓN" else "CREAR CUENTA")
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Link iniciar sesión
-                    if (isLoginMode.value) {
+
+                    if (isVerified.value) {
+                        // Pantalla de verificación
                         Text(
-                            text = "¿No tienes cuenta?",
+                            text = "Verificar tu cuenta",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Titles,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "código de verificación enviado a",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
                         )
                         Text(
-                            text = "Registrarse",
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
+                            text = "{a determinar correo}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Ingresa el código para activar tu cuenta",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Campo de código de verificación
+                        OutlinedTextField(
+                            value = "",
+                            onValueChange = {},
+                            label = { Text("Código de verificación") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Botón verificar cuenta
+                        Button(
+                            onClick = {},
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                        ) {
+                            Text("VERIFICAR CUENTA")
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Enlaces de verificación
+                        Text(
+                            text = "¿No recibiste el código?",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Reenviar código",
+                            style = MaterialTheme.typography.bodySmall,
                             color = Secondary,
+                            textAlign = TextAlign.Center,
                             modifier = Modifier
-                                .padding(top = 4.dp)
-                                .clickable { isLoginMode.value = false }
+                                .padding(top = 8.dp)
+                                .clickable { /* Lógica para reenviar código */ }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Volver al registro",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .clickable {
+                                    isVerified.value = false
+                                    isLoginMode.value = false
+                                }
                         )
                     } else {
+                        // Pantalla de login/registro original
                         Text(
-                            text = "¿Ya tienes cuenta?",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface
+                            text = if (isLoginMode.value) "Iniciar Sesión" else "Crear Cuenta",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Titles
                         )
                         Text(
-                            text = "Iniciar sesión",
-                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
-                            color = Secondary,
+                            text = if (isLoginMode.value) "Accede a tu cuenta de Canasta" else "organiza tus compras con canasta",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Campos de texto
+                        if (!isLoginMode.value) {
+                            OutlinedTextField(
+                                value = "",
+                                onValueChange = {},
+                                label = { Text("Nombre") },
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(top = 2.dp),
+                            )
+                            OutlinedTextField(
+                                value = "",
+                                onValueChange = {},
+                                label = { Text("Apellido") },
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(top = 8.dp),
+                            )
+                        }
+                        OutlinedTextField(
+                            value = "",
+                            onValueChange = {},
+                            label = { Text("Correo electrónico") },
                             modifier = Modifier
-                                .padding(top = 4.dp)
-                                .clickable { isLoginMode.value = true }
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
                         )
+                        OutlinedTextField(
+                            value = "",
+                            onValueChange = {},
+                            label = {
+                                Text(
+                                    "Contraseña (mínimo 6 caracteres)",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            visualTransformation = PasswordVisualTransformation()
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Botón crear cuenta/iniciar sesión
+                        Button(
+                            onClick = {
+                                if (!isLoginMode.value) {
+                                    // Si estamos en modo registro, ir a verificación
+                                    isVerified.value = true
+                                }
+                                // Aquí puedes agregar lógica adicional para login
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                        ) {
+                            Text(if (isLoginMode.value) "INICIAR SESIÓN" else "CREAR CUENTA")
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Links de navegación
+                        if (isLoginMode.value) {
+                            Text(
+                                text = "¿No tienes cuenta?",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Registrarse",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Secondary,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .clickable { isLoginMode.value = false }
+                            )
+                        } else {
+                            Text(
+                                text = "¿Ya tienes cuenta?",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Iniciar sesión",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Secondary,
+                                modifier = Modifier
+                                    .padding(top = 4.dp)
+                                    .clickable { isLoginMode.value = true }
+                            )
+                        }
                     }
                 }
             }
