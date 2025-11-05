@@ -37,13 +37,21 @@ fun BottomNavBar() {
             selected = false,
             onClick = { /* TODO: Navegar a Productos */ },
             icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Productos") },
-            label = { Text("Productos") }
+            label = { Text("Productos") },
+
         )
         NavigationBarItem(
             selected = false,
             onClick = { /* TODO: Navegar a Perfil */ },
             icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
-            label = { Text("Perfil") }
+            label = { Text("Perfil") },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Color.White,
+                selectedTextColor = Color.White,
+                unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                unselectedTextColor = Color.White.copy(alpha = 0.7f),
+                indicatorColor = Secondary
+            )
         )
     }
 }
