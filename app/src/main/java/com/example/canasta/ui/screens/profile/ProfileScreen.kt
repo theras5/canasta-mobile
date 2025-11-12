@@ -17,16 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.profile.LogoutButton
 import com.example.canasta.ui.components.profile.ProfileHeader
 import com.example.canasta.ui.components.profile.ProfileMenuItem
 
 @Composable
 fun ProfileScreen() {
-    Scaffold(
-        bottomBar = { BottomNavBar() }
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -10,7 +10,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.data.model.Product
 import com.example.canasta.ui.components.common.AppScaffold
-import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.common.CategoryChips
 import com.example.canasta.ui.components.common.ProductsSearchBar
 import com.example.canasta.ui.components.products.ProductList
@@ -27,8 +26,7 @@ fun ProductsScreen() {
                 style = MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
-        },
-        bottomBar = { BottomNavBar() }
+        }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             ProductsSearchBar()

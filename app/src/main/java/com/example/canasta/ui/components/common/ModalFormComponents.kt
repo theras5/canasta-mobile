@@ -26,10 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.canasta.ui.theme.Titles
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.MaterialTheme
 
 /**
  * Campo de entrada de texto para modales con label personalizado
- * 
+ *
  * @param label Etiqueta del campo
  * @param value Valor actual del campo
  * @param onValueChange Callback cuando cambia el valor
@@ -53,7 +55,7 @@ fun ModalTextField(
             color = Titles,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        
+
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
@@ -81,7 +83,7 @@ fun ModalTextField(
 
 /**
  * Selector desplegable para modales con label personalizado
- * 
+ *
  * @param label Etiqueta del selector
  * @param selectedValue Valor seleccionado actual
  * @param placeholder Texto cuando no hay selección
@@ -105,7 +107,7 @@ fun ModalDropdown(
             color = Titles,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,7 +134,7 @@ fun ModalDropdown(
                     fontSize = 16.sp,
                     modifier = Modifier.weight(1f)
                 )
-                
+
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "Desplegar",
@@ -144,3 +146,28 @@ fun ModalDropdown(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun ModalTextFieldPreview() {
+    MaterialTheme {
+        ModalTextField(
+            label = "Etiqueta",
+            value = "Ejemplo",
+            onValueChange = {},
+            placeholder = "Placeholder"
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ModalDropdownPreview() {
+    MaterialTheme {
+        ModalDropdown(
+            label = "Categoría",
+            selectedValue = null,
+            placeholder = "Seleccione",
+            onClick = {}
+        )
+    }
+}

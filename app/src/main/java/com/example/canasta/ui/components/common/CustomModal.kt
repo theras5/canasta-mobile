@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.MaterialTheme
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 
@@ -150,3 +152,12 @@ fun ModalActionButton(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun CustomModalPreview() {
+    MaterialTheme {
+        CustomModal(title = "Preview Modal", onDismiss = {}) {
+            Text(text = "Contenido de ejemplo para el preview")
+        }
+    }
+}
