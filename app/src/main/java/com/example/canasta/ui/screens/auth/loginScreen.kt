@@ -15,27 +15,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.R
-import com.example.canasta.data.model.Product
 import com.example.canasta.ui.components.common.AppScaffold
-import com.example.canasta.ui.components.common.BottomNavBar
-import com.example.canasta.ui.components.common.CategoryChips
-import com.example.canasta.ui.components.common.ProductsSearchBar
-import com.example.canasta.ui.components.products.ProductList
-import com.example.canasta.ui.theme.CanastaTheme
 import com.example.canasta.ui.theme.Primary
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
-import com.example.canasta.ui.theme.Background
-import com.example.canasta.ui.theme.Warnings
-import com.example.canasta.ui.theme.Errors
-import com.example.canasta.ui.theme.Success
 
 
 @Composable
 fun LoginScreen() {
     val isLoginMode = remember { mutableStateOf(false) }
     val isVerified = remember { mutableStateOf(true) }
-    AppScaffold (bottomBar = {BottomNavBar()}){ innerPadding ->
+    AppScaffold { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
