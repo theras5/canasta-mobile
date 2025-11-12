@@ -16,6 +16,8 @@ import com.example.canasta.ui.components.common.ProductsSearchBar
 import com.example.canasta.ui.components.products.ProductList
 import com.example.canasta.ui.theme.CanastaTheme
 
+
+
 @Composable
 fun ProductsScreen() {
     AppScaffold(
