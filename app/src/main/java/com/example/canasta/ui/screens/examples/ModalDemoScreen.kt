@@ -17,7 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.SimpleDropdownModal
 import com.example.canasta.ui.components.common.SimpleTextInputModal
@@ -140,3 +142,10 @@ fun ModalDemoScreen() {
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun ModalDemoScreenPreview() {
+    MaterialTheme {
+        ModalDemoScreen()
+    }
+}

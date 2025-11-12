@@ -8,6 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 import com.example.canasta.ui.components.common.CustomModal
 import com.example.canasta.ui.components.common.ModalActionButton
@@ -68,3 +70,10 @@ fun CreateListModal(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun CreateListModalPreview() {
+    MaterialTheme {
+        CreateListModal(onDismiss = {}, onCreateList = { _: String, _: String? -> })
+    }
+}

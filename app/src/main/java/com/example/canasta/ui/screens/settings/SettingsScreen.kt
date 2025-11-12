@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
 
@@ -57,8 +56,7 @@ fun SettingsScreen(
                     containerColor = Color.White
                 )
             )
-        },
-        bottomBar = { BottomNavBar() }
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier

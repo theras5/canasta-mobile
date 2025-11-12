@@ -27,15 +27,6 @@ fun TopBarListas() {
                 color = Titles
             )
         },
-        actions = {
-            IconButton(onClick = { /* TODO: Lógica para ver el historial */ }) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = "Historial de listas",
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-        },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
     )
 }
