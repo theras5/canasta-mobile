@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.data.model.Product
@@ -19,7 +18,7 @@ fun ProductList(products: List<Product>) {
     ) {
         items(
             items = products,
-            key = { product -> product.id }
+            key = { product -> product.id ?: product.hashCode() }
         ) { product ->
             ProductCard(product = product)
         }
@@ -31,9 +30,9 @@ fun ProductList(products: List<Product>) {
 fun ProductListPreview() {
     CanastaTheme {
         val mockProducts = listOf(
-            Product(1, "Aceite", "Condimentos"),
-            Product(2, "Agua mineral", "Bebidas"),
-            Product(3, "Banana", "Frutas")
+            Product("Aceite", "Condimentos"),
+            Product("Agua mineral", "Bebidas"),
+            Product("Banana", "Frutas")
         )
         ProductList(products = mockProducts)
     }

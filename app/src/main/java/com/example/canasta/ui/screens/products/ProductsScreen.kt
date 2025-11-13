@@ -32,9 +32,9 @@ fun ProductsScreen() {
             ProductsSearchBar()
             CategoryChips(listOf("Lácteos", "Carnes", "Verduras", "Frutas", "Panadería"))
             val mockProducts = listOf(
-                Product(1, "Aceite", "Condimentos"),
-                Product(2, "Agua mineral", "Bebidas"),
-                Product(3, "Banana", "Frutas")
+                Product("Aceite", "Condimentos"),
+                Product("Agua mineral", "Bebidas"),
+                Product("Banana", "Frutas")
             )
             ProductList(products = mockProducts)
         }

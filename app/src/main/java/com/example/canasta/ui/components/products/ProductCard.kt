@@ -36,13 +36,19 @@ fun ProductCard(product: Product) {
         ) {
             Icon(
                 imageVector = Icons.Default.ShoppingCart, // Placeholder icon
-                contentDescription = product.name,
+                contentDescription = product.name ?: "Producto",
                 modifier = Modifier.size(40.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = product.name, style = MaterialTheme.typography.titleMedium)
-                Text(text = product.category, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = product.name ?: "Sin nombre",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = product.category ?: "Sin categoría",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
             IconButton(onClick = { /* TODO: Handle more options */ }) {
                 Icon(
@@ -58,6 +64,6 @@ fun ProductCard(product: Product) {
 @Composable
 fun ProductCardPreview() {
     CanastaTheme {
-        ProductCard(Product(1, "Aceite", "Condimentos"))
+        ProductCard(Product("Aceite", "Condimentos"))
     }
 }
