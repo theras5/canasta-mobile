@@ -1,0 +1,4285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCI -- Grocery Manager REST API documentation - 1.0.0</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <style>
+        html {
+          box-sizing: border-box;
+          overflow: -moz-scrollbars-vertical;
+          overflow-y: scroll;
+        }
+        *, *:before, *:after {
+          box-sizing: inherit;
+        }
+        body {
+          margin:0;
+          background: #fafafa;
+        }
+    </style>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+<script>
+    window.onload = function() {
+      // Construir la UI de Swagger
+      const ui = SwaggerUIBundle({
+        url: '',
+        spec: {
+  "openapi": "3.0.0",
+  "info": {
+    "title": "HCI -- Grocery Manager REST API documentation",
+    "version": "1.0.0",
+    "description": "REST API to serve client applications for HCI assignment."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "responses": {
+    "NotFound": {
+      "description": "Not Found: Requested entity does not exist or doesn't belong to the current user"
+    },
+    "BadRequest": {
+      "description": "Bad Request: Request or data is invalid or a constraint wasn't met"
+    },
+    "Unauthorized": {
+      "description": "Unauthorized: Authorization information is missing or invalid"
+    },
+    "ServerError": {
+      "description": "Internal Server Error: Unexpected error"
+    },
+    "ShoppingListCreate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string"
+        },
+        "recurring": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 1,
+        "name": "Supermarket",
+        "description": "Monthly groceries",
+        "recurring": true,
+        "metadata": {},
+        "createdAt": "2025-09-01",
+        "updatedAt": "2025-09-05"
+      }
+    }
+  },
+  "definitions": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "surname": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "required": [
+        "email",
+        "name",
+        "surname",
+        "password"
+      ],
+      "example": {
+        "id": 1,
+        "name": "John",
+        "surname": "Doe",
+        "password": "1234567890",
+        "email": "johndoe@email.com",
+        "updatedAt": "2024-10-10",
+        "createdAt": "2024-10-09",
+        "metadata": {}
+      }
+    },
+    "NewUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "surname": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 1,
+        "name": "John",
+        "surname": "Doe",
+        "email": "johndoe@email.com",
+        "updatedAt": "2024-10-10",
+        "createdAt": "2024-10-09",
+        "metadata": {}
+      }
+    },
+    "GetUser": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "id": 1,
+        "name": "John",
+        "surname": "Doe",
+        "email": "johndoe@email.com",
+        "metadata": {},
+        "updatedAt": "2024-10-10",
+        "createdAt": "2024-10-09"
+      }
+    },
+    "Credentials": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ],
+      "example": {
+        "email": "johndoe@email.com",
+        "password": "1234567890"
+      }
+    },
+    "RegistrationData": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "surname": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "email",
+        "password",
+        "name",
+        "surname"
+      ],
+      "example": {
+        "name": "John",
+        "surname": "Doe",
+        "metadata": {},
+        "email": "johndoe@email.com",
+        "password": "1234567890"
+      }
+    },
+    "AuthenticationToken": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "token"
+      ],
+      "example": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMsImlhdCI6MTYwMjU2Mjc3MTM4NiwiZXhwIjoxNjAyNTY1MzYzMzg2fQ.ilDzvJ1b77Vyi40g3Sy5mo5iyDj3T6MOhCHsH6jEfDk"
+      }
+    },
+    "VerificationCode": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "example": {
+        "code": "08e8cc040b7ce56c"
+      }
+    },
+    "PasswordRecovery": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "example": {
+        "email": "johndoe@email.com"
+      }
+    },
+    "PasswordReset": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        }
+      },
+      "required": [
+        "code",
+        "password"
+      ],
+      "example": {
+        "code": "08e8cc040b7ce56c",
+        "password": "1234567890"
+      }
+    },
+    "CategoryRegistrationData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "example": {
+        "name": "Supermarket list",
+        "metadata": {}
+      }
+    },
+    "GetCategory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 1,
+        "name": "Supermarket list",
+        "metadata": {},
+        "updatedAt": "2024-10-10",
+        "createdAt": "2024-10-09"
+      }
+    },
+    "ArrayOfCategories": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": [
+        {
+          "id": 1,
+          "name": "Supermarket list",
+          "metadata": {},
+          "updatedAt": "2024-10-10",
+          "createdAt": "2024-10-09"
+        },
+        {
+          "id": 2,
+          "name": "Store list",
+          "metadata": {},
+          "updatedAt": "2024-10-15",
+          "createdAt": "2024-10-12"
+        }
+      ]
+    },
+    "UpdateCategoryProfile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "name": "Supermarket list",
+        "metadata": {}
+      }
+    },
+    "UpdateUserProfile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "surname": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "name": "John Updated",
+        "surname": "Doe Updated",
+        "metadata": {}
+      }
+    },
+    "PasswordChange": {
+      "type": "object",
+      "properties": {
+        "currentPassword": {
+          "type": "string",
+          "minLength": 6
+        },
+        "newPassword": {
+          "type": "string",
+          "minLength": 6
+        }
+      },
+      "required": [
+        "currentPassword",
+        "newPassword"
+      ],
+      "example": {
+        "currentPassword": "123456",
+        "newPassword": "654321"
+      }
+    },
+    "Product": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "category": {
+          "$ref": "#/definitions/GetCategory"
+        },
+        "pantry": {
+          "type": [
+            "object",
+            "null"
+          ]
+        }
+      },
+      "example": {
+        "id": 2,
+        "name": "Milk",
+        "metadata": {
+          "barcode": "1234567890"
+        },
+        "createdAt": "2025-08-01",
+        "updatedAt": "2025-09-02",
+        "category": {
+          "id": 1,
+          "name": "Dairy",
+          "metadata": {},
+          "createdAt": "2025-07-01",
+          "updatedAt": "2025-08-01"
+        },
+        "pantry": {
+          "id": 1,
+          "name": "Fridge",
+          "metadata": {},
+          "createdAt": "2025-09-02",
+          "updatedAt": "2025-09-02",
+          "owner": {
+            "id": 1,
+            "name": "John",
+            "surname": "Doe",
+            "email": "johndoe@example.com",
+            "metadata": {},
+            "createdAt": "2024-10-09",
+            "updatedAt": "2024-10-10"
+          },
+          "sharedWith": []
+        }
+      }
+    },
+    "ProductCreationData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pantry_id": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name",
+        "category_id"
+      ],
+      "example": {
+        "name": "Milk",
+        "category_id": 1,
+        "pantry_id": 4,
+        "metadata": {
+          "barcode": "1234567890"
+        }
+      }
+    },
+    "ProductUpdateData": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pantry_id": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int64"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "name": "Milk Updated",
+        "category_id": 2,
+        "pantry_id": null,
+        "metadata": {
+          "barcode": "1234567890"
+        }
+      }
+    },
+    "ArrayOfProducts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Product"
+      },
+      "example": [
+        {
+          "id": 2,
+          "name": "Milk",
+          "metadata": {
+            "barcode": "1234567890"
+          },
+          "createdAt": "2025-08-01",
+          "updatedAt": "2025-09-02",
+          "category": {
+            "id": 1,
+            "name": "Dairy",
+            "metadata": {},
+            "createdAt": "2025-07-01",
+            "updatedAt": "2025-08-01"
+          },
+          "pantry": {
+            "id": 1,
+            "name": "Fridge",
+            "metadata": {},
+            "createdAt": "2025-09-02",
+            "updatedAt": "2025-09-02",
+            "owner": {
+              "id": 1,
+              "name": "John",
+              "surname": "Doe",
+              "email": "johndoe@example.com",
+              "metadata": {},
+              "createdAt": "2024-10-09",
+              "updatedAt": "2024-10-10"
+            },
+            "sharedWith": []
+          }
+        }
+      ]
+    },
+    "ShoppingList": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string"
+        },
+        "recurring": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "owner": {
+          "$ref": "#/definitions/User"
+        },
+        "sharedWith": [],
+        "lastPurchasedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd",
+          "nullable": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 1,
+        "name": "Supermarket",
+        "description": "Monthly groceries",
+        "recurring": true,
+        "metadata": {},
+        "owner": {
+          "id": 1,
+          "name": "John",
+          "surname": "Doe",
+          "email": "johndoe@example.com",
+          "metadata": {},
+          "createdAt": "2024-10-09",
+          "updatedAt": "2024-10-10"
+        },
+        "sharedWith": [],
+        "lastPurchasedAt": "2025-09-05",
+        "createdAt": "2025-09-01",
+        "updatedAt": "2025-09-05"
+      }
+    },
+    "ShoppingListsArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ShoppingList"
+      },
+      "owner": {
+        "$ref": "#/definitions/User"
+      },
+      "example": [
+        {
+          "id": 1,
+          "name": "Supermarket",
+          "description": "Monthly groceries",
+          "recurring": true,
+          "metadata": {},
+          "owner": {
+            "id": 1,
+            "name": "John",
+            "surname": "Doe",
+            "email": "johndoe@example.com",
+            "metadata": {},
+            "createdAt": "2024-10-09",
+            "updatedAt": "2024-10-10"
+          },
+          "sharedWith": [],
+          "lastPurchasedAt": "2025-09-05",
+          "createdAt": "2025-09-01",
+          "updatedAt": "2025-09-05"
+        }
+      ]
+    },
+    "ShoppingListCreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string"
+        },
+        "recurring": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "example": {
+        "name": "Supermarket",
+        "description": "Monthly groceries",
+        "recurring": true,
+        "metadata": {}
+      }
+    },
+    "ShoppingListUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string"
+        },
+        "recurring": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "name": "Supermarket Updated",
+        "description": "Monthly groceries updated",
+        "recurring": false,
+        "metadata": {
+          "notes": "Bring coupons"
+        }
+      }
+    },
+    "ListItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        },
+        "purchased": {
+          "type": "boolean"
+        },
+        "lastPurchasedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "product": {
+          "$ref": "#/definitions/Product"
+        }
+      },
+      "example": {
+        "id": 2,
+        "quantity": 4,
+        "unit": "kg",
+        "metadata": {},
+        "purchased": false,
+        "lastPurchasedAt": null,
+        "createdAt": "2025-09-16",
+        "updatedAt": "2025-09-16",
+        "product": {
+          "id": 2,
+          "name": "Tomate Updated",
+          "metadata": {
+            "barcode": "2222222222"
+          },
+          "createdAt": "2025-09-11",
+          "updatedAt": "2025-09-11",
+          "category": {
+            "id": 2,
+            "name": "Supermarket list 2",
+            "metadata": {},
+            "createdAt": "2025-09-08",
+            "updatedAt": "2025-09-08"
+          },
+          "pantry": null
+        }
+      }
+    },
+    "ListItemArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ListItem"
+      },
+      "example": [
+        {
+          "id": 2,
+          "quantity": 4,
+          "unit": "kg",
+          "metadata": {},
+          "purchased": false,
+          "lastPurchasedAt": null,
+          "createdAt": "2025-09-16",
+          "updatedAt": "2025-09-16",
+          "product": {
+            "id": 2,
+            "name": "Tomate Updated",
+            "metadata": {
+              "barcode": "2222222222"
+            },
+            "createdAt": "2025-09-11",
+            "updatedAt": "2025-09-11",
+            "category": {
+              "id": 2,
+              "name": "Supermarket list 2",
+              "metadata": {},
+              "createdAt": "2025-09-08",
+              "updatedAt": "2025-09-08"
+            },
+            "pantry": null
+          }
+        }
+      ]
+    },
+    "ListItemCreate": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        }
+      },
+      "required": [
+        "product_id",
+        "quantity",
+        "unit"
+      ]
+    },
+    "ListItemUpdate": {
+      "type": "object",
+      "properties": {
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        }
+      }
+    },
+    "Pantry": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "owner": {
+          "$ref": "#/definitions/User"
+        },
+        "sharedWith": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          },
+          "nullable": true
+        }
+      },
+      "example": {
+        "id": 4,
+        "name": "Fridge",
+        "metadata": {},
+        "createdAt": "2025-09-02",
+        "updatedAt": "2025-09-02",
+        "owner": {
+          "id": 1,
+          "name": "John",
+          "surname": "Doe",
+          "email": "johndoe@example.com",
+          "metadata": {},
+          "createdAt": "2024-10-09",
+          "updatedAt": "2024-10-10"
+        },
+        "sharedWith": [
+          {
+            "id": 2,
+            "name": "Jane",
+            "surname": "Doe",
+            "email": "jane@example.com",
+            "metadata": {},
+            "createdAt": "2024-10-09",
+            "updatedAt": "2024-10-10"
+          }
+        ]
+      }
+    },
+    "PantryItem": {
+      "type": "array",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        },
+        "product": {
+          "$ref": "#/definitions/Product"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 2,
+        "quantity": 4,
+        "unit": "kg",
+        "metadata": {},
+        "product": {
+          "id": 2,
+          "name": "Tomate Updated",
+          "metadata": {
+            "barcode": "2222222222"
+          },
+          "createdAt": "2025-09-11",
+          "updatedAt": "2025-09-11",
+          "category": {
+            "id": 2,
+            "name": "Supermarket list 2",
+            "metadata": {},
+            "createdAt": "2025-09-08",
+            "updatedAt": "2025-09-08"
+          },
+          "pantry": null
+        },
+        "createdAt": "2025-09-16",
+        "updatedAt": "2025-09-16"
+      }
+    },
+    "PantryItemArray": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PantryItem"
+      },
+      "example": [
+        {
+          "id": 2,
+          "quantity": 4,
+          "unit": "kg",
+          "metadata": {},
+          "product": {
+            "id": 2,
+            "name": "Tomate Updated",
+            "metadata": {
+              "barcode": "2222222222"
+            },
+            "createdAt": "2025-09-11",
+            "updatedAt": "2025-09-11",
+            "category": {
+              "id": 2,
+              "name": "Supermarket list 2",
+              "metadata": {},
+              "createdAt": "2025-09-08",
+              "updatedAt": "2025-09-08"
+            },
+            "pantry": null
+          },
+          "createdAt": "2025-09-16",
+          "updatedAt": "2025-09-16"
+        }
+      ]
+    },
+    "PantryCreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "example": {
+        "name": "Heladera",
+        "metadata": {
+          "color": "white"
+        }
+      }
+    },
+    "PantryUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        }
+      },
+      "example": {
+        "name": "Armario",
+        "metadata": {
+          "color": "brown"
+        }
+      }
+    },
+    "ArrayOfPantries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Pantry"
+      },
+      "example": [
+        {
+          "id": 4,
+          "name": "Fridge",
+          "metadata": null,
+          "createdAt": "2025-09-02",
+          "updatedAt": "2025-09-02",
+          "owner": {
+            "id": 1,
+            "name": "John",
+            "surname": "Doe",
+            "email": "john@email.com"
+          },
+          "sharedWith": []
+        }
+      ]
+    },
+    "Purchase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "metadata": {
+          "type": "object",
+          "nullable": true
+        },
+        "owner": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "list": {
+          "$ref": "#/definitions/ShoppingList"
+        },
+        "listItemArray": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ListItemArray"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "YYYY-mm-dd"
+        }
+      },
+      "example": {
+        "id": 1,
+        "metadata": {},
+        "owner": {
+          "id": 2,
+          "name": "Juan",
+          "surname": "Doe",
+          "email": "juan@example.com",
+          "metadata": {},
+          "createdAt": "2023-10-09",
+          "updatedAt": "2023-10-10"
+        },
+        "list": {
+          "id": 1,
+          "name": "Supermarket",
+          "description": "Monthly groceries",
+          "recurring": true,
+          "metadata": {},
+          "owner": {
+            "id": 1,
+            "name": "John",
+            "surname": "Doe",
+            "email": "johndoe@example.com",
+            "metadata": {},
+            "createdAt": "2024-10-09",
+            "updatedAt": "2024-10-10"
+          },
+          "sharedWith": [],
+          "lastPurchasedAt": "2025-09-05",
+          "createdAt": "2025-09-01",
+          "updatedAt": "2025-09-05"
+        },
+        "listItemArray": [
+          {
+            "id": 2,
+            "quantity": 4,
+            "unit": "kg",
+            "metadata": {},
+            "purchased": false,
+            "lastPurchasedAt": null,
+            "createdAt": "2025-09-16",
+            "updatedAt": "2025-09-16",
+            "product": {
+              "id": 2,
+              "name": "Tomate Updated",
+              "metadata": {
+                "barcode": "2222222222"
+              },
+              "createdAt": "2025-09-11",
+              "updatedAt": "2025-09-11",
+              "category": {
+                "id": 2,
+                "name": "Supermarket list 2",
+                "metadata": {},
+                "createdAt": "2025-09-08",
+                "updatedAt": "2025-09-08"
+              },
+              "pantry": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/api/categories": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register new category",
+        "tags": [
+          "Categories"
+        ],
+        "operationId": "registerCategory",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/CategoryRegistrationData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Category created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/GetCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get user categories",
+        "tags": [
+          "Categories"
+        ],
+        "operationId": "getCategories",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the category to filter results"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 1,
+            "description": "Page number to retrieve paginated results"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer"
+            },
+            "default": 10,
+            "description": "Limit retrieve paginated results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            },
+            "default": "ASC",
+            "description": "Order to sort paginated results (ASC, DESC)"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt",
+                "updatedAt"
+              ]
+            },
+            "default": "createdAt",
+            "description": "Field to sort by (name, createdAt, updatedAt)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ArrayOfCategories"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/categories/{categoryId}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get specific user category",
+        "tags": [
+          "Categories"
+        ],
+        "operationId": "getCategoryById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "categoryId",
+            "schema": [
+              {
+                "type": "integer"
+              }
+            ],
+            "description": "Category ID to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/GetCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update category",
+        "tags": [
+          "Categories"
+        ],
+        "operationId": "updateCategory",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Category ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/UpdateCategoryProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/GetCategory"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete category",
+        "tags": [
+          "Categories"
+        ],
+        "operationId": "deleteCategory",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Category ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new shopping list",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "createShoppingList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ShoppingListCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Shopping list created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ShoppingList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all shopping lists",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "getAllShoppingLists",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter lists by name"
+          },
+          {
+            "in": "query",
+            "name": "owner",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter lists by owner (true/false)"
+          },
+          {
+            "in": "query",
+            "name": "recurring",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter recurring lists (true/false)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "owner",
+                "createdAt",
+                "updatedAt",
+                "lastPurchasedAt"
+              ],
+              "default": "name"
+            }
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of shopping lists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/definitions/ShoppingListsArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get shopping list by ID",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "getShoppingListById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shopping list data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ShoppingList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a shopping list",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "updateShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ShoppingListUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shopping list updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ShoppingList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a shopping list",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "deleteShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shopping list deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/purchase": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Mark a shopping list as purchased and create a purchase history entry",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "purchaseShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "type": "object",
+                    "description": "Optional metadata for the purchase"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Shopping list marked as purchased and history purchase entry created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ShoppingList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/reset": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reset all items in a shopping list to not purchased",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "resetShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shopping list reset successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ListItemArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/move-to-pantry": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Move purchased items to pantry",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "moveToPantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Items moved to pantry successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/share": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Share a shopping list with another user by email",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "shareShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email of the user to share the list with"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shopping list shared successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/shared-users": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get users with whom the list is shared",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "sharedUsersShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users with access to the shared list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "surname": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/share/{user_id}": {
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Revoke a user's access to a shared list",
+        "tags": [
+          "Shopping Lists"
+        ],
+        "operationId": "revokeShareShoppingList",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "User ID of the person whose access is to be revoked"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User access revoked successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/items": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add a new item to a shopping list",
+        "tags": [
+          "Shopping List Items"
+        ],
+        "operationId": "addListItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ListItemCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ListItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all items in a shopping list",
+        "tags": [
+          "Shopping List Items"
+        ],
+        "operationId": "getListItems",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          },
+          {
+            "in": "query",
+            "name": "purchased",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Filter items by purchased status (true/false)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of results per page"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "updatedAt",
+                "createdAt",
+                "lastPurchasedAt",
+                "productName"
+              ],
+              "default": "createdAt"
+            },
+            "description": "Sort items by field (including product name)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "DESC"
+            },
+            "description": "Sort order (ascending or descending)"
+          },
+          {
+            "in": "query",
+            "name": "pantry_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter items by pantry id"
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter items by category id"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search items by product name (case-insensitive, partial match)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of items in the shopping list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ListItemArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/shopping-lists/{id}/items/{item_id}": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update an item in a shopping list",
+        "tags": [
+          "Shopping List Items"
+        ],
+        "operationId": "updateListItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ListItemUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ListItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "patch": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Toggle the purchased status of an item",
+        "tags": [
+          "Shopping List Items"
+        ],
+        "operationId": "toggleListItemPurchased",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purchased": {
+                    "type": "boolean"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item purchased status toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ListItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an item from a shopping list",
+        "tags": [
+          "Shopping List Items"
+        ],
+        "operationId": "deleteListItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Shopping list ID"
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Item ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create a new pantry",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "createPantry",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Heladera"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pantry created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Pantry"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all pantries for the user",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "getPantries",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "owner",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "nullable": true,
+              "description": "If true, only pantries you own. If false, only pantries shared with you. If omitted, all."
+            },
+            "description": "Filter by ownership (true=owned, false=shared, undefined=all)"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of results per page"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "updatedAt",
+                "name"
+              ],
+              "default": "createdAt"
+            },
+            "description": "Sort pantries by field"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "ASC"
+            },
+            "description": "Sort order (ascending or descending)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pantries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Pantry"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all products/items in a pantry",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "getPantryById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pantry data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Pantry"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Edit a pantry",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "updatePantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Armario"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pantry updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Pantry"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a pantry",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "deletePantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pantry deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}/share": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Share a pantry with another user by email",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "sharePantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "The email of the user to share the pantry with"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pantry shared successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Pantry"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}/shared-users": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get users with whom the pantry is shared",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "sharedUsersPantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users with access to the shared pantry",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "surname": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string",
+                        "format": "email"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}/share/{user_id}": {
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Revoke a user's access to a shared pantry",
+        "tags": [
+          "Pantries"
+        ],
+        "operationId": "revokeSharePantry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "User ID of the person whose access is to be revoked"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User access revoked successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}/items": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Add an item to the pantry",
+        "tags": [
+          "Pantry Items"
+        ],
+        "operationId": "addPantryItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "product_id": {
+                    "type": "integer"
+                  },
+                  "quantity": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Free text (pack, dozen, kilogram, liter, etc.)"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pantry item created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/PantryItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all items in a pantry (paginated)",
+        "tags": [
+          "Pantry Items"
+        ],
+        "operationId": "getPantryItems",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Results per page"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "quantity",
+                "unit",
+                "productName"
+              ]
+            },
+            "description": "Field to sort by (product name, quantity, unit, productName)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
+            },
+            "description": "Sort order (asc or desc)"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search pantry items by product name"
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter pantry items by category id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pantry items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/definitions/PantryItemArray"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/pantries/{id}/items/{item_id}": {
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update a specific item in the pantry",
+        "tags": [
+          "Pantry Items"
+        ],
+        "operationId": "updatePantryItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry Item ID"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "quantity": {
+                    "type": "number"
+                  },
+                  "unit": {
+                    "type": "string",
+                    "description": "Free text (pack, dozen, kilogram, liter, etc.)"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pantry item updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/PantryItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete a specific item from the pantry",
+        "tags": [
+          "Pantry Items"
+        ],
+        "operationId": "deletePantryItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry ID"
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Pantry Item ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pantry item deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/products": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create new product",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "createProduct",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ProductCreationData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get all products",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "getProducts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter products that contain this name"
+          },
+          {
+            "in": "query",
+            "name": "category_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter products belonging to this category"
+          },
+          {
+            "in": "query",
+            "name": "pantry_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter products belonging to this pantry"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Results per page"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "name",
+                "categoryName",
+                "pantryName",
+                "createdAt",
+                "updatedAt"
+              ],
+              "default": "name"
+            },
+            "description": "Field to sort by"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            },
+            "description": "Sorting order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ArrayOfProducts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get specific product",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "getProductById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update product",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "updateProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/ProductUpdateData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Product"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete product",
+        "tags": [
+          "Products"
+        ],
+        "operationId": "deleteProduct",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Product ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/purchases": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get purchases history",
+        "tags": [
+          "Purchases"
+        ],
+        "operationId": "getPurchases",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "list_id",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter by shopping list ID"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination"
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of results per page"
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "list",
+                "id"
+              ],
+              "default": "createdAt"
+            },
+            "description": "Field to sort by (createdAt, list, id)"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ],
+              "default": "DESC"
+            },
+            "description": "Sort order (ASC or DESC)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of purchases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Purchase"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/purchases/{id}": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get purchase details",
+        "tags": [
+          "Purchases"
+        ],
+        "operationId": "getPurchaseById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Purchase ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Purchase details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/Purchase"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/purchases/{id}/restore": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Restore a purchase (create a new list from a previous purchase)",
+        "tags": [
+          "Purchases"
+        ],
+        "operationId": "restorePurchase",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Purchase ID"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "New shopping list created from purchase",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/ShoppingList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/register": {
+      "post": {
+        "security": [],
+        "summary": "Register new user",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "registerUser",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/RegistrationData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/NewUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "security": [],
+        "summary": "Log user in",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "loginUser",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/Credentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/AuthenticationToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/profile": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get user information",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "getUser",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Logged user data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/GetUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update user profile",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "updateUserProfile",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/UpdateUserProfile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/GetUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/verify-account": {
+      "post": {
+        "security": [],
+        "summary": "Verify user",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "verifyUser",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/VerificationCode"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/definitions/NewUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/forgot-password": {
+      "post": {
+        "security": [],
+        "summary": "Send password recovery instructions to user's email",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "sendPasswordRecoveryCode",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User's email address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recovery instructions sent successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/reset-password": {
+      "post": {
+        "security": [],
+        "summary": "Reset user password",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "resetPassword",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/PasswordReset"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User password reset successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/send-verification": {
+      "post": {
+        "security": [],
+        "summary": "Send verification token instructions to user's email",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "sendVerificationCode",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User's email address"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recovery instructions sent successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/change-password": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Change user password",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "changePassword",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/definitions/PasswordChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User password changed successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Log user out",
+        "tags": [
+          "Users"
+        ],
+        "operationId": "logoutUser",
+        "produces": [
+          "application/json"
+        ],
+        "requestBody": {
+          "description": "Optional payload (can be empty or omitted for logout)",
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "description": "User logged out successfully"
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+},
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        validatorUrl: null,
+        tryItOutEnabled: true,
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        onComplete: function() {
+          console.log('Swagger UI loaded successfully');
+        },
+        onFailure: function(data) {
+          console.error('Swagger UI failed to load:', data);
+        }
+      });
+    };
+</script>
+</body>
+</html>
