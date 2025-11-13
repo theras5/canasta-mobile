@@ -3,26 +3,19 @@ package com.example.canasta.data.network.api
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class AuthInterceptor(private var authToken: String? = null) : Interceptor {
-
-    fun setToken(token: String) {
-        authToken = token
-    }
-
-    fun clearToken() {
-        authToken = null
-    }
+class AuthInterceptor(private val tokenProvider: () -> String?) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request()
+        val originalRequest = chain.request()
+        val token = tokenProvider()
 
-        return if (authToken != null) {
-            val authenticatedRequest = request.newBuilder()
-                .header("Authorization", "Bearer $authToken")
+        return if (token != null) {
+            val authenticatedRequest = originalRequest.newBuilder()
+                .header("Authorization", "Bearer $token")
                 .build()
             chain.proceed(authenticatedRequest)
         } else {
-            chain.proceed(request)
+            chain.proceed(originalRequest)
         }
     }
 }

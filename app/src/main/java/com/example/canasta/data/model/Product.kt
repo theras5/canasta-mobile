@@ -1,29 +1,44 @@
-package com.example.canasta.data.model
+package ar.edu.itba.example.api.data.model
 
-import java.util.*
+import ar.edu.itba.example.api.data.network.model.NetworkCategoryId
+import ar.edu.itba.example.api.data.network.model.NetworkNewProduct
+import ar.edu.itba.example.api.data.network.model.NetworkProduct
+import java.util.Date
 
 class Product(
     var id: Int?,
     var name: String?,
-    var category: String?,
-    var description: String?,
-    var price: Double?,
-    var brand: String?,
-    var imageUrl: String?,
-    var createdAt: Date?,
-    var updatedAt: Date?
+    var category: Category? = null,
+    var metadata: Map<String, String>? = null,
+    var createdAt: Date? = null,
+    var updatedAt: Date? = null
 ) {
-    // Convenience constructors
-    constructor(id: Int) : this(id, null, null, null, null, null, null, null, null)
+    constructor(name: String?, categoryId: Int?, metadata: Map<String, String>? = null) : this(null, name,
+        if (categoryId != null) Category(categoryId) else null, metadata
+    )
 
-    constructor(
-        name: String,
-        category: String,
-        description: String? = null,
-        price: Double? = null,
-        brand: String? = null,
-        imageUrl: String? = null
-    ) : this(null, name, category, description, price, brand, imageUrl, null, null)
+    fun asNetworkNewModel(): NetworkNewProduct {
+        return if (category != null)
+            NetworkNewProduct(
+                category =  NetworkCategoryId(category!!.id!!),
+                name = name,
+                metadata = metadata
+            )
+        else
+            NetworkNewProduct(
+                name = name,
+                metadata = metadata
+            )
+    }
 
-
+    fun asNetworkModel(): NetworkProduct {
+        return NetworkProduct(
+            id = id!!,
+            category = category?.asNetworkModel(),
+            name = name,
+            metadata = metadata,
+            createdAt = createdAt,
+            updatedAt = updatedAt
+        )
+    }
 }

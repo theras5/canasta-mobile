@@ -1,49 +1,61 @@
-package com.example.canasta.data.network
+package ar.edu.itba.example.api.data.network
 
-import com.example.canasta.data.DataSourceException
-import com.example.canasta.data.network.api.model.NetworkError
+import android.util.Log
+import ar.edu.itba.example.api.data.DataSourceException
+import ar.edu.itba.example.api.data.network.model.NetworkError
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 import java.io.IOException
 
 abstract class RemoteDataSource {
+    private val json = Json { ignoreUnknownKeys = true }
 
-    protected suspend fun <T> handleApiResponse(apiCall: suspend () -> Response<T>): T {
-        return try {
-            val response = apiCall()
-            if (response.isSuccessful) {
-                response.body() ?: throw DataSourceException.Server(
-                    code = response.code(),
-                    message = "Empty response body"
-                )
-            } else {
-                handleErrorResponse(response)
+    suspend fun <T : Any> handleApiResponse(
+        execute: suspend () -> Response<T>
+    ): T {
+        try {
+            val response = execute()
+            val body = response.body()
+            if (response.isSuccessful && body != null) {
+                return body
             }
-        } catch (e: IOException) {
-            throw DataSourceException.Network("Network error occurred", e)
+            response.errorBody()?.let {
+                val error = json.decodeFromString<NetworkError>(it.string())
+                throwDataSourceException(response.code(), error.message)
+            }
+            throw DataSourceException(UNEXPECTED_ERROR_CODE, "Missing error")
         } catch (e: DataSourceException) {
             throw e
+        } catch (e: IOException) {
+            throw DataSourceException(
+                CONNECTION_ERROR_CODE,
+                "Connection error"
+            )
         } catch (e: Exception) {
-            throw DataSourceException.Unknown("Unknown error occurred", e)
+            Log.e(TAG, "Unexpected error handling API response", e)
+            throw DataSourceException(
+                UNEXPECTED_ERROR_CODE,
+                "Unexpected error"
+            )
         }
     }
 
-    private fun <T> handleErrorResponse(response: Response<T>): Nothing {
-        val errorCode = response.code()
-        val errorMessage = try {
-            response.errorBody()?.string()?.let { errorBody ->
-                Json.decodeFromString<NetworkError>(errorBody).message
-            } ?: "HTTP $errorCode error"
-        } catch (e: Exception) {
-            "HTTP $errorCode error"
+    private fun throwDataSourceException(statusCode: Int, message: String): DataSourceException {
+        when (statusCode) {
+            400 -> throw DataSourceException(DATA_ERROR, message)
+            401 -> throw DataSourceException(UNAUTHORIZED_ERROR_CODE, message)
+            else -> throw DataSourceException(UNEXPECTED_ERROR_CODE, message)
         }
+    }
 
-        throw when (errorCode) {
-            401 -> DataSourceException.Authentication(errorMessage)
-            404 -> DataSourceException.NotFound(errorMessage)
-            in 400..499 -> DataSourceException.Server(errorCode, errorMessage)
-            in 500..599 -> DataSourceException.Server(errorCode, errorMessage)
-            else -> DataSourceException.Unknown(errorMessage)
-        }
+    companion object {
+        const val TAG = "Data Layer"
+
+        const val UNAUTHORIZED_ERROR_CODE = 1
+        const val DATA_ERROR = 2
+
+        // TODO
+        const val CONNECTION_ERROR_CODE = 98
+        const val UNEXPECTED_ERROR_CODE = 99
     }
 }
