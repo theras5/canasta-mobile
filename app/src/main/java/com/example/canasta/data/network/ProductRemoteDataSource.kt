@@ -1,8 +1,8 @@
-package ar.edu.itba.example.api.data.network
+package com.example.canasta.data.network
 
-import ar.edu.itba.example.api.data.network.api.ProductApiService
-import ar.edu.itba.example.api.data.network.model.NetworkNewProduct
-import ar.edu.itba.example.api.data.network.model.NetworkProduct
+import com.example.canasta.data.network.api.ProductApiService
+import com.example.canasta.data.network.model.NetworkNewProduct
+import com.example.canasta.data.network.model.NetworkProduct
 
 class ProductRemoteDataSource(
     private val productApiService: ProductApiService

@@ -1,7 +1,7 @@
-package ar.edu.itba.example.api.data.repository
+package com.example.canasta.data.repository
 
-import ar.edu.itba.example.api.data.model.Product
-import ar.edu.itba.example.api.data.network.ProductRemoteDataSource
+import com.example.canasta.data.model.Product
+import com.example.canasta.data.network.ProductRemoteDataSource
 import kotlinx.serialization.json.JsonElement
 
 class ProductRepository(

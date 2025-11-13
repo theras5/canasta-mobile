@@ -1,7 +1,7 @@
-package ar.edu.itba.example.api.data.model
+package com.example.canasta.data.model
 
-import ar.edu.itba.example.api.data.network.model.NetworkCategory
-import ar.edu.itba.example.api.data.network.model.NetworkNewCategory
+import com.example.canasta.data.network.model.NetworkCategory
+import com.example.canasta.data.network.model.NetworkNewCategory
 import java.util.Date
 
 class Category(

@@ -1,9 +1,9 @@
-package ar.edu.itba.example.api.data.network
+package com.example.canasta.data.network
 
-import ar.edu.itba.example.api.data.network.api.CategoryApiService
-import ar.edu.itba.example.api.data.network.model.NetworkCategory
-import ar.edu.itba.example.api.data.network.model.NetworkNewCategory
-import ar.edu.itba.example.api.data.network.model.NetworkPagedCategories
+import com.example.canasta.data.network.api.CategoryApiService
+import com.example.canasta.data.network.model.NetworkCategory
+import com.example.canasta.data.network.model.NetworkNewCategory
+import com.example.canasta.data.network.model.NetworkPagedCategories
 import kotlinx.serialization.json.JsonElement
 
 class CategoryRemoteDataSource(

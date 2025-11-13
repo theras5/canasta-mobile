@@ -1,8 +1,8 @@
-package ar.edu.itba.example.api.data.network
+package com.example.canasta.data.network
 
 import android.util.Log
-import ar.edu.itba.example.api.data.DataSourceException
-import ar.edu.itba.example.api.data.network.model.NetworkError
+import com.example.canasta.data.DataSourceException
+import com.example.canasta.data.network.model.NetworkError
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 import java.io.IOException

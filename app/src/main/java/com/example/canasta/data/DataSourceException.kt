@@ -1,6 +1,6 @@
-package ar.edu.itba.example.api.data
+package com.example.canasta.data
 
 class DataSourceException(
-    var code: Int,
+    var code: Int? = null,
     message: String,
 ) : Exception(message)

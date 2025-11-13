@@ -1,4 +1,4 @@
-package ar.edu.itba.example.api.data.network.model
+package com.example.canasta.data.network.model
 
 import kotlinx.serialization.Serializable
 

@@ -1,7 +1,7 @@
-package ar.edu.itba.example.api.data.network.api
+package com.example.canasta.data.network.api
 
-import ar.edu.itba.example.api.data.network.model.NetworkNewProduct
-import ar.edu.itba.example.api.data.network.model.NetworkProduct
+import com.example.canasta.data.network.model.NetworkNewProduct
+import com.example.canasta.data.network.model.NetworkProduct
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST

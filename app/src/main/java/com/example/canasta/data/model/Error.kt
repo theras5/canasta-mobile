@@ -1,4 +1,4 @@
-package ar.edu.itba.example.api.data.model
+package com.example.canasta.data.model
 
 data class Error(
     val code: Int?,

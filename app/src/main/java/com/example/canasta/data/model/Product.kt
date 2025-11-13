@@ -1,8 +1,8 @@
-package ar.edu.itba.example.api.data.model
+package com.example.canasta.data.model
 
-import ar.edu.itba.example.api.data.network.model.NetworkCategoryId
-import ar.edu.itba.example.api.data.network.model.NetworkNewProduct
-import ar.edu.itba.example.api.data.network.model.NetworkProduct
+import com.example.canasta.data.network.model.NetworkCategoryId
+import com.example.canasta.data.network.model.NetworkNewProduct
+import com.example.canasta.data.network.model.NetworkProduct
 import java.util.Date
 
 class Product(

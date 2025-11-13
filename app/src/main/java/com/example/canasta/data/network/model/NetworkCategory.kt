@@ -1,6 +1,6 @@
-package ar.edu.itba.example.api.data.network.model
+package com.example.canasta.data.network.model
 
-import ar.edu.itba.example.api.data.model.Category
+import com.example.canasta.data.model.Category
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import java.util.Date

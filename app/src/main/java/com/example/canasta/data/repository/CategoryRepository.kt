@@ -1,7 +1,7 @@
-package ar.edu.itba.example.api.data.repository
+package com.example.canasta.data.repository
 
-import ar.edu.itba.example.api.data.model.Category
-import ar.edu.itba.example.api.data.network.CategoryRemoteDataSource
+import com.example.canasta.data.model.Category
+import com.example.canasta.data.network.CategoryRemoteDataSource
 
 class CategoryRepository(
     private val remoteDataSource: CategoryRemoteDataSource
