@@ -14,11 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,47 +28,43 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color(0xFF333333)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
-            )
-        }
+        bottomBar = { BottomNavBar() }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start
         ) {
+            // Botón de volver
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Volver",
+                    tint = Color(0xFF333333)
+                )
+            }
+
             // Título "Configuración" alineado a la izquierda
             Text(
                 text = "Configuración",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(start = 24.dp, top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
             )
 
             // Subtítulo
@@ -79,8 +72,7 @@ fun SettingsScreen(
                 text = "Personaliza tu experiencia en Canasta",
                 fontSize = 16.sp,
                 color = Color(0xFF666666),
-                modifier = Modifier
-                    .padding(start = 24.dp, bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 24.dp)
             )
 
             // Sección: Cuenta

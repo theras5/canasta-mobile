@@ -10,7 +10,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
 /**
- * Objetos serializables para navegación type-safe
+ * Destinos serializables para navegación type-safe.
+ * Se usan objetos @Serializable como "route" para poder codificarlos en argumentos.
  */
 @Serializable
 object Lists
@@ -28,31 +29,30 @@ data class ListDetail(
 )
 
 /**
- * Enum que define las rutas principales de navegación de la aplicación
+ * Enum que describe los destinos principales con sus íconos y etiquetas.
  */
-enum class AppDestinations(
+enum class AppDestination(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
     val label: String,
-    val route: Any
+    val route: Any // Mantengo Any para permitir objetos o data classes serializables.
 ) {
     LISTS(
-        selectedIcon = Icons.Outlined.ListAlt,
+        selectedIcon = Icons.Outlined.ListAlt, // No hay versión filled para ListAlt en baseline
         unselectedIcon = Icons.Outlined.ListAlt,
         label = "Listas",
         route = Lists
     ),
     PRODUCTS(
-        selectedIcon = Icons.Default.ShoppingCart,
+        selectedIcon = Icons.Filled.ShoppingCart,
         unselectedIcon = Icons.Outlined.ShoppingCart,
         label = "Productos",
         route = Products
     ),
     PROFILE(
-        selectedIcon = Icons.Default.Person,
+        selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person,
         label = "Perfil",
         route = Profile
-    )
+    );
 }
-

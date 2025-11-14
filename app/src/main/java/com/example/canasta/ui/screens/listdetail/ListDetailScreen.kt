@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Secondary
@@ -137,6 +138,7 @@ fun ListDetailScreen(
                 )
             )
         },
+        bottomBar = { BottomNavBar() },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { addProduct() },

@@ -1,3 +1,5 @@
+// file: app/src/main/java/com/example/canasta/ui/navigation/AppNavigation.kt
+
 package com.example.canasta.ui.navigation
 
 import android.annotation.SuppressLint
@@ -7,23 +9,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.rememberNavController // <-- Add this import
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
-import com.example.canasta.ui.theme.CanastaTheme
+import com.example.canasta.ui.screens.products.ProductsScreen
+import com.example.canasta.ui.screens.profile.ProfileScreen
 
 /**
  * Punto de entrada principal de la navegación de la aplicación
  * Gestiona el NavController y el estado de la navegación
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-    var currentRoute by rememberSaveable { mutableStateOf(AppDestinations.LISTS) }
+@Composable // <-- Add this annotation to make it a Composable function
+fun AppNavigation() { // <-- Wrap the logic in a function
+    val navController = rememberNavController() // <-- Call it inside the Composable
+    var currentRoute by rememberSaveable { mutableStateOf(AppDestination.LISTS) }
 
     // Observar la ruta actual para saber si mostrar el BottomBar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -43,10 +45,10 @@ fun AppNavigation() {
                 ) { route ->
                     // Actualizar la ruta actual basándonos en el destino
                     currentRoute = when(route) {
-                        is Lists -> AppDestinations.LISTS
-                        is Products -> AppDestinations.PRODUCTS
-                        is Profile -> AppDestinations.PROFILE
-                        else -> AppDestinations.LISTS
+                        is Lists -> AppDestination.LISTS
+                        is Products -> AppDestination.PRODUCTS
+                        is Profile -> AppDestination.PROFILE
+                        else -> AppDestination.LISTS
                     }
 
                     // Opciones de navegación para limpiar el back stack cuando volvemos a Lists
@@ -67,13 +69,5 @@ fun AppNavigation() {
         }
     ) {
         AppNavGraph(navController = navController)
-    }
-}
-
-@Composable
-@Preview(showBackground = true, showSystemUi = true, device = "spec:width=411dp,height=891dp")
-fun AppNavigationPreview() {
-    CanastaTheme {
-        AppNavigation()
     }
 }

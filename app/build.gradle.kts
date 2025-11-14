@@ -61,4 +61,14 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    // Retrofit - Cliente HTTP
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // OkHttp - Cliente HTTP subyacente y logging
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Conversor de Kotlinx Serialization para Retrofit
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0")
 }

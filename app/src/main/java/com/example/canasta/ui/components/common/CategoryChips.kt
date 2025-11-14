@@ -23,24 +23,22 @@ import com.example.canasta.ui.theme.CanastaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryChips(categories: List<String>) {
-    var selectedCategories by remember { mutableStateOf(setOf<String>()) }
-
+fun CategoryChips(
+    categories: List<String>,
+    selectedCategory: String? = null,
+    onCategorySelected: (String?) -> Unit = {}
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
         items(categories) { category ->
-            val isSelected = selectedCategories.contains(category)
+            val isSelected = selectedCategory == category || (selectedCategory == null && category == "Todos")
             FilterChip(
                 selected = isSelected,
                 onClick = {
-                    selectedCategories = if (isSelected) {
-                        selectedCategories - category
-                    } else {
-                        selectedCategories + category
-                    }
+                    onCategorySelected(if (category == "Todos") null else category)
                 },
                 label = { Text(category) },
                 leadingIcon = if (isSelected) {

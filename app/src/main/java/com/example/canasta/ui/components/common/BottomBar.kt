@@ -7,7 +7,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.example.canasta.ui.navigation.AppDestinations
+import com.example.canasta.ui.navigation.AppDestination
 import com.example.canasta.ui.theme.Primary
 import com.example.canasta.ui.theme.Secondary
 
@@ -18,14 +18,14 @@ import com.example.canasta.ui.theme.Secondary
  */
 @Composable
 fun BottomBar(
-    currentRoute: AppDestinations,
+    currentRoute: AppDestination,
     onNavigate: (Any) -> Unit
 ) {
     NavigationBar(
         containerColor = Primary,
         contentColor = Color.White
     ) {
-        AppDestinations.entries.forEach { destination ->
+        AppDestination.entries.forEach { destination ->
             NavigationBarItem(
                 selected = currentRoute == destination,
                 onClick = { onNavigate(destination.route) },
