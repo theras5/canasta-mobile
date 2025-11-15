@@ -5,10 +5,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.canasta.ui.screens.categories.CategoriesScreen
 import com.example.canasta.ui.screens.listdetail.ListDetailScreen
 import com.example.canasta.ui.screens.lists.ListsScreen
 import com.example.canasta.ui.screens.products.ProductsScreen
 import com.example.canasta.ui.screens.profile.ProfileScreen
+import com.example.canasta.ui.screens.settings.SettingsScreen
 import kotlin.reflect.typeOf
 
 /**
@@ -38,6 +40,20 @@ fun AppNavGraph(navController: NavHostController) {
         }
         composable<Profile> {
             ProfileScreen()
+        }
+        composable<Settings> {
+            SettingsScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+        composable<Categories> {
+            CategoriesScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable<ListDetail> { backStackEntry ->
             val listDetail = backStackEntry.toRoute<ListDetail>()

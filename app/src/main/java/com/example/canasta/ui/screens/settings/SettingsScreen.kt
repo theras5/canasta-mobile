@@ -12,10 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,28 +34,16 @@ import com.example.canasta.ui.components.settings.SettingsSection
 fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
-    Scaffold(
-        bottomBar = { BottomNavBar() }
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
+                .padding(top = 16.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.Start
         ) {
-            // Botón de volver
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Volver",
-                    tint = Color(0xFF333333)
-                )
-            }
 
             // Título "Configuración" alineado a la izquierda
             Text(

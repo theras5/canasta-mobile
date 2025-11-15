@@ -1,9 +1,11 @@
 package com.example.canasta.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.ListAlt
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -21,6 +23,12 @@ object Products
 
 @Serializable
 object Profile
+
+@Serializable
+object Settings
+
+@Serializable
+object Categories
 
 @Serializable
 data class ListDetail(
@@ -54,5 +62,11 @@ enum class AppDestination(
         unselectedIcon = Icons.Outlined.Person,
         label = "Perfil",
         route = Profile
+    ),
+    MORE(
+        selectedIcon = Icons.Filled.Menu,
+        unselectedIcon = Icons.Outlined.Menu,
+        label = "Más",
+        route = Settings // Default route, pero se manejará con menú desplegable
     );
 }
