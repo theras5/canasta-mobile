@@ -18,6 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.canasta.ui.components.common.BottomNavBar
+import com.example.canasta.ui.components.settings.ChangePasswordDialog
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
 
@@ -34,6 +39,8 @@ import com.example.canasta.ui.components.settings.SettingsSection
 fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+
     Scaffold { innerPadding ->
         Column(
             modifier = Modifier
@@ -84,7 +91,7 @@ fun SettingsScreen(
                 SettingsItem(
                     title = "Cambiar contraseña",
                     subtitle = "Actualiza tu contraseña de acceso",
-                    onClick = { /* TODO: Navegar a cambiar contraseña */ }
+                    onClick = { showChangePasswordDialog = true }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -98,6 +105,17 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    // Dialog de cambiar contraseña
+    if (showChangePasswordDialog) {
+        ChangePasswordDialog(
+            onDismiss = { showChangePasswordDialog = false },
+            onConfirm = { currentPassword, newPassword, confirmPassword ->
+                // TODO: Implementar cambio de contraseña con API
+                showChangePasswordDialog = false
+            }
+        )
     }
 }
 
