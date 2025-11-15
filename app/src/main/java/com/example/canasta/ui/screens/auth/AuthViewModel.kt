@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.canasta.data.repository.AuthRepository
+import com.example.canasta.data.seed.SeedingManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +32,7 @@ data class AuthUiState(
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AuthRepository(application)
+    private val seedingManager = SeedingManager(application)
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -107,6 +109,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
             repository.login(state.email, state.password)
                 .onSuccess { authToken ->
+                    // Ejecutamos seeding en background sin bloquear la UI; requiere token ya configurado
+                    viewModelScope.launch {
+                        seedingManager.seedDefaultsIfEmpty(state.email)
+                    }
+
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         isAuthenticated = true
@@ -181,4 +188,3 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 }
-
