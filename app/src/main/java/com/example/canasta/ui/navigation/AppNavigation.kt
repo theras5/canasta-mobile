@@ -69,7 +69,7 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                 }
             }
         }
-    ) {
-        AppNavGraph(navController = navController)
+    ) { innerPadding ->
+        AppNavGraph(navController = navController, contentPadding = innerPadding)
     }
 }

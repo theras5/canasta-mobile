@@ -1,6 +1,10 @@
 package com.example.canasta.ui.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,10 +22,14 @@ import kotlin.reflect.typeOf
  * Define las rutas y las pantallas correspondientes
  */
 @Composable
-fun AppNavGraph(navController: NavHostController) {
+fun AppNavGraph(
+    navController: NavHostController,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
+) {
     NavHost(
         navController = navController,
-        startDestination = Lists
+        startDestination = Lists,
+        modifier = Modifier.padding(contentPadding)
     ) {
         composable<Lists> {
             ListsScreen(
