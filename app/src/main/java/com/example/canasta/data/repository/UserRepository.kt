@@ -2,6 +2,7 @@ package com.example.canasta.data.repository
 
 import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.remote.models.GetUser
+import com.example.canasta.data.remote.models.PasswordChange
 import com.example.canasta.data.remote.models.UpdateUserProfile
 
 /**
@@ -39,6 +40,25 @@ class UserRepository {
             )
             val updatedUser = userApi.updateUserProfile(updateData)
             Result.success(updatedUser)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Cambia la contraseña del usuario
+     */
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String
+    ): Result<Unit> {
+        return try {
+            val passwordData = PasswordChange(
+                currentPassword = currentPassword,
+                newPassword = newPassword
+            )
+            userApi.changePassword(passwordData)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

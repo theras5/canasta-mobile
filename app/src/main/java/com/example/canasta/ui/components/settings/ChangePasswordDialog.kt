@@ -46,7 +46,9 @@ import com.example.canasta.ui.theme.Secondary
 @Composable
 fun ChangePasswordDialog(
     onDismiss: () -> Unit,
-    onConfirm: (currentPassword: String, newPassword: String, confirmPassword: String) -> Unit
+    onConfirm: (currentPassword: String, newPassword: String, confirmPassword: String) -> Unit,
+    isLoading: Boolean = false,
+    errorMessage: String? = null
 ) {
     var currentPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
@@ -202,7 +204,28 @@ fun ChangePasswordDialog(
                     shape = RoundedCornerShape(8.dp)
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Mostrar mensaje de error si existe
+                if (!errorMessage.isNullOrEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFFFEBEE)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = errorMessage,
+                            color = Color(0xFFD32F2F),
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 // Botones de acción
                 Row(
@@ -240,23 +263,25 @@ fun ChangePasswordDialog(
 
                     Button(
                         onClick = {
-                            onConfirm(currentPassword, newPassword, confirmPassword)
+                            if (!isLoading) {
+                                onConfirm(currentPassword, newPassword, confirmPassword)
+                            }
                         },
                         modifier = Modifier
                             .weight(1f)
                             .height(50.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isFormValid) Secondary else Color(0xFFE0E0E0), // TODO: REVISAR COLORES
+                            containerColor = if (isFormValid && !isLoading) Secondary else Color(0xFFE0E0E0),
                             contentColor = Color.White,
                             disabledContainerColor = Color(0xFFE0E0E0),
                             disabledContentColor = Color.White
                         ),
-                        enabled = isFormValid,
+                        enabled = isFormValid && !isLoading,
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Text(
-                            text = "CAMBIAR\nCONTRASEÑA",
+                            text = if (isLoading) "PROCESANDO..." else "CAMBIAR\nCONTRASEÑA",
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             lineHeight = 12.sp,

@@ -77,3 +77,12 @@ data class UpdateUserProfile(
     val metadata: Map<String, String>? = null
 )
 
+/**
+ * Datos para cambiar contraseña
+ */
+@Serializable
+data class PasswordChange(
+    val currentPassword: String,
+    val newPassword: String
+)
+

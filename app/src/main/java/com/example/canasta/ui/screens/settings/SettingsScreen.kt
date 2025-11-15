@@ -1,47 +1,53 @@
 package com.example.canasta.ui.screens.settings
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.canasta.ui.components.common.BottomNavBar
+import com.example.canasta.data.repository.UserRepository
 import com.example.canasta.ui.components.settings.ChangePasswordDialog
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
-    var showChangePasswordDialog by remember { mutableStateOf(false) }
+    val userRepository = remember { UserRepository() }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold { innerPadding ->
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+    var isChangingPassword by remember { mutableStateOf(false) }
+    var passwordErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -70,23 +76,7 @@ fun SettingsScreen(
 
             // Sección: Cuenta
             SettingsSection(
-                title = "Cuenta",
-                icon = {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFF4A7C4E)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AccountCircle,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
+                title = "Cuenta"
             ) {
                 SettingsItem(
                     title = "Cambiar contraseña",
@@ -110,10 +100,56 @@ fun SettingsScreen(
     // Dialog de cambiar contraseña
     if (showChangePasswordDialog) {
         ChangePasswordDialog(
-            onDismiss = { showChangePasswordDialog = false },
+            onDismiss = {
+                if (!isChangingPassword) {
+                    showChangePasswordDialog = false
+                    passwordErrorMessage = null
+                }
+            },
+            isLoading = isChangingPassword,
+            errorMessage = passwordErrorMessage,
             onConfirm = { currentPassword, newPassword, confirmPassword ->
-                // TODO: Implementar cambio de contraseña con API
-                showChangePasswordDialog = false
+                // No permitir múltiples llamadas mientras se procesa
+                if (isChangingPassword) return@ChangePasswordDialog
+
+                // Limpiar errores previos
+                passwordErrorMessage = null
+
+                // Validar que las contraseñas coincidan
+                if (newPassword != confirmPassword) {
+                    passwordErrorMessage = "Las contraseñas no coinciden"
+                    return@ChangePasswordDialog
+                }
+
+                // Validar longitud mínima
+                if (newPassword.length < 6) {
+                    passwordErrorMessage = "La contraseña debe tener al menos 6 caracteres"
+                    return@ChangePasswordDialog
+                }
+
+                // Llamar a la API
+                isChangingPassword = true
+                scope.launch {
+                    userRepository.changePassword(
+                        currentPassword = currentPassword,
+                        newPassword = newPassword
+                    ).fold(
+                        onSuccess = {
+                            isChangingPassword = false
+                            showChangePasswordDialog = false
+                            passwordErrorMessage = null
+                            snackbarHostState.showSnackbar("Contraseña actualizada exitosamente")
+                        },
+                        onFailure = { error ->
+                            isChangingPassword = false
+                            passwordErrorMessage = when {
+                                error.message?.contains("401") == true -> "Contraseña actual incorrecta"
+                                error.message?.contains("400") == true -> "Datos inválidos"
+                                else -> "Error al cambiar contraseña: ${error.message}"
+                            }
+                        }
+                    )
+                }
             }
         )
     }

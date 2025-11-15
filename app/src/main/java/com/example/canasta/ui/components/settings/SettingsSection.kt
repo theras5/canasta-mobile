@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SettingsSection(
     title: String,
-    icon: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -25,9 +25,11 @@ fun SettingsSection(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Header con ícono y título
-        icon()
-        Spacer(modifier = Modifier.height(8.dp))
+        // Header con ícono (opcional) y título
+        icon?.invoke()
+        if (icon != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         Text(
             text = title,
             fontSize = 20.sp,
