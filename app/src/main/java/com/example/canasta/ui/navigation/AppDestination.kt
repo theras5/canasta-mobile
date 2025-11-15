@@ -16,6 +16,9 @@ import kotlinx.serialization.Serializable
  * Se usan objetos @Serializable como "route" para poder codificarlos en argumentos.
  */
 @Serializable
+object Splash
+
+@Serializable
 object Lists
 
 @Serializable

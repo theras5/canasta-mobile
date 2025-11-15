@@ -15,6 +15,7 @@ import com.example.canasta.ui.screens.lists.ListsScreen
 import com.example.canasta.ui.screens.products.ProductsScreen
 import com.example.canasta.ui.screens.profile.ProfileScreen
 import com.example.canasta.ui.screens.settings.SettingsScreen
+import com.example.canasta.ui.screens.splash.SplashScreen
 import kotlin.reflect.typeOf
 
 /**
@@ -28,9 +29,19 @@ fun AppNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Lists,
+        startDestination = Splash,
         modifier = Modifier.padding(contentPadding)
     ) {
+        composable<Splash> {
+            SplashScreen(
+                onNavigateToLists = {
+                    navController.navigate(Lists) {
+                        // Eliminar el splash del back stack para que no se pueda volver
+                        popUpTo<Splash> { inclusive = true }
+                    }
+                }
+            )
+        }
         composable<Lists> {
             ListsScreen(
                 onNavigateToListDetail = { list ->
