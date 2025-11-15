@@ -5,11 +5,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.canasta.ui.screens.auth.LoginScreen
 import com.example.canasta.ui.screens.listdetail.ListDetailScreen
 import com.example.canasta.ui.screens.lists.ListsScreen
 import com.example.canasta.ui.screens.products.ProductsScreen
 import com.example.canasta.ui.screens.profile.ProfileScreen
-import kotlin.reflect.typeOf
 
 /**
  * Grafo de navegación de la aplicación
@@ -19,8 +19,17 @@ import kotlin.reflect.typeOf
 fun AppNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Lists
+        startDestination = Login
     ) {
+        composable<Login> {
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Lists) {
+                        popUpTo(Login) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable<Lists> {
             ListsScreen(
                 onNavigateToListDetail = { list ->

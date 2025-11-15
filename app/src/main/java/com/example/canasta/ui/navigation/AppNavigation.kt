@@ -33,9 +33,9 @@ fun AppNavigation() { // <-- Wrap the logic in a function
 
     // Determinar si debemos mostrar el BottomBar
     val showBottomBar = currentDestination?.route?.let { route ->
-        // Mostrar BottomBar solo en las pantallas principales
+        // Mostrar BottomBar solo en las pantallas principales, no en Login
         route.contains("Lists") || route.contains("Products") || route.contains("Profile")
-    } ?: true
+    } ?: false
 
     Scaffold(
         bottomBar = {
