@@ -1,29 +1,38 @@
 package com.example.canasta.ui.screens.lists
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.canasta.data.ShoppingListService
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.lists.CreateListModal
 import com.example.canasta.ui.components.lists.EmptyStateListas
 import com.example.canasta.ui.components.lists.ListsGrid
 import com.example.canasta.ui.components.lists.ShoppingList
-import com.example.canasta.ui.components.lists.TopBarListas
 import com.example.canasta.ui.theme.Secondary
-import java.util.UUID
+import kotlinx.coroutines.launch
 
 @Composable
 fun ListsScreen(
@@ -33,50 +42,15 @@ fun ListsScreen(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var listToDelete by remember { mutableStateOf<ShoppingList?>(null) }
 
-    // Datos de ejemplo - en producción vendrían de un ViewModel
-    var lists by remember {
-        mutableStateOf(
-            listOf(
-                ShoppingList("1", "Casa", 38, "🏠", true),
-                ShoppingList("2", "Supermercado", 15, "🛒", false),
-                ShoppingList("3", "Farmacia", 7, "💊", true)
-            )
-        )
-    }
+    val lists by ShoppingListService.listsState.collectAsState()
+    val scope = rememberCoroutineScope()
 
-    // Función dummy para crear una lista
-    fun createList(name: String, icon: String?) {
-        val newList = ShoppingList(
-            id = UUID.randomUUID().toString(),
-            name = name,
-            productCount = 0,
-            icon = icon ?: "📋",
-            isFavorite = false
-        )
-        lists = lists + newList
-        println("Lista creada: $name con ID: ${newList.id}")
-    }
-
-    // Función dummy para eliminar una lista
-    fun deleteList(list: ShoppingList) {
-        lists = lists.filter { it.id != list.id }
-        println("Lista eliminada: ${list.name} con ID: ${list.id}")
-    }
-
-    // Función dummy para marcar/desmarcar como favorito
-    fun toggleFavorite(list: ShoppingList) {
-        lists = lists.map {
-            if (it.id == list.id) {
-                it.copy(isFavorite = !it.isFavorite)
-            } else {
-                it
-            }
-        }
-        println("Toggle favorito: ${list.name} - Favorito: ${!list.isFavorite}")
+    // Al entrar en la pantalla, cargar listas desde la API
+    LaunchedEffect(Unit) {
+        ShoppingListService.refreshLists()
     }
 
     Scaffold(
-        topBar = { TopBarListas() },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateModal = true },
@@ -88,39 +62,51 @@ fun ListsScreen(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding)) {
-            if (lists.isEmpty()) {
-                EmptyStateListas()
-            } else {
-                ListsGrid(
-                    lists = lists,
-                    onListClick = { list ->
-                        onNavigateToListDetail(list)
-                    },
-                    onToggleFavorite = { list ->
-                        toggleFavorite(list)
-                    },
-                    onDeleteList = { list ->
-                        listToDelete = list
-                        showDeleteConfirmation = true
-                    }
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 24.dp)
+        ) {
+            Text(
+                text = "Listas",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .padding(vertical = 16.dp)
+            )
+
+            Box(modifier = Modifier.weight(1f)) {
+                if (lists.isEmpty()) {
+                    EmptyStateListas()
+                } else {
+                    ListsGrid(
+                        lists = lists,
+                        onListClick = { list -> onNavigateToListDetail(list) },
+                        onToggleFavorite = { /* TODO implementar favorito */ },
+                        onDeleteList = { list ->
+                            listToDelete = list
+                            showDeleteConfirmation = true
+                        }
+                    )
+                }
             }
         }
     }
-    
-    // Modal para crear lista
+
     if (showCreateModal) {
         CreateListModal(
             onDismiss = { showCreateModal = false },
             onCreateList = { name, image ->
-                createList(name, image)
+                scope.launch {
+                    ShoppingListService.createList(name, image)
+                }
                 showCreateModal = false
             }
         )
     }
 
-    // Modal de confirmación para eliminar
     if (showDeleteConfirmation && listToDelete != null) {
         ConfirmationModal(
             title = "Eliminar Lista",
@@ -130,7 +116,11 @@ fun ListsScreen(
                 listToDelete = null
             },
             onConfirm = {
-                listToDelete?.let { deleteList(it) }
+                listToDelete?.let { list ->
+                    scope.launch {
+                        ShoppingListService.deleteList(list.id)
+                    }
+                }
                 showDeleteConfirmation = false
                 listToDelete = null
             }

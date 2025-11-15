@@ -14,12 +14,17 @@ import com.example.canasta.ui.theme.Secondary
 /**
  * Barra de navegación inferior
  * @param currentRoute La ruta actual seleccionada
- * @param onNavigate Callback para navegar a una ruta
+ * @param onNavigate Callback para navegar a una ruta (String de la ruta)
  */
 @Composable
 fun BottomBar(
+<<<<<<< Updated upstream
     currentRoute: AppDestinations,
     onNavigate: (Any) -> Unit
+=======
+    currentRoute: AppDestination,
+    onNavigate: (String) -> Unit
+>>>>>>> Stashed changes
 ) {
     NavigationBar(
         containerColor = Primary,
@@ -50,4 +55,3 @@ fun BottomBar(
         }
     }
 }
-

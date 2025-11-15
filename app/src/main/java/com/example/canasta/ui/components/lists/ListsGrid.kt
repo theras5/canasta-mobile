@@ -41,7 +41,7 @@ fun ListsGrid(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(vertical = 16.dp), // solo vertical para no achicar ancho
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(lists) { list ->
@@ -71,4 +71,3 @@ fun ListsGridPreview() {
         ListsGrid(lists = sampleLists)
     }
 }
-
