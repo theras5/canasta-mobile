@@ -49,7 +49,6 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                         is Lists -> AppDestination.LISTS
                         is Products -> AppDestination.PRODUCTS
                         is Profile -> AppDestination.PROFILE
-                        is Settings, is Categories -> AppDestination.MORE
                         else -> AppDestination.LISTS
                     }
 

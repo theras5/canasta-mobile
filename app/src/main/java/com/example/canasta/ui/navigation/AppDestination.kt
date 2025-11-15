@@ -1,11 +1,9 @@
 package com.example.canasta.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.ListAlt
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,6 +15,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 object Splash
+
+@Serializable
+object Login
 
 @Serializable
 object Lists

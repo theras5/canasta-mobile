@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.canasta.ui.screens.categories.CategoriesScreen
+import com.example.canasta.ui.screens.auth.LoginScreen
 import com.example.canasta.ui.screens.listdetail.ListDetailScreen
 import com.example.canasta.ui.screens.lists.ListsScreen
 import com.example.canasta.ui.screens.products.ProductsScreen
@@ -38,6 +39,15 @@ fun AppNavGraph(
                     navController.navigate(Lists) {
                         // Eliminar el splash del back stack para que no se pueda volver
                         popUpTo<Splash> { inclusive = true }
+                    }
+                }
+            )
+        }
+        composable<Login> {
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Lists) {
+                        popUpTo(Login) { inclusive = true }
                     }
                 }
             )
