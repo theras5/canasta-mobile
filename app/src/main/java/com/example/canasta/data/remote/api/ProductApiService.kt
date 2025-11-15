@@ -1,8 +1,10 @@
 package com.example.canasta.data.remote.api
 
 import com.example.canasta.data.remote.models.ArrayOfProducts
-import com.example.canasta.data.remote.models.GetProduct
+import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.remote.models.ProductRegistrationData
+import com.example.canasta.data.remote.models.ProductUpdateData
+import com.example.canasta.data.remote.models.ProductsResponse
 import retrofit2.http.*
 
 /**
@@ -12,45 +14,53 @@ interface ProductApiService {
 
     /**
      * Obtiene todos los productos
-     * GET /products
+     * GET /api/products
      */
-    @GET("products")
-    suspend fun getProducts(): ArrayOfProducts
+    @GET("api/products")
+    suspend fun getProducts(
+        @Query("name") name: String? = null,
+        @Query("category_id") categoryId: Long? = null,
+        @Query("pantry_id") pantryId: Long? = null,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 10,
+        @Query("sort_by") sortBy: String = "name",
+        @Query("order") order: String = "asc"
+    ): ProductsResponse
 
     /**
      * Crea un nuevo producto
-     * POST /products
+     * POST /api/products
      * @param product Datos del producto a crear
      */
-    @POST("products")
-    suspend fun createProduct(@Body product: ProductRegistrationData): GetProduct
+    @POST("api/products")
+    suspend fun createProduct(@Body product: ProductRegistrationData): Product
 
     /**
      * Obtiene un producto específico por su ID
-     * GET /products/{productId}
-     * @param productId ID del producto
+     * GET /api/products/{id}
+     * @param id ID del producto
      */
-    @GET("products/{productId}")
-    suspend fun getProduct(@Path("productId") productId: Long): GetProduct
+    @GET("api/products/{id}")
+    suspend fun getProductById(@Path("id") id: Long): Product
 
     /**
      * Actualiza un producto existente
-     * PUT /products/{productId}
-     * @param productId ID del producto a actualizar
+     * PUT /api/products/{id}
+     * @param id ID del producto a actualizar
      * @param product Datos actualizados del producto
      */
-    @PUT("products/{productId}")
+    @PUT("api/products/{id}")
     suspend fun updateProduct(
-        @Path("productId") productId: Long,
-        @Body product: ProductRegistrationData
-    ): GetProduct
+        @Path("id") id: Long,
+        @Body product: ProductUpdateData
+    ): Product
 
     /**
      * Elimina un producto
-     * DELETE /products/{productId}
-     * @param productId ID del producto a eliminar
+     * DELETE /api/products/{id}
+     * @param id ID del producto a eliminar
      */
-    @DELETE("products/{productId}")
-    suspend fun deleteProduct(@Path("productId") productId: Long)
+    @DELETE("api/products/{id}")
+    suspend fun deleteProduct(@Path("id") id: Long)
 }
 
