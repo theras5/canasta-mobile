@@ -32,12 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.data.model.Product
 import com.example.canasta.ui.components.common.CategoryChips
 import com.example.canasta.ui.components.products.CreateProductModal
-import com.example.canasta.ui.components.products.ListProduct
-import com.example.canasta.ui.components.products.ProductItemCard
+import com.example.canasta.ui.components.products.ProductCard
 import com.example.canasta.ui.theme.Secondary
-import java.util.UUID
 
 @Composable
 fun ProductsScreen() {
@@ -53,37 +52,36 @@ fun ProductsScreen() {
     var products by remember {
         mutableStateOf(
             listOf(
-                ListProduct("1", "Leche", "Entera 1L", false),
-                ListProduct("2", "Queso", "Cheddar 200g", false),
-                ListProduct("3", "Gaseosa", "Cola 2L", false),
-                ListProduct("4", "Jabón", "Para ropa 800g", false),
-                ListProduct("5", "Yogurt", "Frutilla 1L", true)
+                Product(1, "Leche", "Lácteos"),
+                Product(2, "Queso", "Lácteos"),
+                Product(3, "Gaseosa", "Bebidas"),
+                Product(4, "Jabón", "Limpieza"),
+                Product(5, "Yogurt", "Lácteos"),
+                Product(6, "Papas Fritas", "Snacks"),
+                Product(7, "Detergente", "Limpieza"),
+                Product(8, "Jugo de Naranja", "Bebidas")
             )
         )
     }
 
     // Lógica
-    fun toggleChecked(product: ListProduct) {
-        products = products.map { if (it.id == product.id) it.copy(isChecked = !it.isChecked) else it }
-    }
-
-    fun deleteProduct(product: ListProduct) {
+    fun deleteProduct(product: Product) {
         products = products.filter { it.id != product.id }
     }
 
     fun addProduct(name: String, category: String) {
-        val new = ListProduct(
-            id = UUID.randomUUID().toString(),
+        val newId = (products.maxOfOrNull { it.id } ?: 0) + 1
+        val newProduct = Product(
+            id = newId,
             name = name,
-            description = category,
-            isChecked = false
+            category = category
         )
-        products = products + new
+        products = products + newProduct
     }
 
     val filtered = products.filter { p ->
         val matchesSearch = searchQuery.isBlank() || p.name.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == null || selectedCategory == "Todos" || p.description.contains(selectedCategory!!, ignoreCase = true)
+        val matchesCategory = selectedCategory == null || selectedCategory == "Todos" || p.category.contains(selectedCategory!!, ignoreCase = true)
         matchesSearch && matchesCategory
     }
 
@@ -147,10 +145,8 @@ fun ProductsScreen() {
                     contentPadding = PaddingValues(bottom = 88.dp)
                 ) {
                     items(filtered, key = { it.id }) { product ->
-                        ProductItemCard(
-                            product = product,
-                            onCheckedChange = { toggleChecked(product) },
-                            onDelete = { deleteProduct(product) }
+                        ProductCard(
+                            product = product
                         )
                     }
                 }
