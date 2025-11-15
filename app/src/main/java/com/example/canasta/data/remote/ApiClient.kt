@@ -2,6 +2,7 @@ package com.example.canasta.data.remote
 
 import com.example.canasta.data.remote.api.AuthApiService
 import com.example.canasta.data.remote.api.ProductApiService
+import com.example.canasta.data.remote.api.UserApiService
 import com.example.canasta.data.remote.interceptors.AuthInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
@@ -18,8 +19,8 @@ import java.util.concurrent.TimeUnit
 object ApiClient {
 
     // URL base del servidor
-    private const val BASE_URL = "http://192.168.1.35:8080/" //http://10.0.2.2:8080/ http://localhost:8080/
-
+    //private const val BASE_URL = "http://192.168.1.35:8080/" //http://10.0.2.2:8080/ http://localhost:8080/
+    private const val BASE_URL = "http://192.168.0.120:8080/"
     // Configuración de kotlinx-serialization JSON
     private val json = Json {
         ignoreUnknownKeys = true // Ignora campos desconocidos del JSON
@@ -62,6 +63,11 @@ object ApiClient {
     // Servicio de API para autenticación
     val authService: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
+    }
+
+    // Servicio de API para usuarios
+    val userService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 
     /**

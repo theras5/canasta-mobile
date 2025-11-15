@@ -43,14 +43,17 @@ import com.example.canasta.ui.theme.Primary
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileSheet(
+    currentFirstName: String = "",
+    currentLastName: String = "",
+    currentAvatarIndex: Int = 0,
     onDismissRequest: () -> Unit,
     onConfirm: (firstName: String, lastName: String, avatarIndex: Int) -> Unit = { _, _, _ -> }
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var firstName by remember { mutableStateOf("Juan") }
-    var lastName by remember { mutableStateOf("Pérez") }
-    var selectedAvatar by remember { mutableStateOf(0) }
+    var firstName by remember { mutableStateOf(currentFirstName) }
+    var lastName by remember { mutableStateOf(currentLastName) }
+    var selectedAvatar by remember { mutableStateOf(currentAvatarIndex) }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,

@@ -67,3 +67,13 @@ data class GetUser(
     val updatedAt: String? = null
 )
 
+/**
+ * Datos para actualizar el perfil de usuario
+ */
+@Serializable
+data class UpdateUserProfile(
+    val name: String? = null,
+    val surname: String? = null,
+    val metadata: Map<String, String>? = null
+)
+
