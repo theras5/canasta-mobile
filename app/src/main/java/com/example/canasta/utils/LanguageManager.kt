@@ -14,11 +14,12 @@ object LanguageManager {
 
     private const val PREF_NAME = "language_prefs"
     private const val KEY_LANGUAGE = "selected_language"
+    private const val SYSTEM_LANGUAGE = "system"
 
     /**
      * Cambia el idioma de la aplicación y reinicia la actividad
      * @param activity Actividad actual
-     * @param languageCode Código del idioma (es, en)
+     * @param languageCode Código del idioma (es, en, system)
      */
     fun setLanguage(activity: Activity, languageCode: String) {
         // Guardar preferencia
@@ -43,10 +44,18 @@ object LanguageManager {
     @Suppress("DEPRECATION")
     fun applyLanguage(context: Context, languageCode: String? = null) {
         val lang = languageCode ?: getCurrentLanguage(context)
-        val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Locale.forLanguageTag(lang)
+
+        // Si es "system", usar el idioma del sistema
+        val actualLang = if (lang == SYSTEM_LANGUAGE) {
+            getSystemLanguage()
         } else {
-            Locale(lang)
+            lang
+        }
+
+        val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Locale.forLanguageTag(actualLang)
+        } else {
+            Locale(actualLang)
         }
         Locale.setDefault(locale)
 
@@ -59,23 +68,23 @@ object LanguageManager {
     /**
      * Obtiene el idioma actualmente configurado
      * @param context Contexto de la aplicación
-     * @return Código del idioma (es, en)
+     * @return Código del idioma (es, en, system)
      */
     fun getCurrentLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_LANGUAGE, null) ?: getSystemLanguage()
+        return prefs.getString(KEY_LANGUAGE, SYSTEM_LANGUAGE) ?: SYSTEM_LANGUAGE
     }
 
     /**
      * Obtiene el idioma del sistema
-     * @return Código del idioma del sistema
+     * @return Código del idioma del sistema (es o en)
      */
     private fun getSystemLanguage(): String {
         val locale = Locale.getDefault()
         return when (locale.language) {
             "es" -> "es"
             "en" -> "en"
-            else -> "es" // Español por defecto
+            else -> "en" // Inglés por defecto si no es español
         }
     }
 }

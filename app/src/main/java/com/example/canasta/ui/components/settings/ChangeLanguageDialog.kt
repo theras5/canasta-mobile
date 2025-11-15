@@ -82,6 +82,14 @@ fun ChangeLanguageDialog(
 
                 // Opciones de idioma
                 LanguageOption(
+                    displayName = stringResource(R.string.device_language),
+                    isSelected = selectedLanguage == "system",
+                    onClick = { selectedLanguage = "system" }
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                LanguageOption(
                     displayName = stringResource(R.string.spanish),
                     isSelected = selectedLanguage == "es",
                     onClick = { selectedLanguage = "es" }

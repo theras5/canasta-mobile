@@ -44,6 +44,7 @@
 
     <!-- Language Dialog -->
     <string name="select_language">Seleccionar Idioma</string>
+    <string name="device_language">Idioma del dispositivo</string>
     <string name="spanish">Español</string>
     <string name="english">English</string>
     <string name="language_changed">Idioma cambiado exitosamente</string>
