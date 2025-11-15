@@ -8,9 +8,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProductRegistrationData(
     val name: String,
-    val category_id: Long,
-    val pantry_id: Long? = null,
+    val category: CategoryRef? = null,
     val metadata: Map<String, String>? = null
 )
 
-
+@Serializable
+data class CategoryRef(val id: Long)

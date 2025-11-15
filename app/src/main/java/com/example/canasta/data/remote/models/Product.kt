@@ -12,6 +12,5 @@ data class Product(
     val metadata: Map<String, String>? = null,
     val createdAt: String,
     val updatedAt: String,
-    val category: GetCategory
+    val category: GetCategory? = null // ahora nullable
 )
-

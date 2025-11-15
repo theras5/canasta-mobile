@@ -1,10 +1,10 @@
 package com.example.canasta.data.remote.api
 
-import com.example.canasta.data.remote.models.ArrayOfProducts
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.remote.models.ProductRegistrationData
 import com.example.canasta.data.remote.models.ProductUpdateData
 import com.example.canasta.data.remote.models.ProductsResponse
+import com.example.canasta.data.remote.models.UpdateProductResponse
 import retrofit2.http.*
 
 /**
@@ -53,7 +53,7 @@ interface ProductApiService {
     suspend fun updateProduct(
         @Path("id") id: Long,
         @Body product: ProductUpdateData
-    ): Product
+    ): UpdateProductResponse
 
     /**
      * Elimina un producto
@@ -63,4 +63,3 @@ interface ProductApiService {
     @DELETE("api/products/{id}")
     suspend fun deleteProduct(@Path("id") id: Long)
 }
-

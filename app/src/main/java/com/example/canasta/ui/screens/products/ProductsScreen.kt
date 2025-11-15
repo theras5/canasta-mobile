@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,13 +16,19 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,62 +37,68 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.canasta.data.model.Product
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.canasta.data.remote.models.GetCategory
+import com.example.canasta.data.remote.models.Product
+import com.example.canasta.data.repository.CategoryRepository
 import com.example.canasta.ui.components.common.CategoryChips
-import com.example.canasta.ui.components.products.CreateProductModal
-import com.example.canasta.ui.components.products.ProductCard
+import com.example.canasta.ui.components.products.CreateProductModalApi
+import com.example.canasta.ui.components.products.EditProductModal
+import com.example.canasta.ui.components.products.RemoteProductCard
+import com.example.canasta.ui.components.common.ConfirmDeleteModal
 import com.example.canasta.ui.theme.Secondary
 
 @Composable
-fun ProductsScreen() {
-    // Estado UI
+fun ProductsScreen(
+    viewModel: ProductsViewModel = viewModel()
+) {
+    // Estados del ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+    val products by viewModel.products.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
+    // Estados locales de UI
     var showCreateModal by remember { mutableStateOf(false) }
+    var showEditModal by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<Product?>(null) }
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
+    var categories by remember { mutableStateOf<List<GetCategory>>(emptyList()) }
+    var showDeleteModal by remember { mutableStateOf(false) }
+    var productToDelete by remember { mutableStateOf<Product?>(null) }
 
-    // Categorías de ejemplo
-    val categories = listOf("Todos", "Lácteos", "Bebidas", "Snacks", "Limpieza")
+    // SnackbarHost para mensajes
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    // Productos de ejemplo (simulación ViewModel)
-    var products by remember {
-        mutableStateOf(
-            listOf(
-                Product(1, "Leche", "Lácteos"),
-                Product(2, "Queso", "Lácteos"),
-                Product(3, "Gaseosa", "Bebidas"),
-                Product(4, "Jabón", "Limpieza"),
-                Product(5, "Yogurt", "Lácteos"),
-                Product(6, "Papas Fritas", "Snacks"),
-                Product(7, "Detergente", "Limpieza"),
-                Product(8, "Jugo de Naranja", "Bebidas")
-            )
-        )
+    // Cargar categorías al iniciar
+    LaunchedEffect(Unit) {
+        loadCategories { loadedCategories ->
+            categories = loadedCategories
+        }
     }
 
-    // Lógica
-    fun deleteProduct(product: Product) {
-        products = products.filter { it.id != product.id }
+    // Mostrar errores en Snackbar
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
     }
 
-    fun addProduct(name: String, category: String) {
-        val newId = (products.maxOfOrNull { it.id } ?: 0) + 1
-        val newProduct = Product(
-            id = newId,
-            name = name,
-            category = category
-        )
-        products = products + newProduct
-    }
-
-    val filtered = products.filter { p ->
-        val matchesSearch = searchQuery.isBlank() || p.name.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == null || selectedCategory == "Todos" || p.category.contains(selectedCategory!!, ignoreCase = true)
+    // Filtrar productos
+    val filteredProducts = products.filter { product ->
+        val matchesSearch = searchQuery.isBlank() ||
+            product.name.contains(searchQuery, ignoreCase = true)
+        val matchesCategory = selectedCategory == null ||
+            product.category?.id == selectedCategory!!.id
         matchesSearch && matchesCategory
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateModal = true },
@@ -103,15 +116,20 @@ fun ProductsScreen() {
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            // Título
-            Text(
-                text = "Productos",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+            // Título con botón de refrescar
+            Row(
                 modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(top = 16.dp, bottom = 16.dp)
-            )
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Productos",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
 
             // Barra de búsqueda
             OutlinedTextField(
@@ -126,28 +144,89 @@ fun ProductsScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             // Chips de categorías
-            CategoryChips(
-                categories = categories,
-                selectedCategory = selectedCategory,
-                onCategorySelected = { category ->
-                    selectedCategory = category
-                }
-            )
+            if (categories.isNotEmpty()) {
+                CategoryChipsApi(
+                    categories = categories,
+                    selectedCategory = selectedCategory,
+                    onCategorySelected = { category ->
+                        selectedCategory = category
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Lista de productos
+            // Contenido principal basado en el estado
             Box(modifier = Modifier.weight(1f)) {
-                val listState = rememberLazyListState()
-                LazyColumn(
-                    state = listState,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 88.dp)
-                ) {
-                    items(filtered, key = { it.id }) { product ->
-                        ProductCard(
-                            product = product
+                when (uiState) {
+                    is ProductsUiState.Loading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center)
                         )
+                    }
+                    is ProductsUiState.Error -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Error al cargar productos",
+                                style = MaterialTheme.typography.headlineSmall,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = (uiState as ProductsUiState.Error).message,
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            FloatingActionButton(
+                                onClick = { viewModel.loadProducts() },
+                                containerColor = Secondary
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = "Reintentar",
+                                    tint = Color.White
+                                )
+                            }
+                        }
+                    }
+                    is ProductsUiState.Success -> {
+                        if (filteredProducts.isEmpty()) {
+                            Text(
+                                text = if (searchQuery.isBlank() && selectedCategory == null) {
+                                    "No hay productos disponibles"
+                                } else {
+                                    "No se encontraron productos con los filtros aplicados"
+                                },
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        } else {
+                            val listState = rememberLazyListState()
+                            LazyColumn(
+                                state = listState,
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 88.dp)
+                            ) {
+                                items(filteredProducts, key = { it.id }) { product ->
+                                    RemoteProductCard(
+                                        product = product,
+                                        onEditClick = { productToEditClick ->
+                                            productToEdit = productToEditClick
+                                            showEditModal = true
+                                        },
+                                        onDeleteClick = { prod ->
+                                            productToDelete = prod
+                                            showDeleteModal = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -156,15 +235,81 @@ fun ProductsScreen() {
 
     // Modal creación producto
     if (showCreateModal) {
-        CreateProductModal(
-            categories = categories.drop(1), // excluir "Todos"
+        CreateProductModalApi(
+            categories = categories,
             onDismiss = { showCreateModal = false },
-            onCreateProduct = { name, category ->
-                addProduct(name, category)
+            onCreateProduct = { name, categoryId, _ ->
+                viewModel.createProduct(name, categoryId, null)
                 showCreateModal = false
             }
         )
     }
+
+    // Modal edición producto
+    if (showEditModal && productToEdit != null) {
+        EditProductModal(
+            product = productToEdit!!,
+            categories = categories,
+            onDismiss = {
+                showEditModal = false
+                productToEdit = null
+            },
+            onUpdateProduct = { productId, name, categoryId ->
+                viewModel.updateProduct(productId, name, categoryId, null)
+                showEditModal = false
+                productToEdit = null
+            }
+        )
+    }
+
+    // Modal confirmación eliminación
+    if (showDeleteModal && productToDelete != null) {
+        ConfirmDeleteModal(
+            title = "Eliminar Producto",
+            message = "¿Seguro que querés eliminar \"${productToDelete!!.name}\"? Esta acción no se puede revertir.",
+            confirmText = "Eliminar",
+            dismissText = "Cancelar",
+            onConfirm = {
+                viewModel.deleteProduct(productToDelete!!.id)
+                productToDelete = null
+            },
+            onDismiss = {
+                showDeleteModal = false
+                productToDelete = null
+            }
+        )
+    }
+}
+
+// Función auxiliar para cargar categorías
+private suspend fun loadCategories(onCategoriesLoaded: (List<GetCategory>) -> Unit) {
+    val categoryRepository = CategoryRepository()
+    try {
+        categoryRepository.getCategories().fold(
+            onSuccess = { categories -> onCategoriesLoaded(categories) },
+            onFailure = { onCategoriesLoaded(emptyList()) }
+        )
+    } catch (_: Exception) { // silenciar warning
+        onCategoriesLoaded(emptyList())
+    }
+}
+
+// Composable para chips de categorías con la API
+@Composable
+private fun CategoryChipsApi(
+    categories: List<GetCategory>,
+    selectedCategory: GetCategory?,
+    onCategorySelected: (GetCategory?) -> Unit
+) {
+    val categoryNames = listOf("Todos") + categories.map { it.name }
+    CategoryChips(
+        categories = categoryNames,
+        selectedCategory = selectedCategory?.name ?: "Todos",
+        onCategorySelected = { categoryName ->
+            val category = if (categoryName == "Todos") null else categories.find { it.name == categoryName }
+            onCategorySelected(category)
+        }
+    )
 }
 
 @Preview(showBackground = true)
@@ -172,4 +317,3 @@ fun ProductsScreen() {
 private fun ProductsScreenPreview() {
     ProductsScreen()
 }
-

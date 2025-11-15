@@ -1,10 +1,11 @@
 package com.example.canasta.data.repository
 
 import com.example.canasta.data.remote.ApiClient
-import com.example.canasta.data.remote.models.ArrayOfProducts
+import com.example.canasta.data.remote.models.CategoryRef
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.remote.models.ProductRegistrationData
 import com.example.canasta.data.remote.models.ProductUpdateData
+import com.example.canasta.data.remote.models.UpdateProductResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -26,7 +27,7 @@ class ProductRepository {
         perPage: Int = 100,
         sortBy: String = "name",
         order: String = "asc"
-    ): Result<ArrayOfProducts> = withContext(Dispatchers.IO) {
+    ): Result<List<Product>> = withContext(Dispatchers.IO) {
         try {
             val response = productService.getProducts(name, categoryId, pantryId, page, perPage, sortBy, order)
             Result.success(response.data)
@@ -40,12 +41,15 @@ class ProductRepository {
      */
     suspend fun createProduct(
         name: String,
-        categoryId: Long,
-        pantryId: Long? = null,
+        categoryId: Long?,
         metadata: Map<String, String>? = null
     ): Result<Product> = withContext(Dispatchers.IO) {
         try {
-            val productData = ProductRegistrationData(name, categoryId, pantryId, metadata)
+            val productData = ProductRegistrationData(
+                name = name,
+                category = categoryId?.let { CategoryRef(it) },
+                metadata = metadata
+            )
             val product = productService.createProduct(productData)
             Result.success(product)
         } catch (e: Exception) {
@@ -72,12 +76,16 @@ class ProductRepository {
         id: Long,
         name: String? = null,
         categoryId: Long? = null,
-        pantryId: Long? = null,
         metadata: Map<String, String>? = null
     ): Result<Product> = withContext(Dispatchers.IO) {
         try {
-            val updateData = ProductUpdateData(name, categoryId, pantryId, metadata)
-            val product = productService.updateProduct(id, updateData)
+            val updateData = ProductUpdateData(
+                name = name,
+                category = categoryId?.let { CategoryRef(it) },
+                metadata = metadata
+            )
+            val response = productService.updateProduct(id, updateData)
+            val product = response.product ?: throw IllegalStateException("Respuesta sin producto")
             Result.success(product)
         } catch (e: Exception) {
             Result.failure(e)
@@ -96,4 +104,3 @@ class ProductRepository {
         }
     }
 }
-

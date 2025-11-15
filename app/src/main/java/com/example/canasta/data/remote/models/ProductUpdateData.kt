@@ -8,8 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ProductUpdateData(
     val name: String? = null,
-    val category_id: Long? = null,
-    val pantry_id: Long? = null,
+    val category: CategoryRef? = null,
     val metadata: Map<String, String>? = null
 )
 
@@ -24,3 +23,8 @@ data class ProductsResponse(
     val total: Int? = null
 )
 
+/**
+ * Respuesta para la actualización de un producto
+ */
+@Serializable
+data class UpdateProductResponse(val product: Product?)
