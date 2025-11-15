@@ -1,8 +1,12 @@
 package com.example.canasta.ui.screens.auth
 
+import android.app.Application
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,10 +14,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.R
 import com.example.canasta.ui.components.common.AppScaffold
@@ -24,9 +35,20 @@ import com.example.canasta.ui.theme.Titles
 
 @Composable
 fun LoginScreen(
-    onNavigateToHome: () -> Unit = {},
-    viewModel: AuthViewModel = viewModel()
+    onNavigateToHome: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
+    val viewModel: AuthViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return AuthViewModel(context.applicationContext as Application) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     // Navegar a home cuando se autentique
@@ -40,7 +62,13 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    })
+                },
             contentAlignment = Alignment.Center
         ) {
             Card(
@@ -59,7 +87,7 @@ fun LoginScreen(
                 ) {
                     // Icono de canasta
                     Image(
-                        painter = painterResource(id = R.drawable.logo),
+                        painter = painterResource(id = R.drawable.logohd),
                         contentDescription = "Canasta Icon",
                         modifier = Modifier.size(72.dp)
                     )
@@ -74,7 +102,9 @@ fun LoginScreen(
                             onResend = viewModel::resendVerification,
                             onBackToRegister = viewModel::backToRegister,
                             errorMessage = uiState.errorMessage,
-                            isLoading = uiState.isLoading
+                            isLoading = uiState.isLoading,
+                            keyboardController = keyboardController,
+                            focusManager = focusManager
                         )
                     } else {
                         AuthContent(
@@ -91,7 +121,9 @@ fun LoginScreen(
                             onLogin = viewModel::login,
                             onRegister = viewModel::register,
                             errorMessage = uiState.errorMessage,
-                            isLoading = uiState.isLoading
+                            isLoading = uiState.isLoading,
+                            keyboardController = keyboardController,
+                            focusManager = focusManager
                         )
                     }
                 }
@@ -109,7 +141,9 @@ private fun VerificationContent(
     onResend: () -> Unit,
     onBackToRegister: () -> Unit,
     errorMessage: String?,
-    isLoading: Boolean
+    isLoading: Boolean,
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    focusManager: androidx.compose.ui.focus.FocusManager
 ) {
     Text(
         text = "Verificar tu cuenta",
@@ -146,7 +180,17 @@ private fun VerificationContent(
         label = { Text("Código de verificación") },
         modifier = Modifier.fillMaxWidth(),
         enabled = !isLoading,
-        isError = errorMessage != null && !errorMessage.contains("reenviado")
+        isError = errorMessage != null && !errorMessage.contains("reenviado"),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            }
+        ),
+        singleLine = true
     )
 
     if (errorMessage != null) {
@@ -224,7 +268,9 @@ private fun AuthContent(
     onLogin: () -> Unit,
     onRegister: () -> Unit,
     errorMessage: String?,
-    isLoading: Boolean
+    isLoading: Boolean,
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    focusManager: androidx.compose.ui.focus.FocusManager
 ) {
     Text(
         text = if (isLoginMode) "Iniciar Sesión" else "Crear Cuenta",
@@ -232,7 +278,7 @@ private fun AuthContent(
         color = Titles
     )
     Text(
-        text = if (isLoginMode) "Accede a tu cuenta de Canasta" else "organiza tus compras con canasta",
+        text = if (isLoginMode) "Accede a tu cuenta de Canasta" else "Organiza tus compras con canasta",
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -249,7 +295,11 @@ private fun AuthContent(
                 .fillMaxWidth()
                 .padding(top = 2.dp),
             enabled = !isLoading,
-            isError = errorMessage != null
+            isError = errorMessage != null,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            singleLine = true
         )
         OutlinedTextField(
             value = surname,
@@ -259,7 +309,11 @@ private fun AuthContent(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             enabled = !isLoading,
-            isError = errorMessage != null
+            isError = errorMessage != null,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            singleLine = true
         )
     }
     OutlinedTextField(
@@ -270,7 +324,12 @@ private fun AuthContent(
             .fillMaxWidth()
             .padding(top = 8.dp),
         enabled = !isLoading,
-        isError = errorMessage != null
+        isError = errorMessage != null,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true
     )
     OutlinedTextField(
         value = password,
@@ -288,7 +347,18 @@ private fun AuthContent(
             .padding(top = 8.dp),
         visualTransformation = PasswordVisualTransformation(),
         enabled = !isLoading,
-        isError = errorMessage != null
+        isError = errorMessage != null,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            }
+        ),
+        singleLine = true
     )
 
     if (errorMessage != null) {

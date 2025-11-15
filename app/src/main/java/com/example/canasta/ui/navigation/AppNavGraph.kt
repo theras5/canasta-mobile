@@ -17,7 +17,6 @@ import com.example.canasta.ui.screens.products.ProductsScreen
 import com.example.canasta.ui.screens.profile.ProfileScreen
 import com.example.canasta.ui.screens.settings.SettingsScreen
 import com.example.canasta.ui.screens.splash.SplashScreen
-import kotlin.reflect.typeOf
 
 /**
  * Grafo de navegación de la aplicación
@@ -37,6 +36,12 @@ fun AppNavGraph(
             SplashScreen(
                 onNavigateToLists = {
                     navController.navigate(Lists) {
+                        // Eliminar el splash del back stack para que no se pueda volver
+                        popUpTo<Splash> { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Login) {
                         // Eliminar el splash del back stack para que no se pueda volver
                         popUpTo<Splash> { inclusive = true }
                     }
@@ -68,7 +73,14 @@ fun AppNavGraph(
             ProductsScreen()
         }
         composable<Profile> {
-            ProfileScreen()
+            ProfileScreen(
+                onLogout = {
+                    navController.navigate(Login) {
+                        // Limpiar todo el back stack para que no pueda volver atrás
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
         composable<Settings> {
             SettingsScreen(

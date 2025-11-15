@@ -1,6 +1,7 @@
 package com.example.canasta.ui.screens.auth
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.canasta.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,9 +28,9 @@ data class AuthUiState(
 /**
  * ViewModel para gestionar el estado de autenticación
  */
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = AuthRepository()
+    private val repository = AuthRepository(application)
 
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()

@@ -25,15 +25,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.data.repository.AuthRepository
 import com.example.canasta.ui.components.profile.EditProfileSheet
 import com.example.canasta.ui.components.profile.LogoutButton
 import com.example.canasta.ui.components.profile.ProfileHeader
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    onLogout: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    val authRepository = remember { AuthRepository(context) }
     var showEdit by remember { mutableStateOf(false) }
 
     Box(
@@ -87,7 +93,10 @@ fun ProfileScreen() {
 
         // Botón de cerrar sesión fijo, con padding para barras del sistema y separación de la bottom bar
         LogoutButton(
-            onClick = { /* TODO: Cerrar sesión */ },
+            onClick = {
+                authRepository.logout()
+                onLogout()
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()

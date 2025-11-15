@@ -1,14 +1,17 @@
 package com.example.canasta.data.repository
 
+import android.content.Context
+import com.example.canasta.data.local.TokenManager
 import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.remote.models.*
 
 /**
  * Repository para operaciones de autenticación
  */
-class AuthRepository {
+class AuthRepository(context: Context) {
 
     private val authApi = ApiClient.authService
+    private val tokenManager = TokenManager.getInstance(context)
 
     /**
      * Registra un nuevo usuario
@@ -40,7 +43,8 @@ class AuthRepository {
     suspend fun login(email: String, password: String): Result<AuthenticationToken> {
         return try {
             val response = authApi.login(Credentials(email, password))
-            // Guardar el token en el ApiClient
+            // Guardar el token en TokenManager y ApiClient
+            tokenManager.saveToken(response.token)
             ApiClient.setAuthToken(response.token)
             Result.success(response)
         } catch (e: Exception) {
@@ -76,7 +80,25 @@ class AuthRepository {
      * Cierra sesión eliminando el token
      */
     fun logout() {
+        tokenManager.clearToken()
         ApiClient.setAuthToken(null)
+    }
+
+    /**
+     * Verifica si hay una sesión activa
+     */
+    fun hasActiveSession(): Boolean {
+        return tokenManager.hasActiveSession()
+    }
+
+    /**
+     * Restaura la sesión desde el token guardado
+     */
+    fun restoreSession() {
+        val token = tokenManager.getToken()
+        if (token != null) {
+            ApiClient.setAuthToken(token)
+        }
     }
 }
 
