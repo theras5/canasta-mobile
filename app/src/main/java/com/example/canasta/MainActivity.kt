@@ -12,12 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.canasta.ui.navigation.AppNavigation
-import com.example.canasta.ui.screens.lists.ListsScreen
 import com.example.canasta.ui.theme.CanastaTheme
+import com.example.canasta.utils.LanguageManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Aplicar el idioma guardado
+        LanguageManager.applyLanguage(this)
+
         enableEdgeToEdge()
         setContent {
             CanastaTheme {

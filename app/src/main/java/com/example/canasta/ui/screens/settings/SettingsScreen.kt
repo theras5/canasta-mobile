@@ -1,5 +1,6 @@
 package com.example.canasta.ui.screens.settings
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,20 +22,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.data.repository.UserRepository
+import com.example.canasta.ui.components.settings.ChangeLanguageDialog
 import com.example.canasta.ui.components.settings.ChangePasswordDialog
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
+import com.example.canasta.utils.LanguageManager
 import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val activity = context as? Activity
     val userRepository = remember { UserRepository() }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -42,6 +50,9 @@ fun SettingsScreen(
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var isChangingPassword by remember { mutableStateOf(false) }
     var passwordErrorMessage by remember { mutableStateOf<String?>(null) }
+
+    var showChangeLanguageDialog by remember { mutableStateOf(false) }
+    val currentLanguage = remember { LanguageManager.getCurrentLanguage(context) }
 
     Scaffold(
         snackbarHost = {
@@ -60,7 +71,7 @@ fun SettingsScreen(
 
             // Título "Configuración" alineado a la izquierda
             Text(
-                text = "Configuración",
+                text = stringResource(R.string.settings),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -68,7 +79,7 @@ fun SettingsScreen(
 
             // Subtítulo
             Text(
-                text = "Personaliza tu experiencia en Canasta",
+                text = stringResource(R.string.settings_subtitle),
                 fontSize = 16.sp,
                 color = Color(0xFF666666),
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -76,20 +87,20 @@ fun SettingsScreen(
 
             // Sección: Cuenta
             SettingsSection(
-                title = "Cuenta"
+                title = stringResource(R.string.account_section)
             ) {
                 SettingsItem(
-                    title = "Cambiar contraseña",
-                    subtitle = "Actualiza tu contraseña de acceso",
+                    title = stringResource(R.string.change_password),
+                    subtitle = stringResource(R.string.change_password_subtitle),
                     onClick = { showChangePasswordDialog = true }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 SettingsItem(
-                    title = "Cambiar idioma",
-                    subtitle = "Selecciona tu idioma preferido",
-                    onClick = { /* TODO: Navegar a cambiar idioma */ }
+                    title = stringResource(R.string.change_language),
+                    subtitle = stringResource(R.string.change_language_subtitle),
+                    onClick = { showChangeLanguageDialog = true }
                 )
             }
 
@@ -117,13 +128,13 @@ fun SettingsScreen(
 
                 // Validar que las contraseñas coincidan
                 if (newPassword != confirmPassword) {
-                    passwordErrorMessage = "Las contraseñas no coinciden"
+                    passwordErrorMessage = context.getString(R.string.passwords_dont_match)
                     return@ChangePasswordDialog
                 }
 
                 // Validar longitud mínima
                 if (newPassword.length < 6) {
-                    passwordErrorMessage = "La contraseña debe tener al menos 6 caracteres"
+                    passwordErrorMessage = context.getString(R.string.password_too_short)
                     return@ChangePasswordDialog
                 }
 
@@ -138,17 +149,30 @@ fun SettingsScreen(
                             isChangingPassword = false
                             showChangePasswordDialog = false
                             passwordErrorMessage = null
-                            snackbarHostState.showSnackbar("Contraseña actualizada exitosamente")
+                            snackbarHostState.showSnackbar(context.getString(R.string.password_changed_successfully))
                         },
                         onFailure = { error ->
                             isChangingPassword = false
                             passwordErrorMessage = when {
-                                error.message?.contains("401") == true -> "Contraseña actual incorrecta"
-                                error.message?.contains("400") == true -> "Datos inválidos"
-                                else -> "Error al cambiar contraseña: ${error.message}"
+                                error.message?.contains("401") == true -> context.getString(R.string.incorrect_current_password)
+                                error.message?.contains("400") == true -> context.getString(R.string.invalid_data)
+                                else -> context.getString(R.string.error_changing_password, error.message ?: "")
                             }
                         }
                     )
+                }
+            }
+        )
+    }
+
+    // Dialog de cambiar idioma
+    if (showChangeLanguageDialog) {
+        ChangeLanguageDialog(
+            currentLanguage = currentLanguage,
+            onDismiss = { showChangeLanguageDialog = false },
+            onConfirm = { languageCode ->
+                activity?.let {
+                    LanguageManager.setLanguage(it, languageCode)
                 }
             }
         )

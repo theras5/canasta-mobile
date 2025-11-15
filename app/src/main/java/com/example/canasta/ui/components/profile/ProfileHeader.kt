@@ -9,10 +9,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.canasta.R
 import com.example.canasta.ui.components.common.UserAvatar
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -31,7 +33,8 @@ fun ProfileHeader(
         try {
             val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
             val date = inputFormat.parse(it)
-            val outputFormat = SimpleDateFormat("MMMM 'del' yyyy", Locale("es", "ES"))
+            // Usar el locale actual para formatear la fecha
+            val outputFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
             date?.let { d -> outputFormat.format(d) }
         } catch (e: Exception) {
             null
@@ -66,7 +69,7 @@ fun ProfileHeader(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Miembro desde $formattedDate",
+                text = stringResource(R.string.member_since, formattedDate),
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 13.sp,
                 color = Color.Gray.copy(alpha = 0.8f)

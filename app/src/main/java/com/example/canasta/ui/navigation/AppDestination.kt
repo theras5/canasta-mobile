@@ -1,5 +1,6 @@
 package com.example.canasta.ui.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.canasta.R
 import kotlinx.serialization.Serializable
 
 /**
@@ -48,31 +50,31 @@ data class ListDetail(
 enum class AppDestination(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector,
-    val label: String,
+    @StringRes val labelRes: Int,
     val route: Any // Mantengo Any para permitir objetos o data classes serializables.
 ) {
     LISTS(
-        selectedIcon = Icons.Outlined.ListAlt, // No hay versión filled para ListAlt en baseline
+        selectedIcon = Icons.Outlined.ListAlt,
         unselectedIcon = Icons.Outlined.ListAlt,
-        label = "Listas",
+        labelRes = R.string.nav_lists,
         route = Lists
     ),
     PRODUCTS(
         selectedIcon = Icons.Filled.ShoppingCart,
         unselectedIcon = Icons.Outlined.ShoppingCart,
-        label = "Productos",
+        labelRes = R.string.nav_products,
         route = Products
     ),
     PROFILE(
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person,
-        label = "Perfil",
+        labelRes = R.string.nav_profile,
         route = Profile
     ),
     MORE(
         selectedIcon = Icons.Filled.Menu,
         unselectedIcon = Icons.Outlined.Menu,
-        label = "Más",
+        labelRes = R.string.nav_more,
         route = Settings // Default route, pero se manejará con menú desplegable
     );
 }

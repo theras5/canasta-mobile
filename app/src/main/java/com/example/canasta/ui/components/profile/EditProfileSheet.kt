@@ -34,9 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.ui.components.common.ModalTextField
 import com.example.canasta.ui.theme.Primary
 
@@ -77,7 +79,7 @@ fun EditProfileSheet(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Editar Perfil",
+                    text = stringResource(R.string.edit_profile),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -87,25 +89,25 @@ fun EditProfileSheet(
 
             // Campo Nombre
             ModalTextField(
-                label = "Nombre *",
+                label = stringResource(R.string.first_name),
                 value = firstName,
                 onValueChange = { firstName = it },
-                placeholder = "Ingresá tu nombre"
+                placeholder = stringResource(R.string.enter_first_name)
             )
 
             // Campo Apellido
             ModalTextField(
-                label = "Apellido *",
+                label = stringResource(R.string.last_name),
                 value = lastName,
                 onValueChange = { lastName = it },
-                placeholder = "Ingresá tu apellido"
+                placeholder = stringResource(R.string.enter_last_name)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Selector de avatar
             Text(
-                text = "Elige tu avatar",
+                text = stringResource(R.string.choose_avatar),
                 fontSize = 16.sp,
                 color = Color.Gray
             )
@@ -135,7 +137,7 @@ fun EditProfileSheet(
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = Primary)
             ) {
-                Text(text = "GUARDAR CAMBIOS")
+                Text(text = stringResource(R.string.save_changes))
             }
 
             OutlinedButton(
@@ -145,7 +147,7 @@ fun EditProfileSheet(
                     contentColor = Color.Gray
                 )
             ) {
-                Text(text = "CANCELAR")
+                Text(text = stringResource(R.string.cancel))
             }
         }
     }

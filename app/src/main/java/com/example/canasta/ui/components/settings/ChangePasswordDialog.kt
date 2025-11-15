@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -41,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.canasta.R
 import com.example.canasta.ui.theme.Secondary
 
 @Composable
@@ -88,7 +90,7 @@ fun ChangePasswordDialog(
                         modifier = Modifier.padding(end = 12.dp)
                     )
                     Text(
-                        text = "Cambiar Contraseña",
+                        text = stringResource(R.string.change_password),
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF333333)
@@ -97,7 +99,7 @@ fun ChangePasswordDialog(
 
                 // Campo: Contraseña actual
                 Text(
-                    text = "Contraseña actual *",
+                    text = stringResource(R.string.current_password),
                     fontSize = 14.sp,
                     color = Color(0xFF666666),
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -134,7 +136,7 @@ fun ChangePasswordDialog(
 
                 // Campo: Nueva contraseña
                 Text(
-                    text = "Nueva contraseña *",
+                    text = stringResource(R.string.new_password),
                     fontSize = 14.sp,
                     color = Color(0xFF666666),
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -156,9 +158,9 @@ fun ChangePasswordDialog(
                                 else
                                     Icons.Default.VisibilityOff,
                                 contentDescription = if (newPasswordVisible)
-                                    "Ocultar contraseña"
+                                    stringResource(R.string.hide_password)
                                 else
-                                    "Mostrar contraseña",
+                                    stringResource(R.string.show_password),
                                 tint = Color(0xFF999999)
                             )
                         }
@@ -171,7 +173,7 @@ fun ChangePasswordDialog(
 
                 // Campo: Confirmar nueva contraseña
                 Text(
-                    text = "Confirmar nueva contraseña *",
+                    text = stringResource(R.string.confirm_new_password),
                     fontSize = 14.sp,
                     color = Color(0xFF666666),
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -193,9 +195,9 @@ fun ChangePasswordDialog(
                                 else
                                     Icons.Default.VisibilityOff,
                                 contentDescription = if (confirmPasswordVisible)
-                                    "Ocultar contraseña"
+                                    stringResource(R.string.hide_password)
                                 else
-                                    "Mostrar contraseña",
+                                    stringResource(R.string.show_password),
                                 tint = Color(0xFF999999)
                             )
                         }
@@ -248,7 +250,7 @@ fun ChangePasswordDialog(
                         )
                     ) {
                         Text(
-                            text = "CANCELAR",
+                            text = stringResource(R.string.cancel),
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
                         )
@@ -281,7 +283,7 @@ fun ChangePasswordDialog(
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Text(
-                            text = if (isLoading) "PROCESANDO..." else "CAMBIAR\nCONTRASEÑA",
+                            text = if (isLoading) stringResource(R.string.processing) else stringResource(R.string.change_password_button),
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp,
                             lineHeight = 12.sp,

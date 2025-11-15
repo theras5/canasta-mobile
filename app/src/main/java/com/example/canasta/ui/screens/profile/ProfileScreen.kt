@@ -31,9 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetUser
 import com.example.canasta.data.repository.AuthRepository
 import com.example.canasta.data.repository.UserRepository
@@ -103,7 +105,7 @@ fun ProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Perfil",
+                        text = stringResource(R.string.profile),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -114,7 +116,7 @@ fun ProfileScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar Perfil"
+                            contentDescription = stringResource(R.string.edit_profile)
                         )
                     }
                 }
@@ -165,12 +167,12 @@ fun ProfileScreen(
                                 onSuccess = { updatedUser ->
                                     userProfile = updatedUser
                                     isUpdating = false
-                                    snackbarHostState.showSnackbar("Perfil actualizado exitosamente")
+                                    snackbarHostState.showSnackbar(context.getString(R.string.profile_updated))
                                 },
                                 onFailure = { error ->
                                     isUpdating = false
                                     snackbarHostState.showSnackbar(
-                                        "Error al actualizar perfil: ${error.message}"
+                                        context.getString(R.string.error_updating_profile, error.message ?: "")
                                     )
                                 }
                             )
