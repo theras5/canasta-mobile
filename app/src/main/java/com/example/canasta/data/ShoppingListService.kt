@@ -104,7 +104,7 @@ object ShoppingListService {
         return try {
             val body = ShoppingListCreateDto(
                 name = name,
-                description = null,
+                description = "",  // Backend requiere string, no null
                 recurring = false,
                 metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
             )
