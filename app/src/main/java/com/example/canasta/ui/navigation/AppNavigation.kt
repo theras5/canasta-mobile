@@ -63,11 +63,6 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                         is Categories -> AppDestination.MORE
                         else -> AppDestination.LISTS
                     }
-                // Usar key para forzar recomposición cuando cambie el idioma
-                key(languageChangeCounter) {
-                    BottomBar(
-                        currentRoute = currentRoute
-                    ) { route ->
 
                     // Opciones de navegación para limpiar el back stack hasta la primera aparición
                     // de la pantalla seleccionada. Esto evita acumular duplicados en el stack.
@@ -81,20 +76,12 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                             else -> {}
                         }
                     }
-                        // Opciones de navegación para limpiar el back stack cuando volvemos a Lists
-                        var navOptions: NavOptions? = null
-                        if (route == Lists) {
-                            navOptions = navOptions {
-                                popUpTo<Lists> { inclusive = true }
-                            }
-                        }
 
-                        // Navegar a la ruta seleccionada
-                        navController.navigate(
-                            route = route,
-                            navOptions = navOptions
-                        )
-                    }
+                    // Navegar a la ruta seleccionada
+                    navController.navigate(
+                        route = route,
+                        navOptions = navOptions
+                    )
                 }
             }
         }

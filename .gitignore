@@ -4,7 +4,7 @@
 .gradle
 local.properties
 .DS_Store
-.sqlite
+*.sqlite
 
 # Build
 /build/
