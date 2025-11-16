@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -102,6 +103,7 @@ fun LoginScreen(
                             onResend = viewModel::resendVerification,
                             onBackToRegister = viewModel::backToRegister,
                             errorMessage = uiState.errorMessage,
+                            verificationCodeError = uiState.verificationCodeError,
                             isLoading = uiState.isLoading,
                             keyboardController = keyboardController,
                             focusManager = focusManager
@@ -121,6 +123,14 @@ fun LoginScreen(
                             onLogin = viewModel::login,
                             onRegister = viewModel::register,
                             errorMessage = uiState.errorMessage,
+                            emailError = uiState.emailError,
+                            passwordError = uiState.passwordError,
+                            nameError = uiState.nameError,
+                            surnameError = uiState.surnameError,
+                            onValidateEmail = viewModel::validateEmail,
+                            onValidatePassword = viewModel::validatePassword,
+                            onValidateName = viewModel::validateName,
+                            onValidateSurname = viewModel::validateSurname,
                             isLoading = uiState.isLoading,
                             keyboardController = keyboardController,
                             focusManager = focusManager
@@ -141,9 +151,10 @@ private fun VerificationContent(
     onResend: () -> Unit,
     onBackToRegister: () -> Unit,
     errorMessage: String?,
+    verificationCodeError: String?,
     isLoading: Boolean,
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
-    focusManager: androidx.compose.ui.focus.FocusManager
+    focusManager: FocusManager
 ) {
     Text(
         text = "Verificar tu cuenta",
@@ -174,24 +185,35 @@ private fun VerificationContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     // Campo de código de verificación
-    OutlinedTextField(
-        value = verificationCode,
-        onValueChange = onCodeChange,
-        label = { Text("Código de verificación") },
-        modifier = Modifier.fillMaxWidth(),
-        enabled = !isLoading,
-        isError = errorMessage != null && !errorMessage.contains("reenviado"),
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
-                focusManager.clearFocus()
-            }
-        ),
-        singleLine = true
-    )
+    Column {
+        OutlinedTextField(
+            value = verificationCode,
+            onValueChange = onCodeChange,
+            label = { Text("Código de verificación") },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = verificationCodeError != null,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }
+            ),
+            singleLine = true
+        )
+
+        if (verificationCodeError != null) {
+            Text(
+                text = verificationCodeError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
 
     if (errorMessage != null) {
         Text(
@@ -268,9 +290,17 @@ private fun AuthContent(
     onLogin: () -> Unit,
     onRegister: () -> Unit,
     errorMessage: String?,
+    emailError: String?,
+    passwordError: String?,
+    nameError: String?,
+    surnameError: String?,
+    onValidateEmail: () -> Unit,
+    onValidatePassword: () -> Unit,
+    onValidateName: () -> Unit,
+    onValidateSurname: () -> Unit,
     isLoading: Boolean,
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
-    focusManager: androidx.compose.ui.focus.FocusManager
+    focusManager: FocusManager
 ) {
     Text(
         text = if (isLoginMode) "Iniciar Sesión" else "Crear Cuenta",
@@ -287,79 +317,132 @@ private fun AuthContent(
 
     // Campos de texto
     if (!isLoginMode) {
+        Column {
+            OutlinedTextField(
+                value = name,
+                onValueChange = onNameChange,
+                label = { Text("Nombre") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 2.dp),
+                enabled = !isLoading,
+                isError = nameError != null,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { onValidateName() }
+                ),
+                singleLine = true
+            )
+            if (nameError != null) {
+                Text(
+                    text = nameError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+        }
+
+        Column {
+            OutlinedTextField(
+                value = surname,
+                onValueChange = onSurnameChange,
+                label = { Text("Apellido") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                enabled = !isLoading,
+                isError = surnameError != null,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                keyboardActions = KeyboardActions(
+                    onNext = { onValidateSurname() }
+                ),
+                singleLine = true
+            )
+            if (surnameError != null) {
+                Text(
+                    text = surnameError,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+        }
+    }
+
+    Column {
         OutlinedTextField(
-            value = name,
-            onValueChange = onNameChange,
-            label = { Text("Nombre") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 2.dp),
-            enabled = !isLoading,
-            isError = errorMessage != null,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next
-            ),
-            singleLine = true
-        )
-        OutlinedTextField(
-            value = surname,
-            onValueChange = onSurnameChange,
-            label = { Text("Apellido") },
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text("Correo electrónico") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             enabled = !isLoading,
-            isError = errorMessage != null,
+            isError = emailError != null,
             keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { onValidateEmail() }
             ),
             singleLine = true
         )
-    }
-    OutlinedTextField(
-        value = email,
-        onValueChange = onEmailChange,
-        label = { Text("Correo electrónico") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        enabled = !isLoading,
-        isError = errorMessage != null,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Email,
-            imeAction = ImeAction.Next
-        ),
-        singleLine = true
-    )
-    OutlinedTextField(
-        value = password,
-        onValueChange = onPasswordChange,
-        label = {
+        if (emailError != null) {
             Text(
-                "Contraseña (mínimo 6 caracteres)",
+                text = emailError,
+                color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp),
-        visualTransformation = PasswordVisualTransformation(),
-        enabled = !isLoading,
-        isError = errorMessage != null,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                keyboardController?.hide()
-                focusManager.clearFocus()
-            }
-        ),
-        singleLine = true
-    )
+        }
+    }
+
+    Column {
+        OutlinedTextField(
+            value = password,
+            onValueChange = onPasswordChange,
+            label = {
+                Text(
+                    "Contraseña (mínimo 6 caracteres)",
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            visualTransformation = PasswordVisualTransformation(),
+            enabled = !isLoading,
+            isError = passwordError != null,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onValidatePassword()
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }
+            ),
+            singleLine = true
+        )
+        if (passwordError != null) {
+            Text(
+                text = passwordError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
 
     if (errorMessage != null) {
         Text(
