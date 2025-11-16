@@ -30,8 +30,8 @@ data class ListDetailUiState(
     val listId: String = "",
     val listName: String = "",
     val products: List<ListProduct> = emptyList(),
-    val selectedCategory: String = "Todos",
-    val categories: List<String> = listOf("Todos", "Lacteos", "Limpieza", "Harinas", "Verduras", "Carnes"),
+    val selectedCategory: GetCategory? = null, // null = "Todos"
+    val categories: List<GetCategory> = emptyList(), // Categorías reales de la API
     val screenMode: ScreenMode = ScreenMode.VIEW,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -75,7 +75,10 @@ class ListDetailViewModel : ViewModel() {
                 // Cargar categorías
                 val categoriesResult = categoryRepository.getCategories()
                 categoriesResult.onSuccess { categoriesList ->
-                    _uiState.value = _uiState.value.copy(availableCategories = categoriesList)
+                    _uiState.value = _uiState.value.copy(
+                        availableCategories = categoriesList,
+                        categories = categoriesList // También para los chips de filtro
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -262,7 +265,7 @@ class ListDetailViewModel : ViewModel() {
     /**
      * Cambia la categoría seleccionada
      */
-    fun selectCategory(category: String) {
+    fun selectCategory(category: GetCategory?) {
         _uiState.value = _uiState.value.copy(selectedCategory = category)
     }
 

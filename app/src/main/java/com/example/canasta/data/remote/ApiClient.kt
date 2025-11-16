@@ -28,8 +28,6 @@ object ApiClient {
         ignoreUnknownKeys = true // Ignora campos desconocidos del JSON
         isLenient = true // Permite JSON menos estricto
         coerceInputValues = true // Maneja valores nulos de forma más flexible
-        encodeDefaults = false // No serializa campos con valores por defecto (null)
-        explicitNulls = false // No incluye campos null en el JSON
     }
 
     // Interceptor de autenticación (se puede acceder para setear el token)

@@ -10,6 +10,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
 
 /**
@@ -102,8 +103,10 @@ object ShoppingListService {
     suspend fun createList(name: String, icon: String?): ShoppingList {
         return try {
             val body = ShoppingListCreateDto(
-                name = name
-                // No enviar campos opcionales que podrían causar problemas
+                name = name,
+                description = null,
+                recurring = false,
+                metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
             )
             println("DEBUG: Creando lista con body: $body")
             val dto = api.createShoppingList(body)

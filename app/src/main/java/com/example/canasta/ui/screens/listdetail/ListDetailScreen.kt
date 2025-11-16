@@ -243,11 +243,27 @@ fun ListDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Chip "Todos"
+                        item {
+                            FilterChip(
+                                selected = uiState.selectedCategory == null,
+                                onClick = { viewModel.selectCategory(null) },
+                                label = { Text("Todos") },
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = Secondary.copy(alpha = 0.3f),
+                                    selectedLabelColor = Secondary,
+                                    containerColor = Color(0xFFFFF8F0),
+                                    labelColor = Color(0xFFD2691E)
+                                )
+                            )
+                        }
+
+                        // Chips de categorías de la API
                         items(uiState.categories) { category ->
                             FilterChip(
-                                selected = uiState.selectedCategory == category,
+                                selected = uiState.selectedCategory?.id == category.id,
                                 onClick = { viewModel.selectCategory(category) },
-                                label = { Text(category) },
+                                label = { Text(category.name) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Secondary.copy(alpha = 0.3f),
                                     selectedLabelColor = Secondary,
