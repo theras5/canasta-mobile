@@ -1,3 +1,61 @@
 <resources>
     <string name="app_name">Canasta</string>
+
+    <!-- Profile Screen -->
+    <string name="profile">Perfil</string>
+    <string name="edit_profile">Editar Perfil</string>
+    <string name="logout">CERRAR SESIÓN</string>
+    <string name="member_since">Miembro desde %s</string>
+    <string name="choose_avatar">Elige tu avatar</string>
+    <string name="save_changes">GUARDAR CAMBIOS</string>
+    <string name="cancel">CANCELAR</string>
+    <string name="first_name">Nombre *</string>
+    <string name="last_name">Apellido *</string>
+    <string name="enter_first_name">Ingresá tu nombre</string>
+    <string name="enter_last_name">Ingresá tu apellido</string>
+    <string name="profile_updated">Perfil actualizado exitosamente</string>
+    <string name="error_loading_profile">Error al cargar el perfil: %s</string>
+    <string name="error_updating_profile">Error al actualizar perfil: %s</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Configuración</string>
+    <string name="settings_subtitle">Personaliza tu experiencia en Canasta</string>
+    <string name="account_section">Cuenta</string>
+    <string name="change_password">Cambiar contraseña</string>
+    <string name="change_password_subtitle">Actualiza tu contraseña de acceso</string>
+    <string name="change_language">Cambiar idioma</string>
+    <string name="change_language_subtitle">Selecciona tu idioma preferido</string>
+
+    <!-- Change Password Dialog -->
+    <string name="current_password">Contraseña actual *</string>
+    <string name="new_password">Nueva contraseña *</string>
+    <string name="confirm_new_password">Confirmar nueva contraseña *</string>
+    <string name="change_password_title">Cambiar Contraseña</string>
+    <string name="change_password_button">CAMBIAR\nCONTRASEÑA</string>
+    <string name="processing">PROCESANDO...</string>
+    <string name="show_password">Mostrar contraseña</string>
+    <string name="hide_password">Ocultar contraseña</string>
+    <string name="passwords_dont_match">Las contraseñas no coinciden</string>
+    <string name="password_too_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="incorrect_current_password">Contraseña actual incorrecta</string>
+    <string name="invalid_data">Datos inválidos</string>
+    <string name="error_changing_password">Error al cambiar contraseña: %s</string>
+    <string name="password_changed_successfully">Contraseña actualizada exitosamente</string>
+
+    <!-- Language Dialog -->
+    <string name="select_language">Seleccionar Idioma</string>
+    <string name="device_language">Idioma del dispositivo</string>
+    <string name="spanish">Español</string>
+    <string name="english">English</string>
+    <string name="language_changed">Idioma cambiado exitosamente</string>
+
+    <!-- Navigation -->
+    <string name="nav_lists">Listas</string>
+    <string name="nav_products">Productos</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="nav_more">Más</string>
+    <string name="categories">Categorías</string>
+
+    <!-- Products Screen -->
+    <string name="products">Productos</string>
 </resources>

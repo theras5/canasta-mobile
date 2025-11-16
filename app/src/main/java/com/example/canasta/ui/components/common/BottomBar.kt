@@ -16,8 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.example.canasta.R
 import com.example.canasta.ui.navigation.AppDestination
 import com.example.canasta.ui.navigation.Categories
 import com.example.canasta.ui.navigation.Settings
@@ -58,10 +60,10 @@ fun BottomBar(
                                 destination.selectedIcon
                             else
                                 destination.unselectedIcon,
-                            contentDescription = destination.label
+                            contentDescription = stringResource(destination.labelRes)
                         )
                     },
-                    label = { Text(destination.label) },
+                    label = { Text(stringResource(destination.labelRes)) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Color.White,
                         selectedTextColor = Color.White,
@@ -83,14 +85,14 @@ fun BottomBar(
                 offset = DpOffset(x = (-16).dp, y = (-80).dp)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Configuración") },
+                    text = { Text(stringResource(R.string.settings)) },
                     onClick = {
                         showMenu = false
                         onNavigate(Settings)
                     }
                 )
                 DropdownMenuItem(
-                    text = { Text("Categorías") },
+                    text = { Text(stringResource(R.string.categories)) },
                     onClick = {
                         showMenu = false
                         onNavigate(Categories)
