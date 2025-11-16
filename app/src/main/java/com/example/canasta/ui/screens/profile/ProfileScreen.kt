@@ -1,5 +1,6 @@
 package com.example.canasta.ui.screens.profile
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +51,7 @@ fun ProfileScreen(
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val configuration = LocalConfiguration.current
     val authRepository = remember { AuthRepository(context) }
     val userRepository = remember { UserRepository() }
     val scope = rememberCoroutineScope()
@@ -58,6 +61,9 @@ fun ProfileScreen(
     var userProfile by remember { mutableStateOf<GetUser?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var isUpdating by remember { mutableStateOf(false) }
+
+    // Detectar si estamos en orientación horizontal
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     // Cargar perfil de usuario al iniciar
     LaunchedEffect(Unit) {
@@ -80,7 +86,6 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp)
     ) {
         if (isLoading) {
             // Mostrar indicador de carga
@@ -93,7 +98,14 @@ fun ProfileScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(top = 16.dp),
+                    .then(
+                        if (isLandscape) {
+                            Modifier.navigationBarsPadding()
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Título "Perfil" con icono de editar
@@ -133,21 +145,39 @@ fun ProfileScreen(
                     )
                 }
 
-                // Espacio extra para que el contenido no quede escondido detrás del botón
-                Spacer(modifier = Modifier.height(160.dp))
+                // En landscape, el botón va dentro del scroll
+                if (isLandscape) {
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    LogoutButton(
+                        onClick = {
+                            authRepository.logout()
+                            onLogout()
+                        }
+                    )
+                } else {
+                    // En portrait, agregamos espacio para que el contenido no quede detrás del botón
+                    Spacer(modifier = Modifier.height(100.dp))
+                }
             }
 
-            // Botón de cerrar sesión fijo, con padding para barras del sistema y separación de la bottom bar
-            LogoutButton(
-                onClick = {
-                    authRepository.logout()
-                    onLogout()
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(bottom = 24.dp)
-            )
+            // En portrait, el botón se muestra fijo en la parte inferior
+            if (!isLandscape) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(horizontal = 24.dp, vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LogoutButton(
+                        onClick = {
+                            authRepository.logout()
+                            onLogout()
+                        }
+                    )
+                }
+            }
 
             if (showEdit) {
                 EditProfileSheet(
@@ -187,7 +217,8 @@ fun ProfileScreen(
             hostState = snackbarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 100.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 16.dp)
         )
     }
 }

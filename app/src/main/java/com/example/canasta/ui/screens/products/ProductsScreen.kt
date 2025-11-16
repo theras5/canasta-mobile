@@ -1,5 +1,6 @@
 package com.example.canasta.ui.screens.products
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,8 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
@@ -36,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,6 +58,9 @@ import com.example.canasta.ui.theme.Secondary
 fun ProductsScreen(
     viewModel: ProductsViewModel = viewModel()
 ) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     // Estados del ViewModel
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.products.collectAsState()
@@ -110,126 +116,48 @@ fun ProductsScreen(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-        ) {
-            // Título con botón de refrescar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Productos",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            // Barra de búsqueda
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Buscar") },
-                placeholder = { Text("Buscar producto...") },
-                singleLine = true
+        if (isLandscape) {
+            // En landscape: Scroll unificado de todo el contenido
+            ProductsScreenLandscape(
+                innerPadding = innerPadding,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it },
+                uiState = uiState,
+                filteredProducts = filteredProducts,
+                onEditClick = { product ->
+                    productToEdit = product
+                    showEditModal = true
+                },
+                onDeleteClick = { product ->
+                    productToDelete = product
+                    showDeleteModal = true
+                },
+                onRetry = { viewModel.loadProducts() }
             )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Chips de categorías
-            if (categories.isNotEmpty()) {
-                CategoryChipsApi(
-                    categories = categories,
-                    selectedCategory = selectedCategory,
-                    onCategorySelected = { category ->
-                        selectedCategory = category
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Contenido principal basado en el estado
-            Box(modifier = Modifier.weight(1f)) {
-                when (uiState) {
-                    is ProductsUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    is ProductsUiState.Error -> {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Error al cargar productos",
-                                style = MaterialTheme.typography.headlineSmall,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = (uiState as ProductsUiState.Error).message,
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            FloatingActionButton(
-                                onClick = { viewModel.loadProducts() },
-                                containerColor = Secondary
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Reintentar",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
-                    is ProductsUiState.Success -> {
-                        if (filteredProducts.isEmpty()) {
-                            Text(
-                                text = if (searchQuery.isBlank() && selectedCategory == null) {
-                                    "No hay productos disponibles"
-                                } else {
-                                    "No se encontraron productos con los filtros aplicados"
-                                },
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        } else {
-                            val listState = rememberLazyListState()
-                            LazyColumn(
-                                state = listState,
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = PaddingValues(bottom = 88.dp)
-                            ) {
-                                items(filteredProducts, key = { it.id }) { product ->
-                                    RemoteProductCard(
-                                        product = product,
-                                        onEditClick = { productToEditClick ->
-                                            productToEdit = productToEditClick
-                                            showEditModal = true
-                                        },
-                                        onDeleteClick = { prod ->
-                                            productToDelete = prod
-                                            showDeleteModal = true
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        } else {
+            // En portrait: LazyColumn con scroll eficiente
+            ProductsScreenPortrait(
+                innerPadding = innerPadding,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it },
+                uiState = uiState,
+                filteredProducts = filteredProducts,
+                onEditClick = { product ->
+                    productToEdit = product
+                    showEditModal = true
+                },
+                onDeleteClick = { product ->
+                    productToDelete = product
+                    showDeleteModal = true
+                },
+                onRetry = { viewModel.loadProducts() }
+            )
         }
     }
 
@@ -278,6 +206,274 @@ fun ProductsScreen(
                 productToDelete = null
             }
         )
+    }
+}
+
+// Composable para modo Portrait - con LazyColumn eficiente
+@Composable
+private fun ProductsScreenPortrait(
+    innerPadding: PaddingValues,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    categories: List<GetCategory>,
+    selectedCategory: GetCategory?,
+    onCategorySelected: (GetCategory?) -> Unit,
+    uiState: ProductsUiState,
+    filteredProducts: List<Product>,
+    onEditClick: (Product) -> Unit,
+    onDeleteClick: (Product) -> Unit,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(horizontal = 24.dp)
+    ) {
+        // Título
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Productos",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // Barra de búsqueda
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar") },
+            placeholder = { Text("Buscar producto...") },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Chips de categorías
+        if (categories.isNotEmpty()) {
+            CategoryChipsApi(
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = onCategorySelected
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Contenido principal con LazyColumn
+        Box(modifier = Modifier.weight(1f)) {
+            when (uiState) {
+                is ProductsUiState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                is ProductsUiState.Error -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Error al cargar productos",
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = uiState.message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        FloatingActionButton(
+                            onClick = onRetry,
+                            containerColor = Secondary
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Reintentar",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+                is ProductsUiState.Success -> {
+                    if (filteredProducts.isEmpty()) {
+                        Text(
+                            text = if (searchQuery.isBlank() && selectedCategory == null) {
+                                "No hay productos disponibles"
+                            } else {
+                                "No se encontraron productos con los filtros aplicados"
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(bottom = 88.dp)
+                        ) {
+                            items(filteredProducts, key = { it.id }) { product ->
+                                RemoteProductCard(
+                                    product = product,
+                                    onEditClick = onEditClick,
+                                    onDeleteClick = onDeleteClick
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Composable para modo Landscape - con scroll unificado
+@Composable
+private fun ProductsScreenLandscape(
+    innerPadding: PaddingValues,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    categories: List<GetCategory>,
+    selectedCategory: GetCategory?,
+    onCategorySelected: (GetCategory?) -> Unit,
+    uiState: ProductsUiState,
+    filteredProducts: List<Product>,
+    onEditClick: (Product) -> Unit,
+    onDeleteClick: (Product) -> Unit,
+    onRetry: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp)
+    ) {
+        // Título
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Productos",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // Barra de búsqueda
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar") },
+            placeholder = { Text("Buscar producto...") },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Chips de categorías
+        if (categories.isNotEmpty()) {
+            CategoryChipsApi(
+                categories = categories,
+                selectedCategory = selectedCategory,
+                onCategorySelected = onCategorySelected
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Contenido principal con scroll unificado
+        when (uiState) {
+            is ProductsUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is ProductsUiState.Error -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Error al cargar productos",
+                        style = MaterialTheme.typography.headlineSmall,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    FloatingActionButton(
+                        onClick = onRetry,
+                        containerColor = Secondary
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Reintentar",
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+            is ProductsUiState.Success -> {
+                if (filteredProducts.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (searchQuery.isBlank() && selectedCategory == null) {
+                                "No hay productos disponibles"
+                            } else {
+                                "No se encontraron productos con los filtros aplicados"
+                            },
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(bottom = 88.dp)
+                    ) {
+                        filteredProducts.forEach { product ->
+                            RemoteProductCard(
+                                product = product,
+                                onEditClick = onEditClick,
+                                onDeleteClick = onDeleteClick
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
