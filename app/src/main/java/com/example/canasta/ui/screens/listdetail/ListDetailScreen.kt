@@ -7,19 +7,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,6 +62,7 @@ import kotlinx.coroutines.launch
  * @param viewModel ViewModel para gestionar el estado
  * @param onBackClick Callback cuando se presiona el botón de volver
  * @param onShareClick Callback cuando se presiona compartir
+ * @param onDeleteClick Callback cuando se elimina la lista
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +71,8 @@ fun ListDetailScreen(
     listName: String,
     viewModel: ListDetailViewModel = viewModel(),
     onBackClick: () -> Unit = {},
-    onShareClick: () -> Unit = {}
+    onShareClick: () -> Unit = {},
+    onDeleteClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -82,9 +81,12 @@ fun ListDetailScreen(
         viewModel.loadList(listId, listName)
     }
 
-    // Estado para el modal de confirmación de eliminación
+    // Estado para el modal de confirmación de eliminación de producto
     var showDeleteDialog by remember { mutableStateOf(false) }
     var productToDelete by remember { mutableStateOf<ListProduct?>(null) }
+
+    // Estado para el modal de confirmación de eliminación de lista
+    var showDeleteListDialog by remember { mutableStateOf(false) }
 
     // Estado para el bottom sheet de agregar productos
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
@@ -106,6 +108,22 @@ fun ListDetailScreen(
                 }
                 showDeleteDialog = false
                 productToDelete = null
+            }
+        )
+    }
+
+    // Mostrar modal de confirmación para eliminar lista
+    if (showDeleteListDialog) {
+        ConfirmationModal(
+            title = "Eliminar lista",
+            message = "¿Estás seguro de que quieres eliminar la lista \"${uiState.listName}\"? Esta acción no se puede deshacer.",
+            onDismiss = {
+                showDeleteListDialog = false
+            },
+            onConfirm = {
+                viewModel.deleteList()
+                showDeleteListDialog = false
+                onDeleteClick()
             }
         )
     }
@@ -206,6 +224,19 @@ fun ListDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Share,
                                 contentDescription = "Compartir",
+                                tint = Titles
+                            )
+                        }
+                    }
+
+                    // Botón de Eliminar (solo visible en modo vista)
+                    if (uiState.screenMode == ScreenMode.VIEW) {
+                        IconButton(onClick = {
+                            showDeleteListDialog = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar lista",
                                 tint = Titles
                             )
                         }

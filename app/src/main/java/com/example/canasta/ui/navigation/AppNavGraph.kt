@@ -103,6 +103,9 @@ fun AppNavGraph(
                 listName = listDetail.listName,
                 onBackClick = {
                     navController.popBackStack()
+                },
+                onDeleteClick = {
+                    navController.popBackStack()
                 }
             )
         }
