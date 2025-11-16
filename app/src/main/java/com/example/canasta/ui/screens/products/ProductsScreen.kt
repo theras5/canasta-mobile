@@ -44,7 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.repository.CategoryRepository
-import com.example.canasta.ui.components.common.CategoryChips
+import com.example.canasta.ui.components.common.CategoryChipsApi
 import com.example.canasta.ui.components.products.CreateProductModalApi
 import com.example.canasta.ui.components.products.EditProductModal
 import com.example.canasta.ui.components.products.RemoteProductCard
@@ -292,24 +292,6 @@ private suspend fun loadCategories(onCategoriesLoaded: (List<GetCategory>) -> Un
     } catch (_: Exception) { // silenciar warning
         onCategoriesLoaded(emptyList())
     }
-}
-
-// Composable para chips de categorías con la API
-@Composable
-private fun CategoryChipsApi(
-    categories: List<GetCategory>,
-    selectedCategory: GetCategory?,
-    onCategorySelected: (GetCategory?) -> Unit
-) {
-    val categoryNames = listOf("Todos") + categories.map { it.name }
-    CategoryChips(
-        categories = categoryNames,
-        selectedCategory = selectedCategory?.name ?: "Todos",
-        onCategorySelected = { categoryName ->
-            val category = if (categoryName == "Todos") null else categories.find { it.name == categoryName }
-            onCategorySelected(category)
-        }
-    )
 }
 
 @Preview(showBackground = true)

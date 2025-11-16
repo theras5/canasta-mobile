@@ -11,6 +11,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.data.ShoppingListService
@@ -33,6 +38,7 @@ import com.example.canasta.ui.components.lists.ListsGrid
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.theme.Secondary
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 @Composable
 fun ListsScreen(
@@ -45,12 +51,27 @@ fun ListsScreen(
     val lists by ShoppingListService.listsState.collectAsState()
     val scope = rememberCoroutineScope()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     // Al entrar en la pantalla, cargar listas desde la API
     LaunchedEffect(Unit) {
         ShoppingListService.refreshLists()
     }
 
     Scaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    // Snackbar rojo para errores
+                    androidx.compose.material3.Snackbar(
+                        snackbarData = data,
+                        containerColor = Color(0xFFB00020), // rojo de error
+                        contentColor = Color.White
+                    )
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateModal = true },
@@ -71,7 +92,7 @@ fun ListsScreen(
             Text(
                 text = "Listas",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.Start)
                     .padding(vertical = 16.dp)
@@ -100,7 +121,30 @@ fun ListsScreen(
             onDismiss = { showCreateModal = false },
             onCreateList = { name, image ->
                 scope.launch {
-                    ShoppingListService.createList(name, image)
+                    try {
+                        ShoppingListService.createList(name, image)
+                        // Si llega aquí, la creación fue exitosa y refreshLists() ya se llamó en el servicio
+                    } catch (e: HttpException) {
+                        if (e.code() == 409) {
+                            snackbarHostState.showSnackbar(
+                                message = "Ya existe una lista con ese nombre.",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        } else {
+                            snackbarHostState.showSnackbar(
+                                message = "Error al crear la lista (${e.code()}). Intenta de nuevo.",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    } catch (e: Exception) {
+                        snackbarHostState.showSnackbar(
+                            message = "Error de red al crear la lista. Revisa tu conexión.",
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
                 showCreateModal = false
             }

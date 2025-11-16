@@ -43,6 +43,28 @@ data class ShoppingListDto(
 )
 
 /**
+ * Información de paginación devuelta por la API de listas de compras.
+ */
+@Serializable
+data class ShoppingListPaginationDto(
+    val total: Int,
+    val page: Int,
+    val per_page: Int,
+    val total_pages: Int,
+    val has_next: Boolean,
+    val has_prev: Boolean
+)
+
+/**
+ * Respuesta paginada de la API de listas de compras.
+ */
+@Serializable
+data class ShoppingListPagedResponseDto(
+    val data: List<ShoppingListDto>,
+    val pagination: ShoppingListPaginationDto
+)
+
+/**
  * DTO para crear una shopping list
  */
 @Serializable
@@ -61,11 +83,10 @@ interface ShoppingListApi {
         @Query("name") name: String? = null,
         @Query("page") page: Int? = null,
         @Query("per_page") perPage: Int? = null
-    ): List<ShoppingListDto>
+    ): ShoppingListPagedResponseDto
 
     @POST("/api/shopping-lists")
     suspend fun createShoppingList(
         @Body body: ShoppingListCreateDto
     ): ShoppingListDto
 }
-
