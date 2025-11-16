@@ -5,17 +5,15 @@ package com.example.canasta.ui.navigation
 import android.annotation.SuppressLint
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController // <-- Add this import
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
-import com.example.canasta.ui.screens.products.ProductsScreen
-import com.example.canasta.ui.screens.profile.ProfileScreen
 
 /**
  * Punto de entrada principal de la navegación de la aplicación
@@ -30,6 +28,18 @@ fun AppNavigation() { // <-- Wrap the logic in a function
     // Observar la ruta actual para saber si mostrar el BottomBar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    // Actualizar currentRoute cuando cambia el back stack (incluyendo al presionar back)
+    LaunchedEffect(currentDestination?.route) {
+        currentRoute = when {
+            currentDestination?.route?.contains("Lists") == true -> AppDestination.LISTS
+            currentDestination?.route?.contains("Products") == true -> AppDestination.PRODUCTS
+            currentDestination?.route?.contains("Profile") == true -> AppDestination.PROFILE
+            currentDestination?.route?.contains("Settings") == true -> AppDestination.MORE
+            currentDestination?.route?.contains("Categories") == true -> AppDestination.MORE
+            else -> currentRoute // Mantener el valor actual si no coincide
+        }
+    }
+
 
     // Determinar si debemos mostrar el BottomBar
     val showBottomBar = currentDestination?.route?.let { route ->
@@ -49,14 +59,21 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                         is Lists -> AppDestination.LISTS
                         is Products -> AppDestination.PRODUCTS
                         is Profile -> AppDestination.PROFILE
+                        is Settings -> AppDestination.MORE
+                        is Categories -> AppDestination.MORE
                         else -> AppDestination.LISTS
                     }
 
-                    // Opciones de navegación para limpiar el back stack cuando volvemos a Lists
-                    var navOptions: NavOptions? = null
-                    if (route == Lists) {
-                        navOptions = navOptions {
-                            popUpTo<Lists> { inclusive = true }
+                    // Opciones de navegación para limpiar el back stack hasta la primera aparición
+                    // de la pantalla seleccionada. Esto evita acumular duplicados en el stack.
+                    val navOptions = navOptions {
+                        when(route) {
+                            is Lists -> popUpTo<Lists> { inclusive = true }
+                            is Products -> popUpTo<Products> { inclusive = true }
+                            is Profile -> popUpTo<Profile> { inclusive = true }
+                            is Settings -> popUpTo<Settings> { inclusive = true }
+                            is Categories -> popUpTo<Categories> { inclusive = true }
+                            else -> {}
                         }
                     }
 
