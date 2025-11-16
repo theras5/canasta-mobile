@@ -1,7 +1,7 @@
 package com.example.canasta.data.api
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -10,27 +10,49 @@ import retrofit2.http.Query
 /**
  * DTOs alineados con swagger para listas de compras.
  */
+
+/**
+ * Usuario simplificado (owner de la lista)
+ */
+@Serializable
+data class UserDto(
+    val id: Long,
+    val name: String,
+    val surname: String,
+    val email: String,
+    val metadata: JsonObject? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
+)
+
+/**
+ * ShoppingList completo según swagger
+ */
 @Serializable
 data class ShoppingListDto(
     val id: Long,
     val name: String,
     val description: String? = null,
-    val recurring: Boolean? = null
+    val recurring: Boolean? = null,
+    val metadata: JsonObject? = null,
+    val owner: UserDto? = null,
+    val sharedWith: List<UserDto>? = null,
+    val lastPurchasedAt: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
+/**
+ * DTO para crear una shopping list
+ */
 @Serializable
 data class ShoppingListCreateDto(
     val name: String,
     val description: String? = null,
     val recurring: Boolean? = null,
-    val metadata: Map<String, String>? = null
+    val metadata: JsonObject? = null
 )
 
-@Serializable
-data class ShoppingListsResponseDto(
-    // Según swagger, ShoppingListsArray es un array de ShoppingList
-    val items: List<ShoppingListDto>? = null
-)
 
 interface ShoppingListApi {
 

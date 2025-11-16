@@ -30,11 +30,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,22 +46,21 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-<<<<<<< Updated upstream
-=======
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.canasta.ui.components.common.BottomNavBar
 import com.example.canasta.ui.components.common.ConfirmationModal
-import com.example.canasta.ui.components.products.EditProductModal
->>>>>>> Stashed changes
+import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle de una lista con sus productos
  * Soporta dos modos: VIEW (visualización) y EDIT (edición)
  *
+ * @param listId ID de la lista a mostrar
+ * @param listName Nombre inicial de la lista
  * @param viewModel ViewModel para gestionar el estado
  * @param onBackClick Callback cuando se presiona el botón de volver
  * @param onShareClick Callback cuando se presiona compartir
@@ -66,19 +68,27 @@ import com.example.canasta.ui.theme.Titles
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailScreen(
+    listId: String,
+    listName: String,
     viewModel: ListDetailViewModel = viewModel(),
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    // Cargar la lista al iniciar la pantalla
+    LaunchedEffect(listId) {
+        viewModel.loadList(listId, listName)
+    }
+
     // Estado para el modal de confirmación de eliminación
     var showDeleteDialog by remember { mutableStateOf(false) }
     var productToDelete by remember { mutableStateOf<ListProduct?>(null) }
 
-    // Estado para el modal de edición de producto
-    var showEditModal by remember { mutableStateOf(false) }
-    var productToEdit by remember { mutableStateOf<ListProduct?>(null) }
+    // Estado para el bottom sheet de agregar productos
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var showAddProductSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Mostrar modal de confirmación si hay producto para eliminar
     if (showDeleteDialog && productToDelete != null) {
@@ -99,24 +109,26 @@ fun ListDetailScreen(
         )
     }
 
-    // Mostrar modal de edición si hay producto para editar
-    if (showEditModal && productToEdit != null) {
-        EditProductModal(
-            product = productToEdit!!,
+    // Mostrar bottom sheet de agregar productos
+    if (showAddProductSheet) {
+        AddProductToListBottomSheet(
+            sheetState = bottomSheetState,
+            products = uiState.availableProducts,
+            categories = uiState.availableCategories,
+            addedProductNames = uiState.products.map { it.name }.toSet(),
             onDismiss = {
-                showEditModal = false
-                productToEdit = null
-            },
-            onSave = { _, newQuantity ->
-                // Solo actualizamos la cantidad en el ViewModel
-                productToEdit?.let { product ->
-                    viewModel.updateProductQuantity(product.id, newQuantity)
+                scope.launch {
+                    bottomSheetState.hide()
+                    showAddProductSheet = false
                 }
-                showEditModal = false
-                productToEdit = null
+            },
+            onAddProduct = { product ->
+                viewModel.addProductToList(product)
+                // No cerramos el bottom sheet para permitir agregar múltiples productos
             }
         )
     }
+
 
     Scaffold(
         topBar = {
@@ -208,8 +220,7 @@ fun ListDetailScreen(
             if (uiState.screenMode == ScreenMode.VIEW) {
                 FloatingActionButton(
                     onClick = {
-                        // TODO: Implementar agregar producto
-                        println("Agregar producto")
+                        showAddProductSheet = true
                     },
                     containerColor = Secondary,
                     contentColor = Color.White,
@@ -260,8 +271,7 @@ fun ListDetailScreen(
                             }
                         },
                         onEdit = {
-                            productToEdit = product
-                            showEditModal = true
+                            // TODO: Implementar modal de edición con el tipo correcto
                         },
                         onDelete = {
                             // Solo permitir eliminar si no está comprado
@@ -277,10 +287,13 @@ fun ListDetailScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ListDetailScreenPreview() {
-    MaterialTheme {
-        ListDetailScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ListDetailScreenPreview() {
+//    MaterialTheme {
+//        ListDetailScreen(
+//            listId = "preview-list-id",
+//            listName = "Mi Lista de Compras"
+//        )
+//    }
+//}

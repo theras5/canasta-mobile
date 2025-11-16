@@ -22,11 +22,14 @@ object ApiClient {
     // URL base del servidor
     //private const val BASE_URL = "http://192.168.1.35:8080/" //http://10.0.2.2:8080/ http://localhost:8080/
     private const val BASE_URL = "http://192.168.0.120:8080/"
+
     // Configuración de kotlinx-serialization JSON
     private val json = Json {
         ignoreUnknownKeys = true // Ignora campos desconocidos del JSON
         isLenient = true // Permite JSON menos estricto
         coerceInputValues = true // Maneja valores nulos de forma más flexible
+        encodeDefaults = false // No serializa campos con valores por defecto (null)
+        explicitNulls = false // No incluye campos null en el JSON
     }
 
     // Interceptor de autenticación (se puede acceder para setear el token)
@@ -88,5 +91,12 @@ object ApiClient {
      * Obtiene el token actual
      */
     fun getAuthToken(): String? = authInterceptor.getToken()
+
+    /**
+     * Método genérico para crear cualquier servicio de API con autenticación
+     */
+    fun <T> createService(serviceClass: Class<T>): T {
+        return retrofit.create(serviceClass)
+    }
 }
 

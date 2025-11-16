@@ -99,6 +99,7 @@ fun AppNavGraph(
         composable<ListDetail> { backStackEntry ->
             val listDetail = backStackEntry.toRoute<ListDetail>()
             ListDetailScreen(
+                listId = listDetail.listId,
                 listName = listDetail.listName,
                 onBackClick = {
                     navController.popBackStack()

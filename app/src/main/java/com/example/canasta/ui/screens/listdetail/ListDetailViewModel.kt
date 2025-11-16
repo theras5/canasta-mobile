@@ -3,12 +3,17 @@ package com.example.canasta.ui.screens.listdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.canasta.data.ShoppingListService
+import com.example.canasta.data.repository.CategoryRepository
+import com.example.canasta.data.repository.ProductRepository
+import com.example.canasta.data.remote.models.GetCategory
+import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * Enum que representa los modos de la pantalla de detalle
@@ -29,7 +34,9 @@ data class ListDetailUiState(
     val categories: List<String> = listOf("Todos", "Lacteos", "Limpieza", "Harinas", "Verduras", "Carnes"),
     val screenMode: ScreenMode = ScreenMode.VIEW,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val availableProducts: List<Product> = emptyList(),
+    val availableCategories: List<GetCategory> = emptyList()
 )
 
 /**
@@ -41,9 +48,83 @@ class ListDetailViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ListDetailUiState())
     val uiState: StateFlow<ListDetailUiState> = _uiState.asStateFlow()
 
+    private val productRepository = ProductRepository()
+    private val categoryRepository = CategoryRepository()
+
     // Estado temporal para edición (mantiene una copia de los datos originales)
     private var originalListName: String = ""
     private var originalProducts: List<ListProduct> = emptyList()
+
+    init {
+        // Cargar productos y categorías disponibles
+        loadAvailableProductsAndCategories()
+    }
+
+    /**
+     * Carga productos y categorías desde la API para el bottom sheet
+     */
+    private fun loadAvailableProductsAndCategories() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Cargar productos
+                val productsResult = productRepository.getProducts()
+                productsResult.onSuccess { products ->
+                    _uiState.value = _uiState.value.copy(availableProducts = products)
+                }
+
+                // Cargar categorías
+                val categoriesResult = categoryRepository.getCategories()
+                categoriesResult.onSuccess { categoriesList ->
+                    _uiState.value = _uiState.value.copy(availableCategories = categoriesList)
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al cargar productos: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * Agrega un producto a la lista actual
+     * Los productos nuevos se agregan al inicio de la lista
+     */
+    fun addProductToList(product: Product) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                println("DEBUG ViewModel: Agregando producto '${product.name}' a la lista")
+
+                // Crear el ListProduct localmente
+                val listProduct = ListProduct(
+                    id = UUID.randomUUID().toString(),
+                    name = product.name,
+                    description = "1 unidades",
+                    isChecked = false,
+                    isPurchased = false
+                )
+
+                println("DEBUG ViewModel: ListProduct creado con nombre '${listProduct.name}'")
+
+                // Agregar al servicio local
+                ShoppingListService.upsertProduct(_uiState.value.listId, listProduct)
+
+                // Actualizar UI - agregar al INICIO de la lista
+                val currentProducts = _uiState.value.products
+                val updatedProducts = listOf(listProduct) + currentProducts
+                _uiState.value = _uiState.value.copy(products = updatedProducts)
+
+                println("DEBUG ViewModel: Estado actualizado. Productos en lista: ${updatedProducts.size}")
+                println("DEBUG ViewModel: Nombres en lista: ${updatedProducts.map { it.name }}")
+
+            } catch (e: Exception) {
+                println("ERROR ViewModel: Al agregar producto: ${e.message}")
+                e.printStackTrace()
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al agregar producto: ${e.message}"
+                )
+            }
+        }
+    }
 
     /**
      * Carga los datos de una lista específica por ID

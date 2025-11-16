@@ -1,6 +1,6 @@
 package com.example.canasta.data
 
-import com.example.canasta.data.api.ApiClient
+import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.api.ShoppingListApi
 import com.example.canasta.data.api.ShoppingListCreateDto
 import com.example.canasta.data.api.ListItemApi
@@ -21,8 +21,9 @@ import java.util.UUID
  */
 object ShoppingListService {
 
-    private val api: ShoppingListApi = ApiClient.create(ShoppingListApi::class.java)
-    private val itemsApi: ListItemApi = ApiClient.create(ListItemApi::class.java)
+    // Usar el ApiClient correcto que tiene autenticación configurada
+    private val api: ShoppingListApi = ApiClient.createService(ShoppingListApi::class.java)
+    private val itemsApi: ListItemApi = ApiClient.createService(ListItemApi::class.java)
 
     // Estado in-memory de las listas
     private val _listsState = MutableStateFlow<List<ShoppingList>>(emptyList())
@@ -101,12 +102,12 @@ object ShoppingListService {
     suspend fun createList(name: String, icon: String?): ShoppingList {
         return try {
             val body = ShoppingListCreateDto(
-                name = name,
-                description = null,
-                recurring = false,
-                metadata = emptyMap()
+                name = name
+                // No enviar campos opcionales que podrían causar problemas
             )
+            println("DEBUG: Creando lista con body: $body")
             val dto = api.createShoppingList(body)
+            println("DEBUG: Lista creada exitosamente: ${dto.id}")
             val newList = ShoppingList(
                 id = dto.id.toString(),
                 name = dto.name,
@@ -117,7 +118,8 @@ object ShoppingListService {
             _listsState.value = _listsState.value + newList
             newList
         } catch (e: Exception) {
-            println("Error al crear lista en API: ${e.message}")
+            println("ERROR: Al crear lista en API: ${e.message}")
+            e.printStackTrace()  // Ver el stacktrace completo
             // Fallback in-memory para no romper la UI
             val fallback = ShoppingList(
                 id = UUID.randomUUID().toString(),
