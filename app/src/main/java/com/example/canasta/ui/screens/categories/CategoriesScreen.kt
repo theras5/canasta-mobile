@@ -335,127 +335,203 @@ fun getIconForCategory(iconName: String): androidx.compose.ui.graphics.vector.Im
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateCategoryDialog(
     onDismiss: () -> Unit,
     onConfirm: (String, String) -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name by remember { mutableStateOf("") }
     var selectedIcon by remember { mutableStateOf("category") }
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Nueva categoría") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header con icono
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Secondary,
+                    modifier = Modifier.size(24.dp)
                 )
-
                 Text(
-                    text = "Selecciona un ícono:",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Nueva categoría",
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
 
-                // Selector de íconos con scroll horizontal
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(CategoryIcons.icons) { (iconName, iconLabel) ->
-                        IconOption(
-                            iconName = iconName,
-                            isSelected = selectedIcon == iconName,
-                            onClick = { selectedIcon = iconName }
-                        )
-                    }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Campo de nombre
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Selecciona un ícono:",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Selector de íconos con scroll horizontal
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(CategoryIcons.icons) { (iconName, iconLabel) ->
+                    IconOption(
+                        iconName = iconName,
+                        isSelected = selectedIcon == iconName,
+                        onClick = { selectedIcon = iconName }
+                    )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { if (name.isNotBlank()) onConfirm(name.trim(), selectedIcon) },
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botones
+            Button(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onConfirm(name.trim(), selectedIcon)
+                        onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = name.isNotBlank()
             ) {
                 Text("Crear")
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
+
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.Gray
+                )
+            ) {
                 Text("Cancelar")
             }
         }
-    )
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditCategoryDialog(
     category: GetCategory,
     onDismiss: () -> Unit,
     onConfirm: (String, String) -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var name by remember { mutableStateOf(category.name) }
     var selectedIcon by remember { mutableStateOf(category.icon) }
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("Editar categoría") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Header con icono
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = Secondary,
+                    modifier = Modifier.size(24.dp)
                 )
-
                 Text(
-                    text = "Selecciona un ícono:",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = "Editar categoría",
+                    fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
 
-                // Selector de íconos con scroll horizontal
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(CategoryIcons.icons) { (iconName, iconLabel) ->
-                        IconOption(
-                            iconName = iconName,
-                            isSelected = selectedIcon == iconName,
-                            onClick = { selectedIcon = iconName }
-                        )
-                    }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Campo de nombre
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "Selecciona un ícono:",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold
+            )
+
+            // Selector de íconos con scroll horizontal
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(CategoryIcons.icons) { (iconName, iconLabel) ->
+                    IconOption(
+                        iconName = iconName,
+                        isSelected = selectedIcon == iconName,
+                        onClick = { selectedIcon = iconName }
+                    )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { if (name.isNotBlank()) onConfirm(name.trim(), selectedIcon) },
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botones
+            Button(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onConfirm(name.trim(), selectedIcon)
+                        onDismiss()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = name.isNotBlank()
             ) {
                 Text("Guardar")
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
+
+            OutlinedButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.Gray
+                )
+            ) {
                 Text("Cancelar")
             }
         }
-    )
+    }
 }
 
 @Composable
