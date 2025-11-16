@@ -3,6 +3,7 @@ package com.example.canasta.ui.screens.auth
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.canasta.R
 import com.example.canasta.data.repository.AuthRepository
 import com.example.canasta.data.seed.SeedingManager
 import com.example.canasta.utils.ValidationUtils
@@ -77,36 +78,39 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     // Validar email cuando el usuario sale del campo
     fun validateEmail() {
-        val error = ValidationUtils.getEmailError(_uiState.value.email)
+        val error = ValidationUtils.getEmailError(_uiState.value.email, getApplication())
         _uiState.value = _uiState.value.copy(emailError = error)
     }
 
     // Validar contraseña cuando el usuario sale del campo
     fun validatePassword() {
-        val error = ValidationUtils.getPasswordError(_uiState.value.password)
+        val error = ValidationUtils.getPasswordError(_uiState.value.password, getApplication())
         _uiState.value = _uiState.value.copy(passwordError = error)
     }
 
     // Validar nombre cuando el usuario sale del campo
     fun validateName() {
-        val error = ValidationUtils.getNameError(_uiState.value.name, "nombre")
+        val context = getApplication<Application>()
+        val error = ValidationUtils.getNameError(_uiState.value.name, context.getString(R.string.field_name), context)
         _uiState.value = _uiState.value.copy(nameError = error)
     }
 
     // Validar apellido cuando el usuario sale del campo
     fun validateSurname() {
-        val error = ValidationUtils.getNameError(_uiState.value.surname, "apellido")
+        val context = getApplication<Application>()
+        val error = ValidationUtils.getNameError(_uiState.value.surname, context.getString(R.string.field_surname), context)
         _uiState.value = _uiState.value.copy(surnameError = error)
     }
 
     fun register() {
         val state = _uiState.value
+        val context = getApplication<Application>()
 
         // Validar todos los campos
-        val nameError = ValidationUtils.getNameError(state.name, "nombre")
-        val surnameError = ValidationUtils.getNameError(state.surname, "apellido")
-        val emailError = ValidationUtils.getEmailError(state.email)
-        val passwordError = ValidationUtils.getPasswordError(state.password)
+        val nameError = ValidationUtils.getNameError(state.name, context.getString(R.string.field_name), context)
+        val surnameError = ValidationUtils.getNameError(state.surname, context.getString(R.string.field_surname), context)
+        val emailError = ValidationUtils.getEmailError(state.email, context)
+        val passwordError = ValidationUtils.getPasswordError(state.password, context)
 
         // Si hay algún error, mostrarlos
         if (nameError != null || surnameError != null || emailError != null || passwordError != null) {
@@ -140,9 +144,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     // Convertir errores técnicos en mensajes amigables
                     val friendlyMessage = when {
                         error.message?.contains("409") == true || error.message?.contains("already exists") == true ->
-                            "Este correo electrónico ya está registrado"
-                        error.message?.contains("400") == true -> "Por favor verifica los datos ingresados"
-                        else -> "Error al registrar. Intenta nuevamente"
+                            context.getString(R.string.error_email_already_registered)
+                        error.message?.contains("400") == true -> context.getString(R.string.error_verify_data)
+                        else -> context.getString(R.string.error_register_generic)
                     }
 
                     _uiState.value = _uiState.value.copy(
@@ -155,10 +159,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun login() {
         val state = _uiState.value
+        val context = getApplication<Application>()
 
         // Validar campos
-        val emailError = ValidationUtils.getEmailError(state.email)
-        val passwordError = ValidationUtils.getPasswordError(state.password)
+        val emailError = ValidationUtils.getEmailError(state.email, context)
+        val passwordError = ValidationUtils.getPasswordError(state.password, context)
 
         // Si hay algún error, mostrarlos
         if (emailError != null || passwordError != null) {
@@ -193,12 +198,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     // Convertir errores técnicos en mensajes amigables
                     val friendlyMessage = when {
                         error.message?.contains("401") == true || error.message?.contains("Unauthorized") == true ->
-                            "Correo o contraseña incorrectos"
+                            context.getString(R.string.error_incorrect_credentials)
                         error.message?.contains("403") == true || error.message?.contains("not verified") == true ->
-                            "Debes verificar tu cuenta antes de iniciar sesión"
-                        error.message?.contains("404") == true -> "Correo o contraseña incorrectos"
-                        error.message?.contains("400") == true -> "Por favor verifica tus credenciales"
-                        else -> "Error al iniciar sesión. Intenta nuevamente"
+                            context.getString(R.string.error_account_not_verified)
+                        error.message?.contains("404") == true -> context.getString(R.string.error_incorrect_credentials)
+                        error.message?.contains("400") == true -> context.getString(R.string.error_verify_data)
+                        else -> context.getString(R.string.error_login_generic)
                     }
 
                     _uiState.value = _uiState.value.copy(
@@ -211,9 +216,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun verifyAccount() {
         val state = _uiState.value
+        val context = getApplication<Application>()
 
         if (state.verificationCode.isBlank()) {
-            _uiState.value = state.copy(verificationCodeError = "Ingresa el código de verificación")
+            _uiState.value = state.copy(verificationCodeError = context.getString(R.string.error_verification_code_required))
             return
         }
 
@@ -239,23 +245,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         .onFailure { error ->
                             // Si falla el login automático, enviar a pantalla de login
+                            val context = getApplication<Application>()
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 isVerificationMode = false,
                                 isLoginMode = true,
                                 verificationCode = "",
-                                errorMessage = "Cuenta verificada. Por favor, inicia sesión"
+                                errorMessage = context.getString(R.string.account_verified_login)
                             )
                         }
                 }
                 .onFailure { error ->
                     // Convertir errores técnicos en mensajes amigables
                     val friendlyMessage = when {
-                        error.message?.contains("400") == true -> "El código ingresado es incorrecto"
-                        error.message?.contains("404") == true -> "El código ingresado es incorrecto"
-                        error.message?.contains("expired") == true -> "El código ha expirado. Solicita uno nuevo"
-                        error.message?.contains("invalid") == true -> "El código ingresado es incorrecto"
-                        else -> "El código ingresado es incorrecto"
+                        error.message?.contains("400") == true -> context.getString(R.string.error_verification_code_incorrect)
+                        error.message?.contains("404") == true -> context.getString(R.string.error_verification_code_incorrect)
+                        error.message?.contains("expired") == true -> context.getString(R.string.error_verification_code_expired)
+                        error.message?.contains("invalid") == true -> context.getString(R.string.error_verification_code_incorrect)
+                        else -> context.getString(R.string.error_verification_code_incorrect)
                     }
 
                     _uiState.value = _uiState.value.copy(
@@ -268,22 +275,23 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resendVerification() {
         viewModelScope.launch {
+            val context = getApplication<Application>()
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
 
             repository.resendVerification(_uiState.value.email)
                 .onSuccess {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        errorMessage = "Código reenviado"
+                        errorMessage = context.getString(R.string.code_resent)
                     )
                 }
                 .onFailure { error ->
                     // Convertir errores técnicos en mensajes amigables
                     val friendlyMessage = when {
-                        error.message?.contains("400") == true -> "No se pudo reenviar el código"
-                        error.message?.contains("404") == true -> "Usuario no encontrado"
-                        error.message?.contains("already verified") == true -> "La cuenta ya está verificada"
-                        else -> "Error al reenviar código. Intenta nuevamente"
+                        error.message?.contains("400") == true -> context.getString(R.string.error_resend_code_failed)
+                        error.message?.contains("404") == true -> context.getString(R.string.error_user_not_found)
+                        error.message?.contains("already verified") == true -> context.getString(R.string.error_account_already_verified)
+                        else -> context.getString(R.string.error_resend_generic)
                     }
 
                     _uiState.value = _uiState.value.copy(

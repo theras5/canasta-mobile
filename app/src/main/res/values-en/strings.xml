@@ -58,5 +58,54 @@
 
     <!-- Products Screen -->
     <string name="products">Products</string>
+
+    <!-- Login/Register Screen -->
+    <string name="verify_your_account">Verify your account</string>
+    <string name="verification_code_sent_to">verification code sent to</string>
+    <string name="enter_code_to_activate">Enter the code to activate your account</string>
+    <string name="verification_code">Verification code</string>
+    <string name="verify_account_button">VERIFY ACCOUNT</string>
+    <string name="didnt_receive_code">Didn\'t receive the code?</string>
+    <string name="resend_code">Resend code</string>
+    <string name="back_to_register">Back to register</string>
+    <string name="login">Log In</string>
+    <string name="create_account">Create Account</string>
+    <string name="access_your_canasta_account">Access your Canasta account</string>
+    <string name="organize_your_shopping">Organize your shopping with Canasta</string>
+    <string name="name_label">First Name</string>
+    <string name="surname_label">Last Name</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password (minimum 6 characters)</string>
+    <string name="login_button">LOG IN</string>
+    <string name="create_account_button">CREATE ACCOUNT</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="register">Sign up</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="login_link">Log in</string>
+
+    <!-- Validation Errors -->
+    <string name="error_email_required">Email is required</string>
+    <string name="error_email_invalid">Enter a valid email address</string>
+    <string name="error_password_required">Password is required</string>
+    <string name="error_password_too_short">Password must be at least 6 characters</string>
+    <string name="error_name_required">%s is required</string>
+    <string name="error_name_invalid">%s can only contain letters</string>
+    <string name="error_verification_code_required">Enter the verification code</string>
+    <string name="account_verified_login">Account verified. Please log in</string>
+    <string name="code_resent">Code resent</string>
+    <string name="field_name">first name</string>
+    <string name="field_surname">last name</string>
+    <string name="error_verification_code_incorrect">The code entered is incorrect</string>
+    <string name="error_verification_code_expired">The code has expired. Request a new one</string>
+    <string name="error_email_already_registered">This email is already registered</string>
+    <string name="error_verify_data">Please verify the entered data</string>
+    <string name="error_register_generic">Error registering. Please try again</string>
+    <string name="error_incorrect_credentials">Incorrect email or password</string>
+    <string name="error_account_not_verified">You must verify your account before logging in</string>
+    <string name="error_login_generic">Error logging in. Please try again</string>
+    <string name="error_resend_code_failed">Could not resend the code</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_account_already_verified">The account is already verified</string>
+    <string name="error_resend_generic">Error resending code. Please try again</string>
 </resources>
 

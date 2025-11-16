@@ -1,6 +1,8 @@
 package com.example.canasta.utils
 
+import android.content.Context
 import android.util.Patterns
+import com.example.canasta.R
 
 /**
  * Utilidades para validación de campos de formulario
@@ -31,10 +33,10 @@ object ValidationUtils {
     /**
      * Obtiene el mensaje de error para un email inválido
      */
-    fun getEmailError(email: String): String? {
+    fun getEmailError(email: String, context: Context): String? {
         return when {
-            email.isBlank() -> "El correo electrónico es obligatorio"
-            !isValidEmail(email) -> "Ingresa un correo electrónico válido"
+            email.isBlank() -> context.getString(R.string.error_email_required)
+            !isValidEmail(email) -> context.getString(R.string.error_email_invalid)
             else -> null
         }
     }
@@ -42,10 +44,10 @@ object ValidationUtils {
     /**
      * Obtiene el mensaje de error para una contraseña inválida
      */
-    fun getPasswordError(password: String): String? {
+    fun getPasswordError(password: String, context: Context): String? {
         return when {
-            password.isBlank() -> "La contraseña es obligatoria"
-            !isValidPassword(password) -> "La contraseña debe tener al menos 6 caracteres"
+            password.isBlank() -> context.getString(R.string.error_password_required)
+            !isValidPassword(password) -> context.getString(R.string.error_password_too_short)
             else -> null
         }
     }
@@ -53,10 +55,10 @@ object ValidationUtils {
     /**
      * Obtiene el mensaje de error para un nombre inválido
      */
-    fun getNameError(name: String, fieldName: String = "nombre"): String? {
+    fun getNameError(name: String, fieldName: String, context: Context): String? {
         return when {
-            name.isBlank() -> "El $fieldName es obligatorio"
-            !isValidName(name) -> "El $fieldName solo puede contener letras"
+            name.isBlank() -> context.getString(R.string.error_name_required, fieldName)
+            !isValidName(name) -> context.getString(R.string.error_name_invalid, fieldName)
             else -> null
         }
     }

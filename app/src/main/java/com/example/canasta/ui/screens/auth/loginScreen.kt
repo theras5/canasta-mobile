@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -157,14 +158,14 @@ private fun VerificationContent(
     focusManager: FocusManager
 ) {
     Text(
-        text = "Verificar tu cuenta",
+        text = stringResource(R.string.verify_your_account),
         style = MaterialTheme.typography.headlineMedium,
         color = Titles,
         textAlign = TextAlign.Center
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
-        text = "código de verificación enviado a",
+        text = stringResource(R.string.verification_code_sent_to),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center
@@ -177,7 +178,7 @@ private fun VerificationContent(
     )
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-        text = "Ingresa el código para activar tu cuenta",
+        text = stringResource(R.string.enter_code_to_activate),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center
@@ -189,7 +190,7 @@ private fun VerificationContent(
         OutlinedTextField(
             value = verificationCode,
             onValueChange = onCodeChange,
-            label = { Text("Código de verificación") },
+            label = { Text(stringResource(R.string.verification_code)) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading,
             isError = verificationCodeError != null,
@@ -243,7 +244,7 @@ private fun VerificationContent(
                 color = MaterialTheme.colorScheme.onPrimary
             )
         } else {
-            Text("VERIFICAR CUENTA")
+            Text(stringResource(R.string.verify_account_button))
         }
     }
 
@@ -251,13 +252,13 @@ private fun VerificationContent(
 
     // Enlaces de verificación
     Text(
-        text = "¿No recibiste el código?",
+        text = stringResource(R.string.didnt_receive_code),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center
     )
     Text(
-        text = "Reenviar código",
+        text = stringResource(R.string.resend_code),
         style = MaterialTheme.typography.bodySmall,
         color = Secondary,
         textAlign = TextAlign.Center,
@@ -267,7 +268,7 @@ private fun VerificationContent(
     )
     Spacer(modifier = Modifier.height(16.dp))
     Text(
-        text = "Volver al registro",
+        text = stringResource(R.string.back_to_register),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center,
@@ -303,12 +304,12 @@ private fun AuthContent(
     focusManager: FocusManager
 ) {
     Text(
-        text = if (isLoginMode) "Iniciar Sesión" else "Crear Cuenta",
+        text = if (isLoginMode) stringResource(R.string.login) else stringResource(R.string.create_account),
         style = MaterialTheme.typography.headlineMedium,
         color = Titles
     )
     Text(
-        text = if (isLoginMode) "Accede a tu cuenta de Canasta" else "Organiza tus compras con canasta",
+        text = if (isLoginMode) stringResource(R.string.access_your_canasta_account) else stringResource(R.string.organize_your_shopping),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(vertical = 4.dp)
@@ -321,7 +322,7 @@ private fun AuthContent(
             OutlinedTextField(
                 value = name,
                 onValueChange = onNameChange,
-                label = { Text("Nombre") },
+                label = { Text(stringResource(R.string.name_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 2.dp),
@@ -349,7 +350,7 @@ private fun AuthContent(
             OutlinedTextField(
                 value = surname,
                 onValueChange = onSurnameChange,
-                label = { Text("Apellido") },
+                label = { Text(stringResource(R.string.surname_label)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
@@ -378,7 +379,7 @@ private fun AuthContent(
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            label = { Text("Correo electrónico") },
+            label = { Text(stringResource(R.string.email_label)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
@@ -409,7 +410,7 @@ private fun AuthContent(
             onValueChange = onPasswordChange,
             label = {
                 Text(
-                    "Contraseña (mínimo 6 caracteres)",
+                    stringResource(R.string.password_label),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
@@ -472,7 +473,7 @@ private fun AuthContent(
                 color = MaterialTheme.colorScheme.onPrimary
             )
         } else {
-            Text(if (isLoginMode) "INICIAR SESIÓN" else "CREAR CUENTA")
+            Text(if (isLoginMode) stringResource(R.string.login_button) else stringResource(R.string.create_account_button))
         }
     }
     Spacer(modifier = Modifier.height(16.dp))
@@ -480,12 +481,12 @@ private fun AuthContent(
     // Links de navegación
     if (isLoginMode) {
         Text(
-            text = "¿No tienes cuenta?",
+            text = stringResource(R.string.dont_have_account),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Registrarse",
+            text = stringResource(R.string.register),
             style = MaterialTheme.typography.bodySmall,
             color = Secondary,
             modifier = Modifier
@@ -494,12 +495,12 @@ private fun AuthContent(
         )
     } else {
         Text(
-            text = "¿Ya tienes cuenta?",
+            text = stringResource(R.string.already_have_account),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Iniciar sesión",
+            text = stringResource(R.string.login_link),
             style = MaterialTheme.typography.bodySmall,
             color = Secondary,
             modifier = Modifier

@@ -58,4 +58,53 @@
 
     <!-- Products Screen -->
     <string name="products">Productos</string>
+
+    <!-- Login/Register Screen -->
+    <string name="verify_your_account">Verificar tu cuenta</string>
+    <string name="verification_code_sent_to">código de verificación enviado a</string>
+    <string name="enter_code_to_activate">Ingresa el código para activar tu cuenta</string>
+    <string name="verification_code">Código de verificación</string>
+    <string name="verify_account_button">VERIFICAR CUENTA</string>
+    <string name="didnt_receive_code">¿No recibiste el código?</string>
+    <string name="resend_code">Reenviar código</string>
+    <string name="back_to_register">Volver al registro</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="create_account">Crear Cuenta</string>
+    <string name="access_your_canasta_account">Accede a tu cuenta de Canasta</string>
+    <string name="organize_your_shopping">Organiza tus compras con canasta</string>
+    <string name="name_label">Nombre</string>
+    <string name="surname_label">Apellido</string>
+    <string name="email_label">Correo electrónico</string>
+    <string name="password_label">Contraseña (mínimo 6 caracteres)</string>
+    <string name="login_button">INICIAR SESIÓN</string>
+    <string name="create_account_button">CREAR CUENTA</string>
+    <string name="dont_have_account">¿No tienes cuenta?</string>
+    <string name="register">Registrarse</string>
+    <string name="already_have_account">¿Ya tienes cuenta?</string>
+    <string name="login_link">Iniciar sesión</string>
+
+    <!-- Validation Errors -->
+    <string name="error_email_required">El correo electrónico es obligatorio</string>
+    <string name="error_email_invalid">Ingresa un correo electrónico válido</string>
+    <string name="error_password_required">La contraseña es obligatoria</string>
+    <string name="error_password_too_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="error_name_required">El %s es obligatorio</string>
+    <string name="error_name_invalid">El %s solo puede contener letras</string>
+    <string name="error_verification_code_required">Ingresa el código de verificación</string>
+    <string name="account_verified_login">Cuenta verificada. Por favor, inicia sesión</string>
+    <string name="code_resent">Código reenviado</string>
+    <string name="field_name">nombre</string>
+    <string name="field_surname">apellido</string>
+    <string name="error_verification_code_incorrect">El código ingresado es incorrecto</string>
+    <string name="error_verification_code_expired">El código ha expirado. Solicita uno nuevo</string>
+    <string name="error_email_already_registered">Este correo electrónico ya está registrado</string>
+    <string name="error_verify_data">Por favor verifica los datos ingresados</string>
+    <string name="error_register_generic">Error al registrar. Intenta nuevamente</string>
+    <string name="error_incorrect_credentials">Correo o contraseña incorrectos</string>
+    <string name="error_account_not_verified">Debes verificar tu cuenta antes de iniciar sesión</string>
+    <string name="error_login_generic">Error al iniciar sesión. Intenta nuevamente</string>
+    <string name="error_resend_code_failed">No se pudo reenviar el código</string>
+    <string name="error_user_not_found">Usuario no encontrado</string>
+    <string name="error_account_already_verified">La cuenta ya está verificada</string>
+    <string name="error_resend_generic">Error al reenviar código. Intenta nuevamente</string>
 </resources>
