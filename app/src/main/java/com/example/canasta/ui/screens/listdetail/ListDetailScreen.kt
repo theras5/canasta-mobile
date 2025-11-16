@@ -10,9 +10,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -21,11 +24,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,87 +39,119 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+<<<<<<< Updated upstream
+=======
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.ui.components.common.BottomNavBar
+import com.example.canasta.ui.components.common.ConfirmationModal
+import com.example.canasta.ui.components.products.EditProductModal
+>>>>>>> Stashed changes
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
-import java.util.UUID
 
 /**
  * Pantalla de detalle de una lista con sus productos
+ * Soporta dos modos: VIEW (visualización) y EDIT (edición)
  *
- * @param listName Nombre de la lista
+ * @param viewModel ViewModel para gestionar el estado
  * @param onBackClick Callback cuando se presiona el botón de volver
  * @param onShareClick Callback cuando se presiona compartir
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDetailScreen(
-    listName: String = "Casa",
+    viewModel: ListDetailViewModel = viewModel(),
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {}
 ) {
-    var selectedCategory by remember { mutableStateOf("Lacteos") }
+    val uiState by viewModel.uiState.collectAsState()
 
-    // Datos de ejemplo - en producción vendrían de un ViewModel
-    var products by remember {
-        mutableStateOf(
-            listOf(
-                ListProduct("1", "Leche", "2L, 2%", false),
-                ListProduct("2", "Queso", "Cheddar", false),
-                ListProduct("3", "Yogurt", "2L, Frutilla", false),
-                ListProduct("4", "Crema", "500mL", false),
-                ListProduct("5", "Queso", "Cheddar", true)
-            )
-        )
-    }
+    // Estado para el modal de confirmación de eliminación
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var productToDelete by remember { mutableStateOf<ListProduct?>(null) }
 
-    val categories = listOf("Lacteos", "Limpieza", "Harinas", "Verduras", "Carnes")
+    // Estado para el modal de edición de producto
+    var showEditModal by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<ListProduct?>(null) }
 
-    // Función dummy para toggle del checkbox
-    fun toggleProductCheck(product: ListProduct) {
-        products = products.map {
-            if (it.id == product.id) {
-                it.copy(isChecked = !it.isChecked)
-            } else {
-                it
+    // Mostrar modal de confirmación si hay producto para eliminar
+    if (showDeleteDialog && productToDelete != null) {
+        ConfirmationModal(
+            title = "Eliminar producto",
+            message = "¿Estás seguro de que quieres eliminar ${productToDelete?.name}?",
+            onDismiss = {
+                showDeleteDialog = false
+                productToDelete = null
+            },
+            onConfirm = {
+                productToDelete?.let { product ->
+                    viewModel.deleteProduct(product.id)
+                }
+                showDeleteDialog = false
+                productToDelete = null
             }
-        }
-        println("Producto ${product.name} - Checked: ${!product.isChecked}")
-    }
-
-    // Función dummy para eliminar producto
-    fun deleteProduct(product: ListProduct) {
-        products = products.filter { it.id != product.id }
-        println("Producto eliminado: ${product.name}")
-    }
-
-    // Función dummy para agregar producto
-    fun addProduct() {
-        val newProduct = ListProduct(
-            id = UUID.randomUUID().toString(),
-            name = "Nuevo Producto",
-            description = "Descripción",
-            isChecked = false
         )
-        products = products + newProduct
-        println("Producto agregado: ${newProduct.name}")
+    }
+
+    // Mostrar modal de edición si hay producto para editar
+    if (showEditModal && productToEdit != null) {
+        EditProductModal(
+            product = productToEdit!!,
+            onDismiss = {
+                showEditModal = false
+                productToEdit = null
+            },
+            onSave = { _, newQuantity ->
+                // Solo actualizamos la cantidad en el ViewModel
+                productToEdit?.let { product ->
+                    viewModel.updateProductQuantity(product.id, newQuantity)
+                }
+                showEditModal = false
+                productToEdit = null
+            }
+        )
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = listName,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Titles
-                    )
+                    // Si estamos en modo edición, mostrar TextField editable
+                    if (uiState.screenMode == ScreenMode.EDIT) {
+                        OutlinedTextField(
+                            value = uiState.listName,
+                            onValueChange = { viewModel.updateListName(it) },
+                            modifier = Modifier.fillMaxWidth(0.6f),
+                            textStyle = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Titles
+                            ),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Secondary,
+                                unfocusedIndicatorColor = Color.Gray
+                            ),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done
+                            )
+                        )
+                    } else {
+                        // Modo vista - solo texto
+                        Text(
+                            text = uiState.listName,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Titles
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -125,12 +163,39 @@ fun ListDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onShareClick) {
+                    // Botón de Editar/Guardar
+                    IconButton(onClick = {
+                        if (uiState.screenMode == ScreenMode.EDIT) {
+                            // Validar antes de guardar
+                            if (viewModel.validateListName()) {
+                                viewModel.toggleEditMode()
+                            }
+                        } else {
+                            viewModel.toggleEditMode()
+                        }
+                    }) {
                         Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = "Compartir",
+                            imageVector = if (uiState.screenMode == ScreenMode.EDIT)
+                                Icons.Default.Done
+                            else
+                                Icons.Default.Edit,
+                            contentDescription = if (uiState.screenMode == ScreenMode.EDIT)
+                                "Guardar cambios"
+                            else
+                                "Editar lista",
                             tint = Titles
                         )
+                    }
+
+                    // Botón de Compartir (solo visible en modo vista)
+                    if (uiState.screenMode == ScreenMode.VIEW) {
+                        IconButton(onClick = onShareClick) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Compartir",
+                                tint = Titles
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -138,15 +203,20 @@ fun ListDetailScreen(
                 )
             )
         },
-        bottomBar = { BottomNavBar() },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { addProduct() },
-                containerColor = Secondary,
-                contentColor = Color.White,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Filled.Add, "Agregar producto")
+            // FAB solo visible en modo vista
+            if (uiState.screenMode == ScreenMode.VIEW) {
+                FloatingActionButton(
+                    onClick = {
+                        // TODO: Implementar agregar producto
+                        println("Agregar producto")
+                    },
+                    containerColor = Secondary,
+                    contentColor = Color.White,
+                    shape = CircleShape
+                ) {
+                    Icon(Icons.Filled.Add, "Agregar producto")
+                }
             }
         }
     ) { innerPadding ->
@@ -162,10 +232,10 @@ fun ListDetailScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(categories) { category ->
+                        items(uiState.categories) { category ->
                             FilterChip(
-                                selected = selectedCategory == category,
-                                onClick = { selectedCategory = category },
+                                selected = uiState.selectedCategory == category,
+                                onClick = { viewModel.selectCategory(category) },
                                 label = { Text(category) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = Secondary.copy(alpha = 0.3f),
@@ -179,11 +249,27 @@ fun ListDetailScreen(
                 }
 
                 // Lista de productos
-                items(products) { product ->
+                items(uiState.products) { product ->
                     ProductItemCard(
                         product = product,
-                        onCheckedChange = { toggleProductCheck(product) },
-                        onDelete = { deleteProduct(product) }
+                        isEditMode = uiState.screenMode == ScreenMode.EDIT,
+                        onCheckedChange = {
+                            // Solo permitir check/uncheck en modo vista
+                            if (uiState.screenMode == ScreenMode.VIEW) {
+                                viewModel.toggleProductCheck(product.id)
+                            }
+                        },
+                        onEdit = {
+                            productToEdit = product
+                            showEditModal = true
+                        },
+                        onDelete = {
+                            // Solo permitir eliminar si no está comprado
+                            if (!product.isPurchased) {
+                                productToDelete = product
+                                showDeleteDialog = true
+                            }
+                        }
                     )
                 }
             }
@@ -198,4 +284,3 @@ fun ListDetailScreenPreview() {
         ListDetailScreen()
     }
 }
-
