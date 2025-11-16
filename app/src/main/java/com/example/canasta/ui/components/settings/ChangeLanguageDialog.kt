@@ -41,7 +41,7 @@ fun ChangeLanguageDialog(
     onDismiss: () -> Unit,
     onConfirm: (language: String) -> Unit
 ) {
-    var selectedLanguage by remember { mutableStateOf(currentLanguage) }
+    var selectedLanguage by remember(currentLanguage) { mutableStateOf(currentLanguage) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -109,7 +109,6 @@ fun ChangeLanguageDialog(
                 Button(
                     onClick = {
                         onConfirm(selectedLanguage)
-                        onDismiss()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,8 +144,9 @@ private fun LanguageOption(
             containerColor = if (isSelected) Secondary.copy(alpha = 0.1f) else Color(0xFFF5F5F5)
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 2.dp else 0.dp
-        )
+            defaultElevation = 0.dp
+        ),
+        border = null
     ) {
         Row(
             modifier = Modifier

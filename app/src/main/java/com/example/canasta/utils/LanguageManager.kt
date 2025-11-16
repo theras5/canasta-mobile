@@ -1,10 +1,12 @@
 package com.example.canasta.utils
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
-import android.os.Build
+import android.util.Log
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
 
 /**
@@ -16,25 +18,32 @@ object LanguageManager {
     private const val KEY_LANGUAGE = "selected_language"
     private const val SYSTEM_LANGUAGE = "system"
 
+    private val _languageChangeCounter = MutableStateFlow(0L)
+    val languageChangeCounter: StateFlow<Long> = _languageChangeCounter.asStateFlow()
+
     /**
-     * Cambia el idioma de la aplicación y reinicia la actividad
-     * @param activity Actividad actual
+     * Cambia el idioma de la aplicación sin reiniciar
+     * @param context Contexto de la aplicación
      * @param languageCode Código del idioma (es, en, system)
      */
-    fun setLanguage(activity: Activity, languageCode: String) {
+    fun setLanguage(context: Context, languageCode: String) {
+        Log.d("LanguageManager", "setLanguage called with: $languageCode")
+
         // Guardar preferencia
-        val prefs = activity.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit {
             putString(KEY_LANGUAGE, languageCode)
         }
 
-        // Aplicar configuración
-        applyLanguage(activity, languageCode)
+        // Verificar que se guardó correctamente
+        val saved = prefs.getString(KEY_LANGUAGE, null)
+        Log.d("LanguageManager", "Saved language: $saved")
 
-        // Reiniciar la actividad para aplicar cambios
-        val intent = activity.intent
-        activity.finish()
-        activity.startActivity(intent)
+        // Aplicar configuración
+        applyLanguage(context, languageCode)
+
+        // Notificar cambio para recomposición
+        _languageChangeCounter.value = System.currentTimeMillis()
     }
 
     /**
@@ -52,11 +61,7 @@ object LanguageManager {
             lang
         }
 
-        val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            Locale.forLanguageTag(actualLang)
-        } else {
-            Locale(actualLang)
-        }
+        val locale = Locale.forLanguageTag(actualLang)
         Locale.setDefault(locale)
 
         val config = Configuration(context.resources.configuration)
@@ -72,7 +77,9 @@ object LanguageManager {
      */
     fun getCurrentLanguage(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_LANGUAGE, SYSTEM_LANGUAGE) ?: SYSTEM_LANGUAGE
+        val language = prefs.getString(KEY_LANGUAGE, SYSTEM_LANGUAGE) ?: SYSTEM_LANGUAGE
+        Log.d("LanguageManager", "getCurrentLanguage: $language")
+        return language
     }
 
     /**

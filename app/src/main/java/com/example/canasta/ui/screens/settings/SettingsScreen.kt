@@ -1,6 +1,5 @@
 package com.example.canasta.ui.screens.settings
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +13,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +42,6 @@ fun SettingsScreen(
     onBackClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val activity = context as? Activity
     val userRepository = remember { UserRepository() }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -52,7 +51,12 @@ fun SettingsScreen(
     var passwordErrorMessage by remember { mutableStateOf<String?>(null) }
 
     var showChangeLanguageDialog by remember { mutableStateOf(false) }
-    val currentLanguage = remember { LanguageManager.getCurrentLanguage(context) }
+
+    // Observar cambios de idioma para actualizar el diálogo
+    val languageChangeCounter by LanguageManager.languageChangeCounter.collectAsState()
+    val currentLanguage = remember(languageChangeCounter) {
+        LanguageManager.getCurrentLanguage(context)
+    }
 
     Scaffold(
         snackbarHost = {
@@ -171,9 +175,8 @@ fun SettingsScreen(
             currentLanguage = currentLanguage,
             onDismiss = { showChangeLanguageDialog = false },
             onConfirm = { languageCode ->
-                activity?.let {
-                    LanguageManager.setLanguage(it, languageCode)
-                }
+                LanguageManager.setLanguage(context, languageCode)
+                showChangeLanguageDialog = false
             }
         )
     }

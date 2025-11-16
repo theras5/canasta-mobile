@@ -5,17 +5,18 @@ package com.example.canasta.ui.navigation
 import android.annotation.SuppressLint
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController // <-- Add this import
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
-import com.example.canasta.ui.screens.products.ProductsScreen
-import com.example.canasta.ui.screens.profile.ProfileScreen
+import com.example.canasta.utils.LanguageManager
 
 /**
  * Punto de entrada principal de la navegación de la aplicación
@@ -26,6 +27,9 @@ import com.example.canasta.ui.screens.profile.ProfileScreen
 fun AppNavigation() { // <-- Wrap the logic in a function
     val navController = rememberNavController() // <-- Call it inside the Composable
     var currentRoute by rememberSaveable { mutableStateOf(AppDestination.LISTS) }
+
+    // Observar cambios de idioma para forzar recomposición del BottomBar
+    val languageChangeCounter by LanguageManager.languageChangeCounter.collectAsState()
 
     // Observar la ruta actual para saber si mostrar el BottomBar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -41,30 +45,33 @@ fun AppNavigation() { // <-- Wrap the logic in a function
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                BottomBar(
-                    currentRoute = currentRoute
-                ) { route ->
-                    // Actualizar la ruta actual basándonos en el destino
-                    currentRoute = when(route) {
-                        is Lists -> AppDestination.LISTS
-                        is Products -> AppDestination.PRODUCTS
-                        is Profile -> AppDestination.PROFILE
-                        else -> AppDestination.LISTS
-                    }
-
-                    // Opciones de navegación para limpiar el back stack cuando volvemos a Lists
-                    var navOptions: NavOptions? = null
-                    if (route == Lists) {
-                        navOptions = navOptions {
-                            popUpTo<Lists> { inclusive = true }
+                // Usar key para forzar recomposición cuando cambie el idioma
+                key(languageChangeCounter) {
+                    BottomBar(
+                        currentRoute = currentRoute
+                    ) { route ->
+                        // Actualizar la ruta actual basándonos en el destino
+                        currentRoute = when(route) {
+                            is Lists -> AppDestination.LISTS
+                            is Products -> AppDestination.PRODUCTS
+                            is Profile -> AppDestination.PROFILE
+                            else -> AppDestination.LISTS
                         }
-                    }
 
-                    // Navegar a la ruta seleccionada
-                    navController.navigate(
-                        route = route,
-                        navOptions = navOptions
-                    )
+                        // Opciones de navegación para limpiar el back stack cuando volvemos a Lists
+                        var navOptions: NavOptions? = null
+                        if (route == Lists) {
+                            navOptions = navOptions {
+                                popUpTo<Lists> { inclusive = true }
+                            }
+                        }
+
+                        // Navegar a la ruta seleccionada
+                        navController.navigate(
+                            route = route,
+                            navOptions = navOptions
+                        )
+                    }
                 }
             }
         }
