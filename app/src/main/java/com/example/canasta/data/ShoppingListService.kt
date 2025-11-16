@@ -4,6 +4,7 @@ import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.api.ShoppingListApi
 import com.example.canasta.data.api.ShoppingListCreateDto
 import com.example.canasta.data.api.ListItemApi
+import com.example.canasta.data.api.ListItemPagedResponseDto
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.delay
@@ -12,6 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
+import retrofit2.HttpException
+import com.example.canasta.data.api.ListItemCreateDto
+import com.example.canasta.data.api.ProductRef
+import com.example.canasta.data.api.TogglePurchasedBody
 
 /**
  * Servicio singleton in-memory para gestionar listas de compras y sus ítems.
@@ -43,7 +48,9 @@ object ShoppingListService {
      */
     suspend fun refreshLists() {
         try {
-            val remote = api.getShoppingLists()
+            // La API ahora devuelve un objeto paginado con campos data y pagination
+            val response = api.getShoppingLists()
+            val remote = response.data
             _listsState.value = remote.map { dto ->
                 ShoppingList(
                     id = dto.id.toString(),
@@ -53,6 +60,7 @@ object ShoppingListService {
                     isFavorite = false
                 )
             }
+            // Si en el futuro quieres usar la info de paginación, está en response.pagination
         } catch (e: Exception) {
             // En caso de error, dejamos el estado actual y logueamos
             println("Error al cargar listas desde API: ${e.message}")
@@ -61,16 +69,21 @@ object ShoppingListService {
 
     /**
      * Refresca los productos de una lista desde la API y actualiza el cache local.
+     * Permite filtrar por categoría (categoryId) si se provee.
      */
-    suspend fun refreshProductsForList(listId: String) {
+    suspend fun refreshProductsForList(listId: String, categoryId: Long? = null) {
         try {
-            val dtoItems = itemsApi.getItemsForList(listId.toLong())
+            val response = itemsApi.getItemsForList(
+                listId = listId.toLong(),
+                categoryId = categoryId
+            )
+            val dtoItems = response.data
             val mapped = dtoItems.map { dto ->
                 val quantityPart = dto.quantity?.let { q ->
                     val unit = dto.unit ?: "unidades"
                     "${q.toInt()} $unit"
                 } ?: ""
-                ListProduct(
+                com.example.canasta.ui.components.products.ListProduct(
                     id = dto.id.toString(),
                     name = dto.product.name,
                     description = quantityPart,
@@ -98,41 +111,43 @@ object ShoppingListService {
         productsByList.value[listId] ?: emptyList()
 
     /**
-     * Crea una nueva lista (simula POST /shopping-lists)
+     * Crea una nueva lista (usa POST /shopping-lists y luego refresca desde la API).
+     *
+     * En caso de error HTTP (por ejemplo 409 nombre duplicado) no modifica el estado local
+     * y relanza la excepción para que la UI pueda mostrar un mensaje adecuado.
      */
     suspend fun createList(name: String, icon: String?): ShoppingList {
-        return try {
-            val body = ShoppingListCreateDto(
-                name = name,
-                description = "",  // Backend requiere string, no null
-                recurring = false,
-                metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
-            )
+        val body = ShoppingListCreateDto(
+            name = name,
+            description = "",  // Backend requiere string, no null
+            recurring = false,
+            metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
+        )
+        try {
             println("DEBUG: Creando lista con body: $body")
             val dto = api.createShoppingList(body)
             println("DEBUG: Lista creada exitosamente: ${dto.id}")
-            val newList = ShoppingList(
+
+            // Tras crear con éxito en backend, refrescamos desde API para mantener consistencia
+            refreshLists()
+
+            // Devolvemos una representación minimal para la UI (opcionalmente podrías buscarla en listsState)
+            return ShoppingList(
                 id = dto.id.toString(),
                 name = dto.name,
                 productCount = 0,
                 icon = icon ?: "\uD83D\uDCCB",
                 isFavorite = false
             )
-            _listsState.value = _listsState.value + newList
-            newList
+        } catch (e: HttpException) {
+            // No tocamos el estado local, dejamos que la UI decida qué hacer
+            println("ERROR HTTP al crear lista en API: code=${e.code()} message=${e.message()}")
+            throw e
         } catch (e: Exception) {
-            println("ERROR: Al crear lista en API: ${e.message}")
-            e.printStackTrace()  // Ver el stacktrace completo
-            // Fallback in-memory para no romper la UI
-            val fallback = ShoppingList(
-                id = UUID.randomUUID().toString(),
-                name = name,
-                productCount = 0,
-                icon = icon ?: "\uD83D\uDCCB",
-                isFavorite = false
-            )
-            _listsState.value = _listsState.value + fallback
-            fallback
+            // Otros errores de red o inesperados: tampoco modificamos el estado local
+            println("ERROR general al crear lista en API: ${e.message}")
+            e.printStackTrace()
+            throw e
         }
     }
 
@@ -194,6 +209,36 @@ object ShoppingListService {
         }
         _listsState.value = _listsState.value.map { list ->
             if (list.id == listId) list.copy(productCount = newList.size) else list
+        }
+    }
+
+    /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
+    suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
+        try {
+            val body = com.example.canasta.data.api.ListItemCreateDto(
+                product = ProductRef(id = productId),
+                quantity = quantity,
+                unit = unit,
+                metadata = null
+            )
+            itemsApi.addItemToList(listId.toLong(), body)
+            // Refrescar items sin filtro
+            refreshProductsForList(listId)
+        } catch (e: Exception) {
+            println("Error al agregar item a lista $listId en API: ${e.message}")
+            throw e
+        }
+    }
+
+    /** Toggle purchased en backend y refrescar la lista */
+    suspend fun toggleItemPurchasedApi(listId: String, itemId: String, purchased: Boolean) {
+        try {
+            itemsApi.togglePurchased(listId.toLong(), itemId.toLong(), TogglePurchasedBody(purchased))
+            // Refrescar items manteniendo el filtro actual no es trivial aquí; refrescamos sin filtro
+            refreshProductsForList(listId)
+        } catch (e: Exception) {
+            println("Error al togglear purchased del item $itemId en lista $listId: ${e.message}")
+            throw e
         }
     }
 }

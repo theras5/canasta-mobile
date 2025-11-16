@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.ui.components.common.ConfirmationModal
+import com.example.canasta.ui.components.common.CategoryChipsApi
 import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
@@ -239,40 +240,13 @@ fun ListDetailScreen(
             ) {
                 // Chips de categorías
                 item {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        // Chip "Todos"
-                        item {
-                            FilterChip(
-                                selected = uiState.selectedCategory == null,
-                                onClick = { viewModel.selectCategory(null) },
-                                label = { Text("Todos") },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Secondary.copy(alpha = 0.3f),
-                                    selectedLabelColor = Secondary,
-                                    containerColor = Color(0xFFFFF8F0),
-                                    labelColor = Color(0xFFD2691E)
-                                )
-                            )
+                    CategoryChipsApi(
+                        categories = uiState.categories,
+                        selectedCategory = uiState.selectedCategory,
+                        onCategorySelected = { category ->
+                            viewModel.selectCategory(category)
                         }
-
-                        // Chips de categorías de la API
-                        items(uiState.categories) { category ->
-                            FilterChip(
-                                selected = uiState.selectedCategory?.id == category.id,
-                                onClick = { viewModel.selectCategory(category) },
-                                label = { Text(category.name) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = Secondary.copy(alpha = 0.3f),
-                                    selectedLabelColor = Secondary,
-                                    containerColor = Color(0xFFFFF8F0),
-                                    labelColor = Color(0xFFD2691E)
-                                )
-                            )
-                        }
-                    }
+                    )
                 }
 
                 // Lista de productos

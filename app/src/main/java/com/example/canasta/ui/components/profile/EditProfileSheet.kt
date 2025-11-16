@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import com.example.canasta.R
 import com.example.canasta.ui.components.common.ModalTextField
 import com.example.canasta.ui.theme.Primary
+import com.example.canasta.ui.theme.Secondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -135,7 +136,7 @@ fun EditProfileSheet(
                     onDismissRequest()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary)
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary)
             ) {
                 Text(text = stringResource(R.string.save_changes))
             }

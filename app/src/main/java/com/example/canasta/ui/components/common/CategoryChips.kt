@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.theme.CanastaTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,6 +52,34 @@ fun CategoryChips(
                 } else {
                     null
                 }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryChipsApi(
+    categories: List<GetCategory>,
+    selectedCategory: GetCategory?,
+    onCategorySelected: (GetCategory?) -> Unit
+) {
+    LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(vertical = 8.dp)
+    ) {
+        items(listOf<GetCategory?>(null) + categories) { category ->
+            val isSelected = (selectedCategory == null && category == null) ||
+                    (selectedCategory != null && category != null && selectedCategory.id == category.id)
+            val label = category?.name ?: "Todos"
+            FilterChip(
+                selected = isSelected,
+                onClick = { onCategorySelected(category) },
+                label = { Text(label) },
+                leadingIcon = if (isSelected) {
+                    { Icon(imageVector = Icons.Filled.Done, contentDescription = null) }
+                } else null
             )
         }
     }

@@ -9,6 +9,7 @@ import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -89,39 +90,24 @@ class ListDetailViewModel : ViewModel() {
     }
 
     /**
-     * Agrega un producto a la lista actual
-     * Los productos nuevos se agregan al inicio de la lista
+     * Agrega un producto a la lista actual usando la API real
      */
     fun addProductToList(product: Product) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                println("DEBUG ViewModel: Agregando producto '${product.name}' a la lista")
-
-                // Crear el ListProduct localmente
-                val listProduct = ListProduct(
-                    id = UUID.randomUUID().toString(),
-                    name = product.name,
-                    description = "1 unidades",
-                    isChecked = false,
-                    isPurchased = false
+                val currentListId = _uiState.value.listId
+                if (currentListId.isBlank()) return@launch
+                // Llamada real a API
+                ShoppingListService.addProductToListApi(
+                    listId = currentListId,
+                    productId = product.id,
+                    quantity = 1.0,
+                    unit = "unidades"
                 )
-
-                println("DEBUG ViewModel: ListProduct creado con nombre '${listProduct.name}'")
-
-                // Agregar al servicio local
-                ShoppingListService.upsertProduct(_uiState.value.listId, listProduct)
-
-                // Actualizar UI - agregar al INICIO de la lista
-                val currentProducts = _uiState.value.products
-                val updatedProducts = listOf(listProduct) + currentProducts
-                _uiState.value = _uiState.value.copy(products = updatedProducts)
-
-                println("DEBUG ViewModel: Estado actualizado. Productos en lista: ${updatedProducts.size}")
-                println("DEBUG ViewModel: Nombres en lista: ${updatedProducts.map { it.name }}")
-
+                // Luego de refrescar en el servicio, actualizamos productos en UI
+                val refreshed = ShoppingListService.getProductsForList(currentListId)
+                _uiState.value = _uiState.value.copy(products = refreshed)
             } catch (e: Exception) {
-                println("ERROR ViewModel: Al agregar producto: ${e.message}")
-                e.printStackTrace()
                 _uiState.value = _uiState.value.copy(
                     error = "Error al agregar producto: ${e.message}"
                 )
@@ -131,7 +117,6 @@ class ListDetailViewModel : ViewModel() {
 
     /**
      * Carga los datos de una lista específica por ID
-     * En producción, esto haría una llamada a Room o API
      */
     fun loadList(listId: String, listName: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -249,24 +234,42 @@ class ListDetailViewModel : ViewModel() {
     }
 
     /**
-     * Marca/desmarca un producto como completado
+     * Marca/desmarca un producto como completado en backend
      */
     fun toggleProductCheck(productId: String) {
-        val updatedProducts = _uiState.value.products.map { product ->
-            if (product.id == productId) {
-                product.copy(isChecked = !product.isChecked)
-            } else {
-                product
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val currentListId = _uiState.value.listId
+                if (currentListId.isBlank()) return@launch
+                val current = _uiState.value.products.firstOrNull { it.id == productId }
+                val newPurchased = !(current?.isPurchased ?: false)
+                ShoppingListService.toggleItemPurchasedApi(currentListId, productId, newPurchased)
+                val refreshed = ShoppingListService.getProductsForList(currentListId)
+                _uiState.value = _uiState.value.copy(products = refreshed)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al actualizar producto: ${e.message}"
+                )
             }
         }
-        _uiState.value = _uiState.value.copy(products = updatedProducts)
     }
 
     /**
-     * Cambia la categoría seleccionada
+     * Cambia la categoría seleccionada: refresca items desde API usando category_id y actualiza UI
      */
     fun selectCategory(category: GetCategory?) {
         _uiState.value = _uiState.value.copy(selectedCategory = category)
+        val currentListId = _uiState.value.listId
+        if (currentListId.isNotBlank()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                // Llamar a API con filtro por categoría
+                val categoryId = category?.id
+                ShoppingListService.refreshProductsForList(currentListId, categoryId)
+                // Actualizar productos en UI state tras la carga
+                val filtered = ShoppingListService.getProductsForList(currentListId)
+                _uiState.value = _uiState.value.copy(products = filtered)
+            }
+        }
     }
 
     /**
