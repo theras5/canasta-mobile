@@ -47,7 +47,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.data.remote.models.CategoryIcons
 import com.example.canasta.data.remote.models.GetCategory
+import com.example.canasta.ui.components.common.CommonFab
+import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.utils.DeviceUtils
 
 @Composable
@@ -66,17 +69,13 @@ fun CategoriesScreen(
     var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
 
     Scaffold(
+        containerColor = Background,
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showCreateDialog = true },
-                containerColor = Secondary
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Agregar categoría",
-                    tint = Color.White
-                )
-            }
+            CommonFab(
+                icon = Icons.Filled.Add,
+                contentDescription = "Agregar categoría",
+                onClick = { showCreateDialog = true }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -84,17 +83,8 @@ fun CategoriesScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
-                .padding(top = 16.dp)
         ) {
-            // Título
-            Text(
-                text = "Categorías",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            // Subtítulo
+            CommonScreenHeader(title = "Categorías")
             Text(
                 text = "Gestiona las categorías de productos",
                 fontSize = 16.sp,
@@ -426,7 +416,7 @@ fun CreateCategoryDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(CategoryIcons.icons) { (iconName, iconLabel) ->
+                items(CategoryIcons.icons) { (iconName, _) ->
                     IconOption(
                         iconName = iconName,
                         isSelected = selectedIcon == iconName,
@@ -526,7 +516,7 @@ fun EditCategoryDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(CategoryIcons.icons) { (iconName, iconLabel) ->
+                items(CategoryIcons.icons) { (iconName, _) ->
                     IconOption(
                         iconName = iconName,
                         isSelected = selectedIcon == iconName,
@@ -588,4 +578,3 @@ fun IconOption(
         }
     }
 }
-

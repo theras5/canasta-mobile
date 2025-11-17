@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
 import com.example.canasta.ui.components.common.SideNavBar
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.utils.DeviceUtils
 
 /**
@@ -101,6 +102,7 @@ fun AppNavigation() { // <-- Wrap the logic in a function
     } else {
         // Modo Móvil: Barra inferior
         Scaffold(
+            containerColor = Background,
             bottomBar = {
                 if (showBottomBar) {
                     BottomBar(

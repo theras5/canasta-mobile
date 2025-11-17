@@ -14,7 +14,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +30,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.data.ShoppingListService
+import com.example.canasta.ui.components.common.CommonFab
+import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.lists.CreateListModal
 import com.example.canasta.ui.components.lists.EmptyStateListas
 import com.example.canasta.ui.components.lists.ListsGrid
 import com.example.canasta.ui.components.lists.ShoppingList
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.ui.theme.Secondary
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -59,6 +61,7 @@ fun ListsScreen(
     }
 
     Scaffold(
+        containerColor = Background,
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -73,14 +76,11 @@ fun ListsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showCreateModal = true },
-                containerColor = Secondary,
-                contentColor = Color.White,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Filled.Add, "Crear nueva lista")
-            }
+            CommonFab(
+                icon = Icons.Filled.Add,
+                contentDescription = "Crear nueva lista",
+                onClick = { showCreateModal = true }
+            )
         }
     ) { innerPadding ->
         Column(
@@ -89,14 +89,7 @@ fun ListsScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            Text(
-                text = "Listas",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.Start)
-                    .padding(vertical = 16.dp)
-            )
+            CommonScreenHeader(title = "Listas")
 
             Box(modifier = Modifier.weight(1f)) {
                 if (lists.isEmpty()) {
@@ -105,7 +98,6 @@ fun ListsScreen(
                     ListsGrid(
                         lists = lists,
                         onListClick = { list -> onNavigateToListDetail(list) },
-                        onToggleFavorite = { /* TODO implementar favorito */ },
                         onDeleteList = { list ->
                             listToDelete = list
                             showDeleteConfirmation = true

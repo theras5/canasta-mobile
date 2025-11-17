@@ -44,6 +44,7 @@ import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.EditProductModal
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 
@@ -170,6 +171,7 @@ fun ListDetailScreen(
 
 
     Scaffold(
+        containerColor = Background,
         topBar = {
             TopAppBar(
                 title = {
@@ -263,7 +265,7 @@ fun ListDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Background
                 )
             )
         },

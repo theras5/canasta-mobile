@@ -4,7 +4,6 @@ import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.api.ShoppingListApi
 import com.example.canasta.data.api.ShoppingListCreateDto
 import com.example.canasta.data.api.ListItemApi
-import com.example.canasta.data.api.ListItemPagedResponseDto
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.delay
@@ -12,7 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.buildJsonObject
-import java.util.UUID
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.put
 import retrofit2.HttpException
 import com.example.canasta.data.api.ListItemCreateDto
 import com.example.canasta.data.api.ProductRef
@@ -52,11 +53,13 @@ object ShoppingListService {
             val response = api.getShoppingLists()
             val remote = response.data
             _listsState.value = remote.map { dto ->
+                // Extraer el emoji/icon del metadata si existe (JsonObject -> JsonElement -> String)
+                val icon = dto.metadata?.get("icon")?.jsonPrimitive?.contentOrNull ?: "\uD83D\uDCCB"
                 ShoppingList(
                     id = dto.id.toString(),
                     name = dto.name,
                     productCount = 0, // La API no devuelve conteo directo
-                    icon = "\uD83D\uDCCB",
+                    icon = icon,
                     isFavorite = false
                 )
             }
@@ -83,7 +86,7 @@ object ShoppingListService {
                     val unit = dto.unit ?: "unidades"
                     "${q.toInt()} $unit"
                 } ?: ""
-                com.example.canasta.ui.components.products.ListProduct(
+                ListProduct(
                     id = dto.id.toString(),
                     name = dto.product.name,
                     description = quantityPart,
@@ -117,11 +120,20 @@ object ShoppingListService {
      * y relanza la excepción para que la UI pueda mostrar un mensaje adecuado.
      */
     suspend fun createList(name: String, icon: String?): ShoppingList {
+        // Crear metadata con el emoji si está presente
+        val metadata = if (icon != null) {
+            buildJsonObject {
+                put("icon", icon)
+            }
+        } else {
+            buildJsonObject { }
+        }
+
         val body = ShoppingListCreateDto(
             name = name,
             description = "",  // Backend requiere string, no null
             recurring = false,
-            metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
+            metadata = metadata
         )
         try {
             println("DEBUG: Creando lista con body: $body")
@@ -215,7 +227,7 @@ object ShoppingListService {
     /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
     suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
         try {
-            val body = com.example.canasta.data.api.ListItemCreateDto(
+            val body = ListItemCreateDto(
                 product = ProductRef(id = productId),
                 quantity = quantity,
                 unit = unit,

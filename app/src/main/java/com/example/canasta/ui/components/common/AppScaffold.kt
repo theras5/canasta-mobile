@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.canasta.ui.theme.Background
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,7 +18,8 @@ fun AppScaffold(
     Scaffold(
         topBar = topBar,
         bottomBar = bottomBar,
-        floatingActionButton = floatingActionButton
+        floatingActionButton = floatingActionButton,
+        containerColor = Background
     ) { innerPadding ->
         // Aquí pasamos el contenido que la pantalla específica quiera mostrar
         content(innerPadding)

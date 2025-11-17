@@ -17,14 +17,11 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -40,9 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,7 +50,9 @@ import com.example.canasta.ui.components.products.CreateProductModalApi
 import com.example.canasta.ui.components.products.EditProductModal
 import com.example.canasta.ui.components.products.RemoteProductCard
 import com.example.canasta.ui.components.common.ConfirmDeleteModal
-import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.ui.components.common.CommonFab
+import com.example.canasta.ui.components.common.CommonScreenHeader
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.utils.DeviceUtils
 
 @Composable
@@ -109,16 +106,14 @@ fun ProductsScreen(
     }
 
     Scaffold(
+        containerColor = Background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showCreateModal = true },
-                containerColor = Secondary,
-                contentColor = Color.White,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Agregar producto")
-            }
+            CommonFab(
+                icon = Icons.Filled.Add,
+                contentDescription = "Agregar producto",
+                onClick = { showCreateModal = true }
+            )
         }
     ) { innerPadding ->
         if (isLandscape) {
@@ -239,19 +234,7 @@ private fun ProductsScreenPortrait(
             .padding(horizontal = 24.dp)
     ) {
         // Título
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Productos",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        CommonScreenHeader(title = "Productos")
 
         // Barra de búsqueda
         OutlinedTextField(
@@ -301,16 +284,11 @@ private fun ProductsScreenPortrait(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        FloatingActionButton(
-                            onClick = onRetry,
-                            containerColor = Secondary
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Reintentar",
-                                tint = Color.White
-                            )
-                        }
+                        CommonFab(
+                            icon = Icons.Filled.Refresh,
+                            contentDescription = "Reintentar",
+                            onClick = onRetry
+                        )
                     }
                 }
                 is ProductsUiState.Success -> {
@@ -388,19 +366,7 @@ private fun ProductsScreenLandscape(
             .padding(horizontal = 24.dp)
     ) {
         // Título
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Productos",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        CommonScreenHeader(title = "Productos")
 
         // Barra de búsqueda
         OutlinedTextField(
@@ -456,16 +422,11 @@ private fun ProductsScreenLandscape(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    FloatingActionButton(
-                        onClick = onRetry,
-                        containerColor = Secondary
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Reintentar",
-                            tint = Color.White
-                        )
-                    }
+                    CommonFab(
+                        icon = Icons.Filled.Refresh,
+                        contentDescription = "Reintentar",
+                        onClick = onRetry
+                    )
                 }
             }
             is ProductsUiState.Success -> {

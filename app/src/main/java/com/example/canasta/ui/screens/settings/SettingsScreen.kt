@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -24,16 +23,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.canasta.R
 import com.example.canasta.data.repository.UserRepository
+import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.components.settings.ChangeLanguageDialog
 import com.example.canasta.ui.components.settings.ChangePasswordDialog
 import com.example.canasta.ui.components.settings.SettingsItem
 import com.example.canasta.ui.components.settings.SettingsSection
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.utils.LanguageManager
 import kotlinx.coroutines.launch
 
@@ -59,6 +59,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        containerColor = Background,
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }
@@ -74,12 +75,7 @@ fun SettingsScreen(
         ) {
 
             // Título "Configuración" alineado a la izquierda
-            Text(
-                text = stringResource(R.string.settings),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+            CommonScreenHeader(title = stringResource(R.string.settings))
 
             // Subtítulo
             Text(
@@ -187,4 +183,3 @@ fun SettingsScreen(
 private fun SettingsScreenPreview() {
     SettingsScreen()
 }
-
