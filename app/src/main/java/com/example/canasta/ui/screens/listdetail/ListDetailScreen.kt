@@ -93,6 +93,16 @@ fun ListDetailScreen(
         viewModel.loadList(listId, listName)
     }
 
+    // Detectar cuando la lista debe ser eliminada automáticamente y navegar de vuelta
+    LaunchedEffect(uiState.shouldDeleteAndNavigateBack) {
+        println("DEBUG Screen: shouldDeleteAndNavigateBack cambió a ${uiState.shouldDeleteAndNavigateBack}")
+        if (uiState.shouldDeleteAndNavigateBack) {
+            println("DEBUG Screen: Navegando de vuelta...")
+            viewModel.resetDeleteAndNavigateBack()
+            onBackClick()
+        }
+    }
+
     // Snackbar state
     val snackbarHostState = remember { SnackbarHostState() }
     var lastMessageWasSuccess by remember { mutableStateOf(false) }

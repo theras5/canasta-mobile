@@ -47,7 +47,8 @@ data class ListDetailUiState(
     val isSharing: Boolean = false,
     val isOwner: Boolean = true, // Por defecto true para mostrar todos los botones
     val currentUserId: Long? = null,
-    val tempAddedProductIds: Set<String> = emptySet() // IDs de productos agregados temporalmente en esta sesión
+    val tempAddedProductIds: Set<String> = emptySet(), // IDs de productos agregados temporalmente en esta sesión
+    val shouldDeleteAndNavigateBack: Boolean = false // Indica que la lista debe ser eliminada y volver atrás
 )
 
 /**
@@ -401,15 +402,89 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 if (currentListId.isBlank()) return@launch
                 val current = _uiState.value.products.firstOrNull { it.id == productId }
                 val newPurchased = !(current?.isPurchased ?: false)
+
+                // Hacer el toggle y esperar a que se complete el refresh
                 ShoppingListService.toggleItemPurchasedApi(currentListId, productId, newPurchased)
+
+                // Si hay un filtro de categoría activo, necesitamos refrescar con ese filtro para la UI
+                val currentCategoryId = _uiState.value.selectedCategory?.id
+                if (currentCategoryId != null) {
+                    ShoppingListService.refreshProductsForList(currentListId, currentCategoryId)
+                }
+
+                // Obtener los productos actualizados del cache para la UI
                 val refreshed = ShoppingListService.getProductsForList(currentListId)
                 _uiState.value = _uiState.value.copy(products = refreshed)
+
+                // Para verificar si todos están comprados, necesitamos consultar TODOS los productos sin filtro
+                val allProducts = ShoppingListService.getAllProductsFromApi(currentListId)
+
+                println("DEBUG: Lista $currentListId tiene ${allProducts.size} productos en total")
+                println("DEBUG: Productos comprados: ${allProducts.count { it.purchased == true }}")
+
+                // Verificar si todos los productos (sin filtro) están comprados
+                if (allProducts.isNotEmpty() && allProducts.all { it.purchased == true }) {
+                    println("DEBUG: Todos los productos están comprados, eliminando lista automáticamente")
+                    // Todos los productos están comprados, eliminar la lista
+                    deleteListAutomatically()
+                }
             } catch (e: Exception) {
+                println("ERROR en toggleProductCheck: ${e.message}")
+                e.printStackTrace()
                 _uiState.value = _uiState.value.copy(
                     error = getApplication<Application>().getString(R.string.error_updating_product_list, e.message ?: "")
                 )
             }
         }
+    }
+
+    /**
+     * Elimina la lista automáticamente cuando todos los productos están comprados
+     */
+    private suspend fun deleteListAutomatically() {
+        try {
+            println("DEBUG: Iniciando eliminación automática de lista")
+            val listId = _uiState.value.listId.toLongOrNull()
+            println("DEBUG: ListId para eliminar: $listId")
+            if (listId != null) {
+                // Eliminar la lista en el backend
+                println("DEBUG: Llamando a deleteShoppingList en API")
+                val response = ApiClient.shoppingListService.deleteShoppingList(listId)
+                println("DEBUG: Respuesta de API: isSuccessful=${response.isSuccessful}, code=${response.code()}")
+                if (response.isSuccessful) {
+                    // Actualizar el servicio local
+                    println("DEBUG: Actualizando servicio local")
+                    ShoppingListService.deleteList(_uiState.value.listId)
+                    // Refrescar las listas
+                    println("DEBUG: Refrescando listas")
+                    ShoppingListService.refreshLists()
+                    // Indicar que se debe navegar de vuelta
+                    println("DEBUG: Marcando shouldDeleteAndNavigateBack = true")
+                    _uiState.value = _uiState.value.copy(
+                        shouldDeleteAndNavigateBack = true,
+                        successMessage = "Lista completada y eliminada"
+                    )
+                    println("DEBUG: Estado actualizado, shouldDeleteAndNavigateBack=${_uiState.value.shouldDeleteAndNavigateBack}")
+                } else {
+                    println("ERROR: La respuesta no fue exitosa: ${response.code()} - ${response.message()}")
+                }
+            } else {
+                println("ERROR: listId es null, no se puede eliminar")
+            }
+        } catch (e: Exception) {
+            println("ERROR en deleteListAutomatically: ${e.message}")
+            e.printStackTrace()
+            _uiState.value = _uiState.value.copy(
+                error = "Error al eliminar lista completada: ${e.message}"
+            )
+        }
+    }
+
+    /**
+     * Resetea el flag de eliminación automática
+     */
+    fun resetDeleteAndNavigateBack() {
+        _uiState.value = _uiState.value.copy(shouldDeleteAndNavigateBack = false)
     }
 
     /**

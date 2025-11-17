@@ -146,6 +146,23 @@ object ShoppingListService {
         productsByList.value[listId] ?: emptyList()
 
     /**
+     * Obtiene todos los productos de una lista directamente desde la API (sin cache)
+     * Útil para verificar el estado real de todos los productos
+     */
+    suspend fun getAllProductsFromApi(listId: String): List<com.example.canasta.data.api.ListItemDto> {
+        return try {
+            val response = itemsApi.getItemsForList(
+                listId = listId.toLong(),
+                categoryId = null // Sin filtro
+            )
+            response.data
+        } catch (e: Exception) {
+            println("Error al obtener todos los productos de la lista $listId: ${e.message}")
+            emptyList()
+        }
+    }
+
+    /**
      * Crea una nueva lista (usa POST /shopping-lists y luego refresca desde la API).
      *
      * En caso de error HTTP (por ejemplo 409 nombre duplicado) no modifica el estado local
