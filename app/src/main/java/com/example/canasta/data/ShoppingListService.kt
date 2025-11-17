@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.put
 import retrofit2.HttpException
 import com.example.canasta.data.api.ListItemCreateDto
 import com.example.canasta.data.api.ProductRef
@@ -65,30 +65,35 @@ object ShoppingListService {
                     isFavorite = false
                 )
             }
-            _listsState.value = mapped
 
-            // Intentar completar los conteos consultando el total de items por lista (paginación.total)
-            try {
-                val updated = coroutineScope {
-                    mapped.map { list ->
-                        async {
+            // Obtener los conteos en paralelo para todas las listas
+            val updated = coroutineScope {
+                mapped.map { list ->
+                    async {
+                        try {
                             val paged = itemsApi.getItemsForList(
                                 listId = list.id.toLong(),
                                 page = 1,
                                 perPage = 1
                             )
                             val total = paged.pagination.total
+                            println("DEBUG: Lista '${list.name}' (id=${list.id}) tiene $total items")
                             list.copy(productCount = total)
+                        } catch (e: Exception) {
+                            println("Error al obtener conteo para lista ${list.name}: ${e.message}")
+                            e.printStackTrace()
+                            // En caso de error, mantener el contador en 0
+                            list
                         }
-                    }.map { it.await() }
-                }
-                _listsState.value = updated
-            } catch (e: Exception) {
-                println("Error al obtener conteo de productos por lista: ${e.message}")
+                    }
+                }.map { it.await() }
             }
+
+            _listsState.value = updated
         } catch (e: Exception) {
             // En caso de error, dejamos el estado actual y logueamos
             println("Error al cargar listas desde API: ${e.message}")
+            e.printStackTrace()
         }
     }
 
@@ -103,6 +108,7 @@ object ShoppingListService {
                 categoryId = categoryId
             )
             val dtoItems = response.data
+            val totalCount = response.pagination.total // Usar el total de paginación
             val mapped = dtoItems.map { dto ->
                 val quantityPart = dto.quantity?.let { q ->
                     val unit = dto.unit ?: "unidades"
@@ -119,9 +125,9 @@ object ShoppingListService {
             _productsByList.value = _productsByList.value.toMutableMap().apply {
                 put(listId, mapped)
             }
-            // Actualizar contador de productos para esa lista
+            // Actualizar contador de productos para esa lista usando el total de paginación
             _listsState.value = _listsState.value.map { list ->
-                if (list.id == listId) list.copy(productCount = mapped.size) else list
+                if (list.id == listId) list.copy(productCount = totalCount) else list
             }
         } catch (e: Exception) {
             println("Error al cargar items de la lista $listId desde API: ${e.message}")
