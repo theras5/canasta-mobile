@@ -3,18 +3,20 @@ package com.example.canasta.ui.screens.listdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.canasta.data.ShoppingListService
+import com.example.canasta.data.remote.ApiClient
+import com.example.canasta.data.remote.models.ListItemUpdate
+import com.example.canasta.data.remote.models.ShoppingListUpdate
+import com.example.canasta.data.remote.models.TogglePurchasedRequest
 import com.example.canasta.data.repository.CategoryRepository
 import com.example.canasta.data.repository.ProductRepository
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 /**
  * Enum que representa los modos de la pantalla de detalle
@@ -93,10 +95,26 @@ class ListDetailViewModel : ViewModel() {
      * Agrega un producto a la lista actual usando la API real
      */
     fun addProductToList(product: Product) {
+        val currentListId = _uiState.value.listId
+        if (currentListId.isBlank()) return
+
+        // Actualización optimista: agregar el producto inmediatamente al UI
+        val newProduct = ListProduct(
+            id = "temp_${product.id}", // ID temporal hasta que la API responda
+            name = product.name,
+            description = "1 unidades",
+            isChecked = false,
+            isPurchased = false
+        )
+
+        val currentProducts = _uiState.value.products
+        _uiState.value = _uiState.value.copy(
+            products = currentProducts + newProduct
+        )
+
+        // Luego hacer la llamada a la API en background
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val currentListId = _uiState.value.listId
-                if (currentListId.isBlank()) return@launch
                 // Llamada real a API
                 ShoppingListService.addProductToListApi(
                     listId = currentListId,
@@ -104,11 +122,13 @@ class ListDetailViewModel : ViewModel() {
                     quantity = 1.0,
                     unit = "unidades"
                 )
-                // Luego de refrescar en el servicio, actualizamos productos en UI
+                // Refrescar para obtener el ID real y datos actualizados del servidor
                 val refreshed = ShoppingListService.getProductsForList(currentListId)
                 _uiState.value = _uiState.value.copy(products = refreshed)
             } catch (e: Exception) {
+                // Si falla, remover el producto temporal y mostrar error
                 _uiState.value = _uiState.value.copy(
+                    products = currentProducts, // Revertir a la lista anterior
                     error = "Error al agregar producto: ${e.message}"
                 )
             }
@@ -119,6 +139,8 @@ class ListDetailViewModel : ViewModel() {
      * Carga los datos de una lista específica por ID
      */
     fun loadList(listId: String, listName: String) {
+        _uiState.value = _uiState.value.copy(isLoading = true)
+
         viewModelScope.launch(Dispatchers.IO) {
             // Traer productos reales de la API a través del servicio
             ShoppingListService.refreshProductsForList(listId)
@@ -176,29 +198,43 @@ class ListDetailViewModel : ViewModel() {
     }
 
     /**
-     * Guarda los cambios en la base de datos
-     * En producción, aquí harías la persistencia en Room
+     * Guarda los cambios usando la API real
      */
     private fun saveChanges() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.value = _uiState.value.copy(isLoading = true)
             try {
-                // Actualizar nombre de la lista en el servicio
                 val current = _uiState.value
-                ShoppingListService.updateList(current.listId, current.listName)
+                val listId = current.listId.toLongOrNull()
 
-                // Persistir productos actuales en el servicio
-                current.products.forEach { product ->
-                    ShoppingListService.upsertProduct(current.listId, product)
+                if (listId != null) {
+                    // Actualizar nombre de la lista en la API
+                    val updateRequest = ShoppingListUpdate(name = current.listName)
+                    val response = ApiClient.shoppingListService.updateShoppingList(listId, updateRequest)
+
+                    if (response.isSuccessful) {
+                        // También actualizar en el servicio local
+                        ShoppingListService.updateList(current.listId, current.listName)
+
+                        originalListName = current.listName
+                        originalProducts = current.products.map { it.copy() }
+
+                        _uiState.value = current.copy(
+                            screenMode = ScreenMode.VIEW,
+                            isLoading = false
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            error = "Error al guardar: ${response.code()}"
+                        )
+                    }
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        error = "ID de lista inválido"
+                    )
                 }
-
-                originalListName = current.listName
-                originalProducts = current.products.map { it.copy() }
-
-                _uiState.value = current.copy(
-                    screenMode = ScreenMode.VIEW,
-                    isLoading = false
-                )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -209,9 +245,10 @@ class ListDetailViewModel : ViewModel() {
     }
 
     /**
-     * Actualiza la cantidad/descripción de un producto
+     * Actualiza la cantidad/descripción de un producto usando la API real
      */
     fun updateProductQuantity(productId: String, newQuantity: String) {
+        // Primero actualizar UI optimistamente
         val updatedProducts = _uiState.value.products.map { product ->
             if (product.id == productId) {
                 product.copy(description = newQuantity)
@@ -220,17 +257,96 @@ class ListDetailViewModel : ViewModel() {
             }
         }
         _uiState.value = _uiState.value.copy(products = updatedProducts)
+
+        // Luego actualizar en la API
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                val itemId = productId.toLongOrNull()
+
+                if (listId != null && itemId != null) {
+                    // Parsear la descripción para extraer cantidad y unidad
+                    // Formato esperado: "X unidades" o solo un número
+                    val parts = newQuantity.trim().split(" ")
+                    val quantity = parts.firstOrNull()?.toDoubleOrNull() ?: 1.0
+                    val unit = if (parts.size > 1) parts.drop(1).joinToString(" ") else "unidades"
+
+                    val updateRequest = ListItemUpdate(
+                        quantity = quantity,
+                        unit = unit
+                    )
+
+                    val response = ApiClient.shoppingListService.updateListItem(listId, itemId, updateRequest)
+                    if (!response.isSuccessful) {
+                        _uiState.value = _uiState.value.copy(
+                            error = "Error al actualizar producto: ${response.code()}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al actualizar producto: ${e.message}"
+                )
+            }
+        }
     }
 
     /**
-     * Elimina un producto de la lista
+     * Elimina un producto de la lista usando la API real
      */
     fun deleteProduct(productId: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            ShoppingListService.deleteProductFromList(_uiState.value.listId, productId)
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                val itemId = productId.toLongOrNull()
+
+                if (listId != null && itemId != null) {
+                    val response = ApiClient.shoppingListService.deleteListItem(listId, itemId)
+                    if (response.isSuccessful) {
+                        // Actualizar UI optimistamente
+                        val updatedProducts = _uiState.value.products.filter { it.id != productId }
+                        _uiState.value = _uiState.value.copy(products = updatedProducts)
+
+                        // También eliminar del servicio local
+                        ShoppingListService.deleteProductFromList(_uiState.value.listId, productId)
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            error = "Error al eliminar producto: ${response.code()}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al eliminar producto: ${e.message}"
+                )
+            }
         }
-        val updatedProducts = _uiState.value.products.filter { it.id != productId }
-        _uiState.value = _uiState.value.copy(products = updatedProducts)
+    }
+
+    /**
+     * Elimina la lista completa usando la API real
+     */
+    fun deleteList() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                if (listId != null) {
+                    val response = ApiClient.shoppingListService.deleteShoppingList(listId)
+                    if (response.isSuccessful) {
+                        // También eliminar del servicio local
+                        ShoppingListService.deleteList(_uiState.value.listId)
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            error = "Error al eliminar lista: ${response.code()}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = "Error al eliminar lista: ${e.message}"
+                )
+            }
+        }
     }
 
     /**

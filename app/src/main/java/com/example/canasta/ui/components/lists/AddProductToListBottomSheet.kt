@@ -41,15 +41,11 @@ fun AddProductToListBottomSheet(
     var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
 
     // Filtrar productos que NO están ya en la lista
+    // No usar remember aquí para que se recalcule automáticamente cuando cambie addedProductNames
     val availableProducts = products.filter { product ->
         !addedProductNames.contains(product.name)
     }
 
-    // Debug: log cuando cambia el filtro
-    LaunchedEffect(addedProductNames.size) {
-        println("DEBUG Bottom Sheet: Total productos: ${products.size}, Ya agregados: ${addedProductNames.size}, Disponibles: ${availableProducts.size}")
-        println("DEBUG Bottom Sheet: Productos agregados: $addedProductNames")
-    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,

@@ -3,6 +3,7 @@ package com.example.canasta.data.remote
 import com.example.canasta.data.remote.api.AuthApiService
 import com.example.canasta.data.remote.api.CategoryApiService
 import com.example.canasta.data.remote.api.ProductApiService
+import com.example.canasta.data.remote.api.ShoppingListApiService
 import com.example.canasta.data.remote.api.UserApiService
 import com.example.canasta.data.remote.interceptors.AuthInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -75,6 +76,11 @@ object ApiClient {
     // Servicio de API para usuarios
     val userService: UserApiService by lazy {
         retrofit.create(UserApiService::class.java)
+    }
+
+    // Servicio de API para shopping lists
+    val shoppingListService: ShoppingListApiService by lazy {
+        retrofit.create(ShoppingListApiService::class.java)
     }
 
     /**
