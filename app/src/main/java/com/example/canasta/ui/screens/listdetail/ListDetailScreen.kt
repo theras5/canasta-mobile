@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,14 +25,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,14 +39,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.CategoryChipsApi
-import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
+import com.example.canasta.ui.components.common.ConfirmationModal
+import com.example.canasta.ui.components.common.EditProductModal
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
-import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle de una lista con sus productos
@@ -88,10 +82,14 @@ fun ListDetailScreen(
     // Estado para el modal de confirmación de eliminación de lista
     var showDeleteListDialog by remember { mutableStateOf(false) }
 
-    // Estado para el bottom sheet de agregar productos
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    var showAddProductSheet by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    // Estado para el modal de edición de producto
+    var showEditDialog by remember { mutableStateOf(false) }
+    var productToEdit by remember { mutableStateOf<ListProduct?>(null) }
+
+    // TODO: Implementar bottom sheet de agregar productos cuando esté disponible
+    // val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    // var showAddProductSheet by remember { mutableStateOf(false) }
+    // val scope = rememberCoroutineScope()
 
     // Mostrar modal de confirmación si hay producto para eliminar
     if (showDeleteDialog && productToDelete != null) {
@@ -128,7 +126,28 @@ fun ListDetailScreen(
         )
     }
 
+    // Mostrar modal de edición de producto
+    if (showEditDialog && productToEdit != null) {
+        EditProductModal(
+            productName = productToEdit?.name ?: "",
+            currentDescription = productToEdit?.description ?: "",
+            onDismiss = {
+                showEditDialog = false
+                productToEdit = null
+            },
+            onConfirm = { newDescription ->
+                productToEdit?.let { product ->
+                    viewModel.updateProductQuantity(product.id, newDescription)
+                }
+                showEditDialog = false
+                productToEdit = null
+            }
+        )
+    }
+
+    // TODO: Implementar bottom sheet de agregar productos
     // Mostrar bottom sheet de agregar productos
+    /*
     if (showAddProductSheet) {
         AddProductToListBottomSheet(
             sheetState = bottomSheetState,
@@ -147,6 +166,7 @@ fun ListDetailScreen(
             }
         )
     }
+    */
 
 
     Scaffold(
@@ -248,6 +268,8 @@ fun ListDetailScreen(
             )
         },
         floatingActionButton = {
+            // TODO: Re-enable FAB when AddProductBottomSheet is implemented
+            /*
             // FAB solo visible en modo vista
             if (uiState.screenMode == ScreenMode.VIEW) {
                 FloatingActionButton(
@@ -261,6 +283,7 @@ fun ListDetailScreen(
                     Icon(Icons.Filled.Add, "Agregar producto")
                 }
             }
+            */
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -292,7 +315,8 @@ fun ListDetailScreen(
                             }
                         },
                         onEdit = {
-                            // TODO: Implementar modal de edición con el tipo correcto
+                            productToEdit = product
+                            showEditDialog = true
                         },
                         onDelete = {
                             // Solo permitir eliminar si no está comprado
