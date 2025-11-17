@@ -54,10 +54,9 @@ object ShoppingListService {
             // La API ahora devuelve un objeto paginado con campos data y pagination
             val response = api.getShoppingLists()
             val remote = response.data
-            _listsState.value = remote.map { dto ->
+            val mapped = remote.map { dto ->
                 // Extraer el emoji/icon del metadata si existe (JsonObject -> JsonElement -> String)
                 val icon = dto.metadata?.get("icon")?.jsonPrimitive?.contentOrNull ?: "\uD83D\uDCCB"
-            val mapped = remote.map { dto ->
                 ShoppingList(
                     id = dto.id.toString(),
                     name = dto.name,
