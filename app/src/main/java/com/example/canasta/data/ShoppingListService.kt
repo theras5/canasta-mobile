@@ -271,7 +271,7 @@ object ShoppingListService {
     }
 
     /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
-    suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades", categoryId: Long? = null) {
+    suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
         try {
             println("=== DEBUG addProductToListApi ===")
             println("listId: $listId, productId: $productId, quantity: $quantity, unit: $unit")
@@ -305,7 +305,9 @@ object ShoppingListService {
             println("================================")
 
             itemsApi.addItemToList(listId.toLong(), body)
-            refreshProductsForList(listId, categoryId)
+            // No pasar categoryId para obtener TODOS los productos
+            // El filtrado por categoría se hace en la UI
+            refreshProductsForList(listId, null)
         } catch (e: Exception) {
             println("Error al agregar item a lista $listId en API: ${e.message}")
             e.printStackTrace()

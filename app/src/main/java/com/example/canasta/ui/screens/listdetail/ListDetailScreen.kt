@@ -112,6 +112,7 @@ fun ListDetailScreen(
         uiState.error?.let { message ->
             lastMessageWasSuccess = false
             snackbarHostState.showSnackbar(message)
+            viewModel.clearErrorMessage()
         }
     }
 
@@ -120,6 +121,7 @@ fun ListDetailScreen(
         uiState.successMessage?.let { message ->
             lastMessageWasSuccess = true
             snackbarHostState.showSnackbar(message)
+            viewModel.clearSuccessMessage()
         }
     }
 
@@ -203,13 +205,10 @@ fun ListDetailScreen(
             products = uiState.availableProducts,
             categories = uiState.availableCategories,
             addedProductNames = uiState.products.map { it.name }.toSet(),
-            tempAddedProductIds = uiState.tempAddedProductIds,
             onDismiss = {
                 scope.launch {
                     bottomSheetState.hide()
                     showAddProductSheet = false
-                    // Refrescar la lista cuando se cierra el bottom sheet
-                    viewModel.clearTempAddedProductsAndRefresh()
                 }
             },
             onAddProduct = { product ->

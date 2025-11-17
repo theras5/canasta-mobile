@@ -38,6 +38,14 @@ data class ListItemDto(
 )
 
 /**
+ * Wrapper para la respuesta de crear un item que viene envuelta en {"item": ...}
+ */
+@Serializable
+data class ListItemResponseWrapper(
+    val item: ListItemDto
+)
+
+/**
  * Información de paginación devuelta por la API de items de lista.
  */
 @Serializable
@@ -90,11 +98,12 @@ interface ListItemApi {
     suspend fun addItemToList(
         @Path("id") listId: Long,
         @Body item: ListItemCreate
-    ): ListItemDto
+    ): ListItemResponseWrapper
 
     /**
      * Cambia el estado de purchased de un item
      * PATCH /api/shopping-lists/{id}/items/{item_id}
+     * Nota: Este endpoint devuelve el item directamente, sin wrapper
      */
     @PATCH("/api/shopping-lists/{id}/items/{item_id}")
     suspend fun togglePurchased(

@@ -47,7 +47,6 @@ data class ListDetailUiState(
     val isSharing: Boolean = false,
     val isOwner: Boolean = true, // Por defecto true para mostrar todos los botones
     val currentUserId: Long? = null,
-    val tempAddedProductIds: Set<String> = emptySet(), // IDs de productos agregados temporalmente en esta sesión
     val shouldDeleteAndNavigateBack: Boolean = false // Indica que la lista debe ser eliminada y volver atrás
 )
 
@@ -83,12 +82,11 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
             ShoppingListService.productsByList.collect { productsByList ->
                 val currentListId = _uiState.value.listId
                 if (currentListId.isNotBlank()) {
-                    val products = productsByList[currentListId] ?: emptyList()
+                    val apiProducts = productsByList[currentListId] ?: emptyList()
 
-                    // Actualizar la UI con los productos más recientes
-                    // El filtrado por categoría ya lo maneja el servicio
+                    // Actualizar la UI con los productos de la API
                     _uiState.value = _uiState.value.copy(
-                        products = products
+                        products = apiProducts
                     )
                 }
             }
@@ -130,41 +128,19 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
         val currentListId = _uiState.value.listId
         if (currentListId.isBlank()) return
 
-        // Actualización optimista: agregar el producto inmediatamente al UI
-        val newProduct = ListProduct(
-            id = "temp_${product.id}", // ID temporal hasta que la API responda
-            name = product.name,
-            description = "1 unidades",
-            isChecked = false,
-            isPurchased = false
-        )
-
-        // AGREGAR INMEDIATAMENTE Y QUEDARSE AHÍ - NO TOCAR NADA MÁS
-        _uiState.value = _uiState.value.copy(
-            products = _uiState.value.products + newProduct,
-            tempAddedProductIds = _uiState.value.tempAddedProductIds + product.id.toString(),
-            successMessage = getApplication<Application>().getString(R.string.product_added_success)
-        )
-
-        // Enviar a la API en background y refrescar inmediatamente
+        // Enviar a la API
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val categoryId = _uiState.value.selectedCategory?.id
                 ShoppingListService.addProductToListApi(
                     listId = currentListId,
                     productId = product.id,
                     quantity = 1.0,
-                    unit = "unidades",
-                    categoryId = categoryId
+                    unit = "unidades"
                 )
-                // ✅ Éxito: La UI se actualizará automáticamente gracias al observer
-                // No necesitamos hacer nada más aquí
+                // El observer actualizará la UI automáticamente
             } catch (e: Exception) {
-                // ❌ Si falla, QUITAR el producto temporal
                 _uiState.value = _uiState.value.copy(
-                    products = _uiState.value.products.filter { it.id != "temp_${product.id}" },
-                    tempAddedProductIds = _uiState.value.tempAddedProductIds - product.id.toString(),
-                    error = getApplication<Application>().getString(R.string.error_adding_product, product.name)
+                    error = "Error al agregar ${product.name}"
                 )
             }
         }
@@ -644,27 +620,16 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /**
-     * Limpia los productos agregados temporalmente y refresca la lista
-     * Se llama cuando se cierra el bottom sheet de agregar productos
+     * Limpia el mensaje de éxito
      */
-    fun clearTempAddedProductsAndRefresh() {
-        // Limpiar PRIMERO los IDs temporales para que el bottom sheet no los filtre más
-        _uiState.value = _uiState.value.copy(tempAddedProductIds = emptySet())
+    fun clearSuccessMessage() {
+        _uiState.value = _uiState.value.copy(successMessage = null)
+    }
 
-        val currentListId = _uiState.value.listId
-        if (currentListId.isNotBlank()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    // Refrescar TODO desde la API (con filtro de categoría si existe)
-                    val categoryId = _uiState.value.selectedCategory?.id
-                    ShoppingListService.refreshProductsForList(currentListId, categoryId)
-                    // La UI se actualizará automáticamente gracias al observer
-                } catch (e: Exception) {
-                    _uiState.value = _uiState.value.copy(
-                        error = getApplication<Application>().getString(R.string.error_refreshing_list, e.message ?: "")
-                    )
-                }
-            }
-        }
+    /**
+     * Limpia el mensaje de error
+     */
+    fun clearErrorMessage() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

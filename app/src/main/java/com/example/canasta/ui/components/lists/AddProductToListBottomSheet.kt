@@ -34,7 +34,6 @@ fun AddProductToListBottomSheet(
     products: List<Product>,
     categories: List<GetCategory>,
     addedProductNames: Set<String>, // Nombres de productos ya agregados
-    tempAddedProductIds: Set<String> = emptySet(), // IDs de productos agregados en esta sesión
     onDismiss: () -> Unit,
     onAddProduct: (Product) -> Unit
 ) {
@@ -42,9 +41,10 @@ fun AddProductToListBottomSheet(
     var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
 
     // Filtrar productos que NO están ya en la lista
-    // No usar remember aquí para que se recalcule automáticamente cuando cambie addedProductNames o tempAddedProductIds
-    val availableProducts = products.filter { product ->
-        !addedProductNames.contains(product.name) && !tempAddedProductIds.contains(product.id.toString())
+    val availableProducts = remember(addedProductNames) {
+        products.filter { product ->
+            !addedProductNames.contains(product.name)
+        }
     }
 
 
