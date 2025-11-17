@@ -25,6 +25,20 @@ data class ShoppingListUpdate(
 )
 
 /**
+ * Modelo de usuario compartido
+ */
+@Serializable
+data class SharedUser(
+    val id: Long = 0,
+    val name: String = "",
+    val surname: String = "",
+    val email: String = "",
+    val metadata: Map<String, String>? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
+)
+
+/**
  * Modelo de respuesta de shopping list
  */
 @Serializable
@@ -36,7 +50,9 @@ data class ShoppingListResponse(
     val metadata: Map<String, String>? = null,
     val createdAt: String,
     val updatedAt: String,
-    val lastPurchasedAt: String? = null
+    val lastPurchasedAt: String? = null,
+    val owner: SharedUser? = null,
+    val sharedWith: List<SharedUser>? = null
 )
 
 /**
@@ -61,3 +77,11 @@ data class Pagination(
     val has_prev: Boolean
 )
 
+
+/**
+ * Modelo para compartir una lista
+ */
+@Serializable
+data class ShareListRequest(
+    val email: String
+)

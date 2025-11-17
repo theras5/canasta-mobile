@@ -18,6 +18,8 @@ import retrofit2.HttpException
 import com.example.canasta.data.api.ListItemCreateDto
 import com.example.canasta.data.api.ProductRef
 import com.example.canasta.data.api.TogglePurchasedBody
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 /**
  * Servicio singleton in-memory para gestionar listas de compras y sus ítems.
@@ -52,7 +54,7 @@ object ShoppingListService {
             // La API ahora devuelve un objeto paginado con campos data y pagination
             val response = api.getShoppingLists()
             val remote = response.data
-            _listsState.value = remote.map { dto ->
+            val mapped = remote.map { dto ->
                 // Extraer el emoji/icon del metadata si existe (JsonObject -> JsonElement -> String)
                 val icon = dto.metadata?.get("icon")?.jsonPrimitive?.contentOrNull ?: "\uD83D\uDCCB"
                 ShoppingList(
@@ -63,7 +65,27 @@ object ShoppingListService {
                     isFavorite = false
                 )
             }
-            // Si en el futuro quieres usar la info de paginación, está en response.pagination
+            _listsState.value = mapped
+
+            // Intentar completar los conteos consultando el total de items por lista (paginación.total)
+            try {
+                val updated = coroutineScope {
+                    mapped.map { list ->
+                        async {
+                            val paged = itemsApi.getItemsForList(
+                                listId = list.id.toLong(),
+                                page = 1,
+                                perPage = 1
+                            )
+                            val total = paged.pagination.total
+                            list.copy(productCount = total)
+                        }
+                    }.map { it.await() }
+                }
+                _listsState.value = updated
+            } catch (e: Exception) {
+                println("Error al obtener conteo de productos por lista: ${e.message}")
+            }
         } catch (e: Exception) {
             // En caso de error, dejamos el estado actual y logueamos
             println("Error al cargar listas desde API: ${e.message}")
@@ -96,6 +118,10 @@ object ShoppingListService {
             }
             _productsByList.value = _productsByList.value.toMutableMap().apply {
                 put(listId, mapped)
+            }
+            // Actualizar contador de productos para esa lista
+            _listsState.value = _listsState.value.map { list ->
+                if (list.id == listId) list.copy(productCount = mapped.size) else list
             }
         } catch (e: Exception) {
             println("Error al cargar items de la lista $listId desde API: ${e.message}")
@@ -143,7 +169,6 @@ object ShoppingListService {
             // Tras crear con éxito en backend, refrescamos desde API para mantener consistencia
             refreshLists()
 
-            // Devolvemos una representación minimal para la UI (opcionalmente podrías buscarla en listsState)
             return ShoppingList(
                 id = dto.id.toString(),
                 name = dto.name,
@@ -152,11 +177,9 @@ object ShoppingListService {
                 isFavorite = false
             )
         } catch (e: HttpException) {
-            // No tocamos el estado local, dejamos que la UI decida qué hacer
             println("ERROR HTTP al crear lista en API: code=${e.code()} message=${e.message()}")
             throw e
         } catch (e: Exception) {
-            // Otros errores de red o inesperados: tampoco modificamos el estado local
             println("ERROR general al crear lista en API: ${e.message}")
             e.printStackTrace()
             throw e
@@ -234,7 +257,6 @@ object ShoppingListService {
                 metadata = null
             )
             itemsApi.addItemToList(listId.toLong(), body)
-            // Refrescar items sin filtro
             refreshProductsForList(listId)
         } catch (e: Exception) {
             println("Error al agregar item a lista $listId en API: ${e.message}")
