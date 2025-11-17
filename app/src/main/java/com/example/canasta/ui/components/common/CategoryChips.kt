@@ -19,8 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.theme.CanastaTheme
 import com.example.canasta.ui.theme.Secondary
@@ -32,17 +34,19 @@ fun CategoryChips(
     selectedCategory: String? = null,
     onCategorySelected: (String?) -> Unit = {}
 ) {
+    val allCategoriesText = stringResource(R.string.all_categories)
+
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(vertical = 8.dp)
     ) {
         items(categories) { category ->
-            val isSelected = selectedCategory == category || (selectedCategory == null && category == "Todos")
+            val isSelected = selectedCategory == category || (selectedCategory == null && category == allCategoriesText)
             FilterChip(
                 selected = isSelected,
                 onClick = {
-                    onCategorySelected(if (category == "Todos") null else category)
+                    onCategorySelected(if (category == allCategoriesText) null else category)
                 },
                 label = { Text(category) },
                 leadingIcon = if (isSelected) {
@@ -80,7 +84,7 @@ fun CategoryChipsApi(
         items(listOf<GetCategory?>(null) + categories) { category ->
             val isSelected = (selectedCategory == null && category == null) ||
                     (selectedCategory != null && category != null && selectedCategory.id == category.id)
-            val label = category?.name ?: "Todos"
+            val label = category?.name ?: stringResource(R.string.all_categories)
             FilterChip(
                 selected = isSelected,
                 onClick = { onCategorySelected(category) },

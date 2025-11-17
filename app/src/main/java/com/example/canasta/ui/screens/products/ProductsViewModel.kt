@@ -2,6 +2,7 @@ package com.example.canasta.ui.screens.products
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.repository.ProductRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 sealed class ProductsUiState {
     object Loading : ProductsUiState()
     data class Success(val products: List<Product>) : ProductsUiState()
-    data class Error(val message: String) : ProductsUiState()
+    data class Error(val messageResId: Int) : ProductsUiState()
 }
 
 /**
@@ -34,11 +35,11 @@ class ProductsViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessageResId = MutableStateFlow<Int?>(null)
+    val errorMessageResId: StateFlow<Int?> = _errorMessageResId.asStateFlow()
 
-    private val _successMessage = MutableStateFlow<String?>(null)
-    val successMessage: StateFlow<String?> = _successMessage.asStateFlow()
+    private val _successMessageResId = MutableStateFlow<Int?>(null)
+    val successMessageResId: StateFlow<Int?> = _successMessageResId.asStateFlow()
 
     init {
         loadProducts()
@@ -54,7 +55,7 @@ class ProductsViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
+            _errorMessageResId.value = null
             _uiState.value = ProductsUiState.Loading
 
             repository.getProducts(name, categoryId, pantryId).fold(
@@ -64,9 +65,9 @@ class ProductsViewModel : ViewModel() {
                     _isLoading.value = false
                 },
                 onFailure = { error ->
-                    val message = error.message ?: "Error al cargar productos"
-                    _errorMessage.value = message
-                    _uiState.value = ProductsUiState.Error(message)
+                    val messageResId = R.string.error_loading_products
+                    _errorMessageResId.value = messageResId
+                    _uiState.value = ProductsUiState.Error(messageResId)
                     _isLoading.value = false
                 }
             )
@@ -83,16 +84,16 @@ class ProductsViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.createProduct(name, categoryId, metadata).fold(
                 onSuccess = {
-                    _successMessage.value = "Producto creado exitosamente"
+                    _successMessageResId.value = R.string.product_created_success
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al crear producto"
+                    _errorMessageResId.value = R.string.error_creating_product
                     _isLoading.value = false
                 }
             )
@@ -110,16 +111,16 @@ class ProductsViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.updateProduct(id, name, categoryId, metadata).fold(
                 onSuccess = {
-                    _successMessage.value = "Producto actualizado exitosamente"
+                    _successMessageResId.value = R.string.product_updated_success
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al actualizar producto"
+                    _errorMessageResId.value = R.string.error_updating_product
                     _isLoading.value = false
                 }
             )
@@ -132,16 +133,16 @@ class ProductsViewModel : ViewModel() {
     fun deleteProduct(id: Long) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.deleteProduct(id).fold(
                 onSuccess = {
-                    _successMessage.value = "Producto eliminado exitosamente"
+                    _successMessageResId.value = R.string.product_deleted_success
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al eliminar producto"
+                    _errorMessageResId.value = R.string.error_deleting_product
                     _isLoading.value = false
                 }
             )
@@ -152,13 +153,13 @@ class ProductsViewModel : ViewModel() {
      * Limpia el mensaje de error
      */
     fun clearError() {
-        _errorMessage.value = null
+        _errorMessageResId.value = null
     }
 
     /**
      * Limpia el mensaje de éxito
      */
     fun clearSuccess() {
-        _successMessage.value = null
+        _successMessageResId.value = null
     }
 }

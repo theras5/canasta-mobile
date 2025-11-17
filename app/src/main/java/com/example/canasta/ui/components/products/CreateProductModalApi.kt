@@ -38,10 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.components.common.ModalTextField
 import com.example.canasta.ui.theme.Secondary
@@ -89,7 +91,7 @@ fun CreateProductModalApi(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Agregar Producto",
+                    text = stringResource(R.string.add_product_title),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -99,10 +101,10 @@ fun CreateProductModalApi(
 
             // Nombre del producto
             ModalTextField(
-                label = "Nombre del producto *",
+                label = stringResource(R.string.product_name_label),
                 value = productName,
                 onValueChange = { productName = it },
-                placeholder = "Ej: Fideos"
+                placeholder = stringResource(R.string.product_name_placeholder)
             )
 
             // Categoría
@@ -111,13 +113,13 @@ fun CreateProductModalApi(
                 onExpandedChange = { if (categories.isNotEmpty()) expanded = !expanded }
             ) {
                 OutlinedTextField(
-                    value = selectedCategory?.name ?: "Seleccione una categoría",
+                    value = selectedCategory?.name ?: stringResource(R.string.select_category),
                     onValueChange = {},
                     readOnly = true,
                     enabled = categories.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    label = { Text("Categoría *") },
-                    placeholder = { Text("Seleccione una categoría") },
+                    label = { Text(stringResource(R.string.category_label)) },
+                    placeholder = { Text(stringResource(R.string.select_category)) },
                     trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
                     colors = OutlinedTextFieldDefaults.colors()
                 )
@@ -151,7 +153,7 @@ fun CreateProductModalApi(
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = productName.isNotBlank() && selectedCategory != null
             ) {
-                Text(text = "Crear")
+                Text(text = stringResource(R.string.create))
             }
 
             OutlinedButton(
@@ -161,7 +163,7 @@ fun CreateProductModalApi(
                     contentColor = Color.Gray
                 )
             ) {
-                Text(text = "Cancelar")
+                Text(text = stringResource(R.string.cancel))
             }
         }
     }

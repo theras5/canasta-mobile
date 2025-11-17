@@ -38,10 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.data.repository.CategoryRepository
@@ -61,6 +64,7 @@ import com.example.canasta.utils.DeviceUtils
 fun ProductsScreen(
     viewModel: ProductsViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val isTablet = DeviceUtils.isTablet()
@@ -68,8 +72,8 @@ fun ProductsScreen(
     // Estados del ViewModel
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.products.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val successMessage by viewModel.successMessage.collectAsState()
+    val errorMessageResId by viewModel.errorMessageResId.collectAsState()
+    val successMessageResId by viewModel.successMessageResId.collectAsState()
 
     // Estados locales de UI
     var showCreateModal by remember { mutableStateOf(false) }
@@ -92,17 +96,17 @@ fun ProductsScreen(
     }
 
     // Mostrar errores en Snackbar
-    LaunchedEffect(errorMessage) {
-        errorMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+    LaunchedEffect(errorMessageResId) {
+        errorMessageResId?.let { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
             viewModel.clearError()
         }
     }
 
     // Mostrar mensajes de éxito en Snackbar
-    LaunchedEffect(successMessage) {
-        successMessage?.let { message ->
-            snackbarHostState.showSnackbar(message)
+    LaunchedEffect(successMessageResId) {
+        successMessageResId?.let { resId ->
+            snackbarHostState.showSnackbar(context.getString(resId))
             viewModel.clearSuccess()
         }
     }
@@ -124,7 +128,7 @@ fun ProductsScreen(
                 snackbar = { data ->
                     androidx.compose.material3.Snackbar(
                         snackbarData = data,
-                        containerColor = if (successMessage != null) Success else Errors,
+                        containerColor = if (successMessageResId != null) Success else Errors,
                         contentColor = androidx.compose.ui.graphics.Color.White
                     )
                 }
@@ -133,7 +137,7 @@ fun ProductsScreen(
         floatingActionButton = {
             CommonFab(
                 icon = Icons.Filled.Add,
-                contentDescription = "Agregar producto",
+                contentDescription = stringResource(R.string.add_product),
                 onClick = { showCreateModal = true }
             )
         }
@@ -217,10 +221,10 @@ fun ProductsScreen(
     // Modal confirmación eliminación
     if (showDeleteModal && productToDelete != null) {
         ConfirmDeleteModal(
-            title = "Eliminar Producto",
-            message = "¿Seguro que querés eliminar \"${productToDelete!!.name}\"? Esta acción no se puede revertir.",
-            confirmText = "Eliminar",
-            dismissText = "Cancelar",
+            title = stringResource(R.string.delete_product_title),
+            message = stringResource(R.string.delete_product_message, productToDelete!!.name),
+            confirmText = stringResource(R.string.delete),
+            dismissText = stringResource(R.string.cancel),
             onConfirm = {
                 viewModel.deleteProduct(productToDelete!!.id)
                 productToDelete = null
@@ -256,15 +260,15 @@ private fun ProductsScreenPortrait(
             .padding(horizontal = 24.dp)
     ) {
         // Título
-        CommonScreenHeader(title = "Productos")
+        CommonScreenHeader(title = stringResource(R.string.products_title))
 
         // Barra de búsqueda
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Buscar") },
-            placeholder = { Text("Buscar producto...") },
+            label = { Text(stringResource(R.string.search)) },
+            placeholder = { Text(stringResource(R.string.search_product)) },
             singleLine = true
         )
 
@@ -294,13 +298,13 @@ private fun ProductsScreenPortrait(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Error al cargar productos",
+                            text = stringResource(R.string.error_loading_products),
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = uiState.message,
+                            text = stringResource(uiState.messageResId),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -308,7 +312,7 @@ private fun ProductsScreenPortrait(
                         Spacer(modifier = Modifier.height(16.dp))
                         CommonFab(
                             icon = Icons.Filled.Refresh,
-                            contentDescription = "Reintentar",
+                            contentDescription = stringResource(R.string.retry),
                             onClick = onRetry
                         )
                     }
@@ -317,9 +321,9 @@ private fun ProductsScreenPortrait(
                     if (filteredProducts.isEmpty()) {
                         Text(
                             text = if (searchQuery.isBlank() && selectedCategory == null) {
-                                "No hay productos disponibles"
+                                stringResource(R.string.no_products_available)
                             } else {
-                                "No se encontraron productos con los filtros aplicados"
+                                stringResource(R.string.no_products_found_filters)
                             },
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
@@ -388,15 +392,15 @@ private fun ProductsScreenLandscape(
             .padding(horizontal = 24.dp)
     ) {
         // Título
-        CommonScreenHeader(title = "Productos")
+        CommonScreenHeader(title = stringResource(R.string.products_title))
 
         // Barra de búsqueda
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Buscar") },
-            placeholder = { Text("Buscar producto...") },
+            label = { Text(stringResource(R.string.search)) },
+            placeholder = { Text(stringResource(R.string.search_product)) },
             singleLine = true
         )
 
@@ -432,13 +436,13 @@ private fun ProductsScreenLandscape(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Error al cargar productos",
+                        text = stringResource(R.string.error_loading_products),
                         style = MaterialTheme.typography.headlineSmall,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = uiState.message,
+                        text = stringResource(uiState.messageResId),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -446,7 +450,7 @@ private fun ProductsScreenLandscape(
                     Spacer(modifier = Modifier.height(16.dp))
                     CommonFab(
                         icon = Icons.Filled.Refresh,
-                        contentDescription = "Reintentar",
+                        contentDescription = stringResource(R.string.retry),
                         onClick = onRetry
                     )
                 }
@@ -461,9 +465,9 @@ private fun ProductsScreenLandscape(
                     ) {
                         Text(
                             text = if (searchQuery.isBlank() && selectedCategory == null) {
-                                "No hay productos disponibles"
+                                stringResource(R.string.no_products_available)
                             } else {
-                                "No se encontraron productos con los filtros aplicados"
+                                stringResource(R.string.no_products_found_filters)
                             },
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center

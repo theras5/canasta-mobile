@@ -15,9 +15,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -38,9 +43,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import com.example.canasta.ui.theme.Secondary
 
 /**
@@ -84,7 +86,7 @@ fun EditProductModal(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Editar Producto",
+                    text = stringResource(R.string.edit_product_title),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -94,10 +96,10 @@ fun EditProductModal(
 
             // Nombre
             ModalTextField(
-                label = "Nombre del producto *",
+                label = stringResource(R.string.product_name_label),
                 value = productName,
                 onValueChange = { productName = it },
-                placeholder = "Ej: Fideos"
+                placeholder = stringResource(R.string.product_name_placeholder)
             )
 
             // Categoría
@@ -106,13 +108,13 @@ fun EditProductModal(
                 onExpandedChange = { if (categories.isNotEmpty()) expanded = !expanded }
             ) {
                 OutlinedTextField(
-                    value = selectedCategory?.name ?: "Seleccione una categoría",
+                    value = selectedCategory?.name ?: stringResource(R.string.select_category),
                     onValueChange = {},
                     readOnly = true,
                     enabled = categories.isNotEmpty(),
                     modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                    label = { Text("Categoría *") },
-                    placeholder = { Text("Seleccione una categoría") },
+                    label = { Text(stringResource(R.string.category_label)) },
+                    placeholder = { Text(stringResource(R.string.select_category)) },
                     trailingIcon = { Icon(Icons.Filled.ArrowDropDown, contentDescription = null) },
                     colors = OutlinedTextFieldDefaults.colors()
                 )
@@ -146,7 +148,7 @@ fun EditProductModal(
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = productName.isNotBlank() && selectedCategory != null
             ) {
-                Text(text = "Guardar")
+                Text(text = stringResource(R.string.save))
             }
 
             OutlinedButton(
@@ -156,7 +158,7 @@ fun EditProductModal(
                     contentColor = Color.Gray
                 )
             ) {
-                Text(text = "Cancelar")
+                Text(text = stringResource(R.string.cancel))
             }
         }
     }

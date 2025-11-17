@@ -84,8 +84,30 @@
 
     <!-- Products Screen -->
     <string name="products">Products</string>
+    <string name="products_title">Products</string>
+    <string name="add_product">Add product</string>
+    <string name="search">Search</string>
+    <string name="search_product">Search product...</string>
+    <string name="error_loading_products">Error loading products</string>
+    <string name="no_products_available">No products available</string>
+    <string name="no_products_found_filters">No products found with the applied filters</string>
+    <string name="delete_product_title">Delete Product</string>
+    <string name="delete_product_message">Are you sure you want to delete \"%s\"? This action cannot be undone.</string>
+    <string name="product_created_success">Product created successfully</string>
+    <string name="product_updated_success">Product updated successfully</string>
+    <string name="product_deleted_success">Product deleted successfully</string>
+    <string name="error_creating_product">Error creating product</string>
+    <string name="error_updating_product">Error updating product</string>
+    <string name="error_deleting_product">Error deleting product</string>
+    <string name="add_product_title">Add Product</string>
+    <string name="edit_product_title">Edit Product</string>
+    <string name="product_name_label">Product name *</string>
+    <string name="product_name_placeholder">E.g: Pasta</string>
+    <string name="category_label">Category *</string>
+    <string name="select_category">Select a category</string>
+    <string name="all_categories">All</string>
 
-    <!-- Login/Register Screen -->
+    <!-- General -->
     <string name="verify_your_account">Verify your account</string>
     <string name="verification_code_sent_to">verification code sent to</string>
     <string name="enter_code_to_activate">Enter the code to activate your account</string>

@@ -84,8 +84,30 @@
 
     <!-- Products Screen -->
     <string name="products">Productos</string>
+    <string name="products_title">Productos</string>
+    <string name="add_product">Agregar producto</string>
+    <string name="search">Buscar</string>
+    <string name="search_product">Buscar producto...</string>
+    <string name="error_loading_products">Error al cargar productos</string>
+    <string name="no_products_available">No hay productos disponibles</string>
+    <string name="no_products_found_filters">No se encontraron productos con los filtros aplicados</string>
+    <string name="delete_product_title">Eliminar Producto</string>
+    <string name="delete_product_message">¿Seguro que querés eliminar \"%s\"? Esta acción no se puede revertir.</string>
+    <string name="product_created_success">Producto creado exitosamente</string>
+    <string name="product_updated_success">Producto actualizado exitosamente</string>
+    <string name="product_deleted_success">Producto eliminado exitosamente</string>
+    <string name="error_creating_product">Error al crear producto</string>
+    <string name="error_updating_product">Error al actualizar producto</string>
+    <string name="error_deleting_product">Error al eliminar producto</string>
+    <string name="add_product_title">Agregar Producto</string>
+    <string name="edit_product_title">Editar Producto</string>
+    <string name="product_name_label">Nombre del producto *</string>
+    <string name="product_name_placeholder">Ej: Fideos</string>
+    <string name="category_label">Categoría *</string>
+    <string name="select_category">Seleccione una categoría</string>
+    <string name="all_categories">Todos</string>
 
-    <!-- Login/Register Screen -->
+    <!-- General -->
     <string name="verify_your_account">Verificar tu cuenta</string>
     <string name="verification_code_sent_to">código de verificación enviado a</string>
     <string name="enter_code_to_activate">Ingresa el código para activar tu cuenta</string>
