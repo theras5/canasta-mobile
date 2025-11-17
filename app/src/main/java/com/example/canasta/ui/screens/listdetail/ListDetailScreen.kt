@@ -136,6 +136,9 @@ fun ListDetailScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<ListProduct?>(null) }
 
+    // Lista de unidades disponibles similar a la web
+    val units = listOf("unidades", "kg", "gr", "lt", "ml", "paquete")
+
     // Estado para el bottom sheet de compartir
     var showShareSheet by remember { mutableStateOf(false) }
 
@@ -181,16 +184,23 @@ fun ListDetailScreen(
 
     // Mostrar modal de edición de producto
     if (showEditDialog && productToEdit != null) {
+        val description = productToEdit?.description ?: ""
+        val parts = description.trim().split(" ")
+        val initialQuantity = parts.firstOrNull()?.replace(",", ".")?.toDoubleOrNull() ?: 1.0
+        val initialUnit = if (parts.size > 1) parts.drop(1).joinToString(" ") else "unidades"
+
         EditProductModal(
             productName = productToEdit?.name ?: "",
-            currentDescription = productToEdit?.description ?: "",
+            initialQuantity = initialQuantity,
+            initialUnit = initialUnit,
+            units = units,
             onDismiss = {
                 showEditDialog = false
                 productToEdit = null
             },
-            onConfirm = { newDescription ->
+            onConfirm = { newQuantity, newUnit ->
                 productToEdit?.let { product ->
-                    viewModel.updateProductQuantity(product.id, newDescription)
+                    viewModel.updateProductQuantity(product.id, newQuantity, newUnit)
                 }
                 showEditDialog = false
                 productToEdit = null
