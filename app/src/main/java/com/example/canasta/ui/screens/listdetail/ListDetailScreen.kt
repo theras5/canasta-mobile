@@ -274,16 +274,11 @@ fun ListDetailScreen(
             /*
             // FAB solo visible en modo vista
             if (uiState.screenMode == ScreenMode.VIEW) {
-                FloatingActionButton(
-                    onClick = {
-                        showAddProductSheet = true
-                    },
-                    containerColor = Secondary,
-                    contentColor = Color.White,
-                    shape = CircleShape
-                ) {
-                    Icon(Icons.Filled.Add, "Agregar producto")
-                }
+                CommonFab(
+                    iconRes = R.drawable.add_item,
+                    contentDescription = "Agregar producto",
+                    onClick = { showAddProductSheet = true }
+                )
             }
             */
         }
