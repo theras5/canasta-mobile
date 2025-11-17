@@ -9,9 +9,27 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.ChildCare
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Dining
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.Egg
+import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Icecream
+import androidx.compose.material.icons.filled.Kitchen
+import androidx.compose.material.icons.filled.LocalBar
+import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.LocalFlorist
+import androidx.compose.material.icons.filled.LocalPizza
+import androidx.compose.material.icons.filled.LunchDining
+import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Spa
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -77,11 +95,32 @@ fun RemoteProductCard(
     }
 }
 
-// Mapeo simple a íconos seguros de Material. Si el nombre no se reconoce, usar Category.
+// Mapeo completo de íconos de categorías a Material Icons
 private fun categoryIcon(name: String) = when (name) {
     "shopping_cart" -> Icons.Filled.ShoppingCart
-    // Se podrían añadir más mapeos si se confirman los íconos disponibles.
-    else -> Icons.Filled.Category
+    "restaurant" -> Icons.Filled.Restaurant
+    "local_pizza" -> Icons.Filled.LocalPizza
+    "fastfood" -> Icons.Filled.Fastfood
+    "bakery_dining" -> Icons.Filled.Restaurant // using Restaurant as alternative
+    "local_cafe" -> Icons.Filled.LocalCafe
+    "local_bar" -> Icons.Filled.LocalBar
+    "icecream" -> Icons.Filled.Icecream
+    "cake" -> Icons.Filled.Restaurant // using Restaurant as alternative
+    "egg" -> Icons.Filled.Egg
+    "lunch_dining" -> Icons.Filled.LunchDining
+    "kitchen" -> Icons.Filled.Kitchen
+    "dining" -> Icons.Filled.Dining
+    "water_drop" -> Icons.Filled.WaterDrop
+    "apple" -> Icons.Filled.Restaurant // using Restaurant as close alternative for fruit
+    "grass" -> Icons.Filled.Eco // using Eco as alternative for vegetables
+    "eco" -> Icons.Filled.Eco
+    "spa" -> Icons.Filled.Spa
+    "cleaning_services" -> Icons.Filled.CleaningServices
+    "pets" -> Icons.Filled.Pets
+    "local_florist" -> Icons.Filled.LocalFlorist
+    "child_care" -> Icons.Filled.ChildCare
+    "medical_services" -> Icons.Filled.MedicalServices
+    else -> Icons.Filled.Category // Default fallback
 }
 
 @Preview(showBackground = true)
