@@ -101,5 +101,30 @@ interface ShoppingListApiService {
         @Path("id") listId: Long,
         @Path("item_id") itemId: Long
     ): Response<Unit>
-}
 
+    /**
+     * Compartir una shopping list con otro usuario
+     */
+    @POST("api/shopping-lists/{id}/share")
+    suspend fun shareShoppingList(
+        @Path("id") listId: Long,
+        @Body request: ShareListRequest
+    ): Response<Unit>
+
+    /**
+     * Obtener usuarios con los que se ha compartido la lista
+     */
+    @GET("api/shopping-lists/{id}/shared-users")
+    suspend fun getSharedUsers(
+        @Path("id") listId: Long
+    ): Response<List<SharedUser>>
+
+    /**
+     * Revocar acceso de un usuario a la lista
+     */
+    @DELETE("api/shopping-lists/{id}/share/{user_id}")
+    suspend fun revokeShareShoppingList(
+        @Path("id") listId: Long,
+        @Path("user_id") userId: Long
+    ): Response<Unit>
+}

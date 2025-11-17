@@ -4,7 +4,6 @@ import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.api.ShoppingListApi
 import com.example.canasta.data.api.ShoppingListCreateDto
 import com.example.canasta.data.api.ListItemApi
-import com.example.canasta.data.api.ListItemPagedResponseDto
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.delay
@@ -12,11 +11,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.buildJsonObject
-import java.util.UUID
 import retrofit2.HttpException
 import com.example.canasta.data.api.ListItemCreateDto
 import com.example.canasta.data.api.ProductRef
 import com.example.canasta.data.api.TogglePurchasedBody
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 /**
  * Servicio singleton in-memory para gestionar listas de compras y sus ítems.
@@ -51,16 +51,36 @@ object ShoppingListService {
             // La API ahora devuelve un objeto paginado con campos data y pagination
             val response = api.getShoppingLists()
             val remote = response.data
-            _listsState.value = remote.map { dto ->
+            val mapped = remote.map { dto ->
                 ShoppingList(
                     id = dto.id.toString(),
                     name = dto.name,
-                    productCount = 0, // La API no devuelve conteo directo
+                    productCount = 0, // Luego actualizaremos con el total real
                     icon = "\uD83D\uDCCB",
                     isFavorite = false
                 )
             }
-            // Si en el futuro quieres usar la info de paginación, está en response.pagination
+            _listsState.value = mapped
+
+            // Intentar completar los conteos consultando el total de items por lista (paginación.total)
+            try {
+                val updated = coroutineScope {
+                    mapped.map { list ->
+                        async {
+                            val paged = itemsApi.getItemsForList(
+                                listId = list.id.toLong(),
+                                page = 1,
+                                perPage = 1
+                            )
+                            val total = paged.pagination.total
+                            list.copy(productCount = total)
+                        }
+                    }.map { it.await() }
+                }
+                _listsState.value = updated
+            } catch (e: Exception) {
+                println("Error al obtener conteo de productos por lista: ${e.message}")
+            }
         } catch (e: Exception) {
             // En caso de error, dejamos el estado actual y logueamos
             println("Error al cargar listas desde API: ${e.message}")
@@ -83,7 +103,7 @@ object ShoppingListService {
                     val unit = dto.unit ?: "unidades"
                     "${q.toInt()} $unit"
                 } ?: ""
-                com.example.canasta.ui.components.products.ListProduct(
+                ListProduct(
                     id = dto.id.toString(),
                     name = dto.product.name,
                     description = quantityPart,
@@ -93,6 +113,10 @@ object ShoppingListService {
             }
             _productsByList.value = _productsByList.value.toMutableMap().apply {
                 put(listId, mapped)
+            }
+            // Actualizar contador de productos para esa lista
+            _listsState.value = _listsState.value.map { list ->
+                if (list.id == listId) list.copy(productCount = mapped.size) else list
             }
         } catch (e: Exception) {
             println("Error al cargar items de la lista $listId desde API: ${e.message}")
@@ -121,7 +145,7 @@ object ShoppingListService {
             name = name,
             description = "",  // Backend requiere string, no null
             recurring = false,
-            metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
+            metadata = buildJsonObject { } // Objeto vacío
         )
         try {
             println("DEBUG: Creando lista con body: $body")
@@ -131,7 +155,6 @@ object ShoppingListService {
             // Tras crear con éxito en backend, refrescamos desde API para mantener consistencia
             refreshLists()
 
-            // Devolvemos una representación minimal para la UI (opcionalmente podrías buscarla en listsState)
             return ShoppingList(
                 id = dto.id.toString(),
                 name = dto.name,
@@ -140,11 +163,9 @@ object ShoppingListService {
                 isFavorite = false
             )
         } catch (e: HttpException) {
-            // No tocamos el estado local, dejamos que la UI decida qué hacer
             println("ERROR HTTP al crear lista en API: code=${e.code()} message=${e.message()}")
             throw e
         } catch (e: Exception) {
-            // Otros errores de red o inesperados: tampoco modificamos el estado local
             println("ERROR general al crear lista en API: ${e.message}")
             e.printStackTrace()
             throw e
@@ -215,14 +236,13 @@ object ShoppingListService {
     /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
     suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
         try {
-            val body = com.example.canasta.data.api.ListItemCreateDto(
+            val body = ListItemCreateDto(
                 product = ProductRef(id = productId),
                 quantity = quantity,
                 unit = unit,
                 metadata = null
             )
             itemsApi.addItemToList(listId.toLong(), body)
-            // Refrescar items sin filtro
             refreshProductsForList(listId)
         } catch (e: Exception) {
             println("Error al agregar item a lista $listId en API: ${e.message}")

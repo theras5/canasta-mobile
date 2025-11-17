@@ -6,7 +6,6 @@ import com.example.canasta.data.ShoppingListService
 import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.remote.models.ListItemUpdate
 import com.example.canasta.data.remote.models.ShoppingListUpdate
-import com.example.canasta.data.remote.models.TogglePurchasedRequest
 import com.example.canasta.data.repository.CategoryRepository
 import com.example.canasta.data.repository.ProductRepository
 import com.example.canasta.data.remote.models.GetCategory
@@ -39,7 +38,12 @@ data class ListDetailUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val availableProducts: List<Product> = emptyList(),
-    val availableCategories: List<GetCategory> = emptyList()
+    val availableCategories: List<GetCategory> = emptyList(),
+    val sharedUsers: List<com.example.canasta.data.remote.models.SharedUser> = emptyList(),
+    val shareError: String? = null,
+    val isSharing: Boolean = false,
+    val isOwner: Boolean = true, // Por defecto true para mostrar todos los botones
+    val currentUserId: Long? = null
 )
 
 /**
@@ -142,21 +146,52 @@ class ListDetailViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(isLoading = true)
 
         viewModelScope.launch(Dispatchers.IO) {
-            // Traer productos reales de la API a través del servicio
-            ShoppingListService.refreshProductsForList(listId)
+            try {
+                // Obtener el usuario actual
+                val currentUser = try {
+                    ApiClient.userService.getUserProfile()
+                } catch (e: Exception) {
+                    null
+                }
 
-            // Obtener listas actuales del servicio y buscar la que corresponde
-            val lists = ShoppingListService.listsState.value
-            val list = lists.firstOrNull { it.id == listId }
-            val effectiveName = list?.name ?: listName
-            val products = ShoppingListService.getProductsForList(listId)
+                // Obtener detalles completos de la lista (incluye owner)
+                val listDetails = try {
+                    val response = ApiClient.shoppingListService.getShoppingListById(listId.toLong())
+                    if (response.isSuccessful) response.body() else null
+                } catch (e: Exception) {
+                    null
+                }
 
-            _uiState.value = _uiState.value.copy(
-                listId = listId,
-                listName = effectiveName,
-                products = products,
-                isLoading = false
-            )
+                // Determinar si el usuario actual es el owner
+                val isOwner = if (currentUser != null && listDetails?.owner != null) {
+                    currentUser.id == listDetails.owner.id
+                } else {
+                    true // Por defecto true si no podemos determinar
+                }
+
+                // Traer productos reales de la API a través del servicio
+                ShoppingListService.refreshProductsForList(listId)
+
+                // Obtener listas actuales del servicio y buscar la que corresponde
+                val lists = ShoppingListService.listsState.value
+                val list = lists.firstOrNull { it.id == listId }
+                val effectiveName = listDetails?.name ?: list?.name ?: listName
+                val products = ShoppingListService.getProductsForList(listId)
+
+                _uiState.value = _uiState.value.copy(
+                    listId = listId,
+                    listName = effectiveName,
+                    products = products,
+                    isLoading = false,
+                    isOwner = isOwner,
+                    currentUserId = currentUser?.id
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Error al cargar lista: ${e.message}"
+                )
+            }
         }
     }
 
@@ -394,5 +429,118 @@ class ListDetailViewModel : ViewModel() {
     fun validateListName(): Boolean {
         val name = _uiState.value.listName.trim()
         return name.isNotEmpty()
+    }
+
+    /**
+     * Carga los usuarios con los que está compartida la lista
+     */
+    fun loadSharedUsers() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                if (listId != null) {
+                    val response = ApiClient.shoppingListService.getSharedUsers(listId)
+                    if (response.isSuccessful) {
+                        val users = response.body() ?: emptyList()
+                        _uiState.value = _uiState.value.copy(
+                            sharedUsers = users,
+                            shareError = null
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            shareError = "Error al cargar usuarios: ${response.code()}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    shareError = "Error al cargar usuarios: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * Comparte la lista con un usuario por email
+     */
+    fun shareListWithEmail(email: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.value = _uiState.value.copy(isSharing = true, shareError = null)
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                if (listId != null) {
+                    val request = com.example.canasta.data.remote.models.ShareListRequest(email = email)
+                    val response = ApiClient.shoppingListService.shareShoppingList(listId, request)
+
+                    if (response.isSuccessful) {
+                        // Recargar la lista de usuarios compartidos
+                        loadSharedUsers()
+                        _uiState.value = _uiState.value.copy(
+                            isSharing = false,
+                            shareError = null
+                        )
+                    } else {
+                        val errorMsg = when (response.code()) {
+                            404 -> "Usuario no encontrado"
+                            409 -> "Ya compartiste esta lista con este usuario"
+                            400 -> "No puedes compartir la lista contigo mismo"
+                            else -> "Error al compartir: ${response.code()}"
+                        }
+                        _uiState.value = _uiState.value.copy(
+                            isSharing = false,
+                            shareError = errorMsg
+                        )
+                    }
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isSharing = false,
+                        shareError = "ID de lista inválido"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isSharing = false,
+                    shareError = "Error al compartir: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * Revoca el acceso de un usuario a la lista
+     */
+    fun revokeShareAccess(user: com.example.canasta.data.remote.models.SharedUser) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val listId = _uiState.value.listId.toLongOrNull()
+                if (listId != null) {
+                    val response = ApiClient.shoppingListService.revokeShareShoppingList(listId, user.id)
+
+                    if (response.isSuccessful) {
+                        // Actualizar la lista eliminando el usuario
+                        val updatedUsers = _uiState.value.sharedUsers.filter { it.id != user.id }
+                        _uiState.value = _uiState.value.copy(
+                            sharedUsers = updatedUsers,
+                            shareError = null
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            shareError = "Error al revocar acceso: ${response.code()}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    shareError = "Error al revocar acceso: ${e.message}"
+                )
+            }
+        }
+    }
+
+    /**
+     * Limpia el error de compartir
+     */
+    fun clearShareError() {
+        _uiState.value = _uiState.value.copy(shareError = null)
     }
 }
