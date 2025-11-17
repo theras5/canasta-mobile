@@ -16,6 +16,8 @@
     <string name="profile_updated">Perfil actualizado exitosamente</string>
     <string name="error_loading_profile">Error al cargar el perfil: %s</string>
     <string name="error_updating_profile">Error al actualizar perfil: %s</string>
+    <string name="account_information">Información de la cuenta</string>
+    <string name="member_since_short">Miembro desde</string>
 
     <!-- Settings Screen -->
     <string name="settings">Configuración</string>

@@ -5,11 +5,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.canasta.utils.DeviceUtils
 
 /**
  * Datos de una lista
@@ -39,19 +43,43 @@ fun ListsGrid(
     onDeleteList: (ShoppingList) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(vertical = 16.dp), // solo vertical para no achicar ancho
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(lists) { list ->
-            ListCard(
-                listName = list.name,
-                productCount = list.productCount,
-                icon = list.icon,
-                onClick = { onListClick(list) },
-                onDelete = { onDeleteList(list) }
-            )
+    val isTablet = DeviceUtils.isTablet()
+
+    if (isTablet) {
+        // Tablet: Grid de 2 columnas
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(lists) { list ->
+                ListCard(
+                    listName = list.name,
+                    productCount = list.productCount,
+                    icon = list.icon,
+                    onClick = { onListClick(list) },
+                    onDelete = { onDeleteList(list) }
+                )
+            }
+        }
+    } else {
+        // Móvil: Lista de 1 columna
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(lists) { list ->
+                ListCard(
+                    listName = list.name,
+                    productCount = list.productCount,
+                    icon = list.icon,
+                    onClick = { onListClick(list) },
+                    onDelete = { onDeleteList(list) }
+                )
+            }
         }
     }
 }

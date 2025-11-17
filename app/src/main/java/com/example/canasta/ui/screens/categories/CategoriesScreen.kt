@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -45,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.data.remote.models.CategoryIcons
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.utils.DeviceUtils
 
 @Composable
 fun CategoriesScreen(
@@ -54,6 +58,7 @@ fun CategoriesScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val isTablet = DeviceUtils.isTablet()
 
     var showCreateDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -155,23 +160,49 @@ fun CategoriesScreen(
                             )
                         }
                     } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el FAB
-                        ) {
-                            items(categories) { category ->
-                                CategoryItem(
-                                    category = category,
-                                    onEditClick = {
-                                        selectedCategory = category
-                                        showEditDialog = true
-                                    },
-                                    onDeleteClick = {
-                                        selectedCategory = category
-                                        showDeleteDialog = true
-                                    }
-                                )
+                        if (isTablet) {
+                            // Tablet: Grid de 2 columnas
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el FAB
+                            ) {
+                                items(categories) { category ->
+                                    CategoryItem(
+                                        category = category,
+                                        onEditClick = {
+                                            selectedCategory = category
+                                            showEditDialog = true
+                                        },
+                                        onDeleteClick = {
+                                            selectedCategory = category
+                                            showDeleteDialog = true
+                                        }
+                                    )
+                                }
+                            }
+                        } else {
+                            // Móvil: Lista de 1 columna
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(bottom = 80.dp) // Espacio para el FAB
+                            ) {
+                                items(categories) { category ->
+                                    CategoryItem(
+                                        category = category,
+                                        onEditClick = {
+                                            selectedCategory = category
+                                            showEditDialog = true
+                                        },
+                                        onDeleteClick = {
+                                            selectedCategory = category
+                                            showDeleteDialog = true
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

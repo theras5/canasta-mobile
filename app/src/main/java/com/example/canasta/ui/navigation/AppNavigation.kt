@@ -3,6 +3,9 @@
 package com.example.canasta.ui.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,10 +13,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
+import com.example.canasta.ui.components.common.SideNavBar
+import com.example.canasta.utils.DeviceUtils
 
 /**
  * Punto de entrada principal de la navegación de la aplicación
@@ -24,6 +31,7 @@ import com.example.canasta.ui.components.common.BottomBar
 fun AppNavigation() { // <-- Wrap the logic in a function
     val navController = rememberNavController() // <-- Call it inside the Composable
     var currentRoute by rememberSaveable { mutableStateOf(AppDestination.LISTS) }
+    val isTablet = DeviceUtils.isTablet()
 
     // Observar la ruta actual para saber si mostrar el BottomBar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -48,44 +56,61 @@ fun AppNavigation() { // <-- Wrap the logic in a function
                 route.contains("Settings") || route.contains("Categories")
     } ?: false
 
-    Scaffold(
-        bottomBar = {
+    val navigationHandler: (Any) -> Unit = { route ->
+        // Actualizar la ruta actual basándonos en el destino
+        currentRoute = when(route) {
+            is Lists -> AppDestination.LISTS
+            is Products -> AppDestination.PRODUCTS
+            is Profile -> AppDestination.PROFILE
+            is Settings -> AppDestination.MORE
+            is Categories -> AppDestination.MORE
+            else -> AppDestination.LISTS
+        }
+
+        // Opciones de navegación para limpiar el back stack hasta la primera aparición
+        // de la pantalla seleccionada. Esto evita acumular duplicados en el stack.
+        val navOptions = navOptions {
+            when(route) {
+                is Lists -> popUpTo<Lists> { inclusive = true }
+                is Products -> popUpTo<Products> { inclusive = true }
+                is Profile -> popUpTo<Profile> { inclusive = true }
+                is Settings -> popUpTo<Settings> { inclusive = true }
+                is Categories -> popUpTo<Categories> { inclusive = true }
+                else -> {}
+            }
+        }
+
+        // Navegar a la ruta seleccionada
+        navController.navigate(
+            route = route,
+            navOptions = navOptions
+        )
+    }
+
+    if (isTablet) {
+        // Modo Tablet: Barra lateral a la izquierda
+        Row(modifier = Modifier.fillMaxSize()) {
             if (showBottomBar) {
-                BottomBar(
-                    currentRoute = currentRoute
-                ) { route ->
-                    // Actualizar la ruta actual basándonos en el destino
-                    currentRoute = when(route) {
-                        is Lists -> AppDestination.LISTS
-                        is Products -> AppDestination.PRODUCTS
-                        is Profile -> AppDestination.PROFILE
-                        is Settings -> AppDestination.MORE
-                        is Categories -> AppDestination.MORE
-                        else -> AppDestination.LISTS
-                    }
-
-                    // Opciones de navegación para limpiar el back stack hasta la primera aparición
-                    // de la pantalla seleccionada. Esto evita acumular duplicados en el stack.
-                    val navOptions = navOptions {
-                        when(route) {
-                            is Lists -> popUpTo<Lists> { inclusive = true }
-                            is Products -> popUpTo<Products> { inclusive = true }
-                            is Profile -> popUpTo<Profile> { inclusive = true }
-                            is Settings -> popUpTo<Settings> { inclusive = true }
-                            is Categories -> popUpTo<Categories> { inclusive = true }
-                            else -> {}
-                        }
-                    }
-
-                    // Navegar a la ruta seleccionada
-                    navController.navigate(
-                        route = route,
-                        navOptions = navOptions
+                SideNavBar(
+                    currentRoute = currentRoute,
+                    onNavigate = navigationHandler
+                )
+            }
+            AppNavGraph(navController = navController, contentPadding = PaddingValues(0.dp))
+        }
+    } else {
+        // Modo Móvil: Barra inferior
+        Scaffold(
+            bottomBar = {
+                if (showBottomBar) {
+                    BottomBar(
+                        currentRoute = currentRoute,
+                        onNavigate = navigationHandler
                     )
                 }
             }
+        ) { innerPadding ->
+            AppNavGraph(navController = navController, contentPadding = innerPadding)
         }
-    ) { innerPadding ->
-        AppNavGraph(navController = navController, contentPadding = innerPadding)
     }
 }
