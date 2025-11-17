@@ -158,6 +158,20 @@
     <string name="error_deleting_product_list">Error al eliminar producto: %s</string>
     <string name="error_deleting_list_detail">Error al eliminar lista: %s</string>
     <string name="error_refreshing_list">Error al refrescar lista: %s</string>
+    <string name="back">Volver</string>
+    <string name="save_changes_list">Guardar cambios</string>
+    <string name="edit_list">Editar lista</string>
+    <string name="share">Compartir</string>
+    <string name="delete_list">Eliminar lista</string>
+    <string name="add_product_to_list">Agregar producto</string>
+    <string name="edit_product_quantity">Editar producto</string>
+    <string name="quantity_and_unit">Cantidad y unidad</string>
+    <string name="quantity_placeholder">Ej: 2 kg, 3 unidades, 1 litro</string>
+    <string name="products_count">Productos</string>
+    <string name="units_default">unidades</string>
+    <string name="list_completed_and_deleted">Lista completada y eliminada</string>
+    <string name="list_created_success">Lista creada exitosamente</string>
+    <string name="list_updated_success">Lista actualizada exitosamente</string>
 
     <!-- Share List Messages -->
     <string name="error_loading_users">Error al cargar usuarios: %s</string>

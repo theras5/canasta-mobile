@@ -36,7 +36,10 @@ fun RemoteProductCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
+            .padding(vertical = 4.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = androidx.compose.ui.graphics.Color(0xFFCED7CE)
+        )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

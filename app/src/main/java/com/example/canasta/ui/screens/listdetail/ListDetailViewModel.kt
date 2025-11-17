@@ -75,6 +75,13 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /**
+     * Ordena los productos poniendo los comprados al final
+     */
+    private fun sortProducts(products: List<ListProduct>): List<ListProduct> {
+        return products.sortedBy { it.isChecked }
+    }
+
+    /**
      * Observa cambios en los productos del servicio y actualiza la UI automáticamente
      */
     private fun observeProductChanges() {
@@ -84,9 +91,9 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 if (currentListId.isNotBlank()) {
                     val apiProducts = productsByList[currentListId] ?: emptyList()
 
-                    // Actualizar la UI con los productos de la API
+                    // Actualizar la UI con los productos de la API, ordenados
                     _uiState.value = _uiState.value.copy(
-                        products = apiProducts
+                        products = sortProducts(apiProducts)
                     )
                 }
             }
@@ -135,12 +142,12 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     listId = currentListId,
                     productId = product.id,
                     quantity = 1.0,
-                    unit = "unidades"
+                    unit = getApplication<Application>().getString(R.string.units_default)
                 )
                 // El observer actualizará la UI automáticamente
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al agregar ${product.name}"
+                    error = getApplication<Application>().getString(R.string.error_adding_product, product.name)
                 )
             }
         }
@@ -188,7 +195,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 _uiState.value = _uiState.value.copy(
                     listId = listId,
                     listName = effectiveName,
-                    products = products,
+                    products = sortProducts(products),
                     isLoading = false,
                     isOwner = isOwner,
                     currentUserId = currentUser?.id
@@ -227,7 +234,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
     fun cancelEdit() {
         _uiState.value = _uiState.value.copy(
             listName = originalListName,
-            products = originalProducts,
+            products = sortProducts(originalProducts),
             screenMode = ScreenMode.VIEW
         )
     }
@@ -263,7 +270,8 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
 
                         _uiState.value = current.copy(
                             screenMode = ScreenMode.VIEW,
-                            isLoading = false
+                            isLoading = false,
+                            successMessage = getApplication<Application>().getString(R.string.list_updated_success)
                         )
                     } else {
                         _uiState.value = _uiState.value.copy(
@@ -298,7 +306,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 product
             }
         }
-        _uiState.value = _uiState.value.copy(products = updatedProducts)
+        _uiState.value = _uiState.value.copy(products = sortProducts(updatedProducts))
 
         // Luego actualizar en la API
         viewModelScope.launch(Dispatchers.IO) {
@@ -311,7 +319,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     // Formato esperado: "X unidades" o solo un número
                     val parts = newQuantity.trim().split(" ")
                     val quantity = parts.firstOrNull()?.toDoubleOrNull() ?: 1.0
-                    val unit = if (parts.size > 1) parts.drop(1).joinToString(" ") else "unidades"
+                    val unit = if (parts.size > 1) parts.drop(1).joinToString(" ") else getApplication<Application>().getString(R.string.units_default)
 
                     val updateRequest = ListItemUpdate(
                         quantity = quantity,
@@ -322,6 +330,10 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     if (!response.isSuccessful) {
                         _uiState.value = _uiState.value.copy(
                             error = getApplication<Application>().getString(R.string.error_updating_product_list, response.code().toString())
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            successMessage = getApplication<Application>().getString(R.string.product_updated_success)
                         )
                     }
                 }
@@ -346,8 +358,9 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     val response = ApiClient.shoppingListService.deleteListItem(listId, itemId)
                     if (response.isSuccessful) {
                         // Actualizar UI optimistamente
+                        val updatedProducts = _uiState.value.products.filter { it.id != productId }
                         _uiState.value = _uiState.value.copy(
-                            products = _uiState.value.products.filter { it.id != productId },
+                            products = sortProducts(updatedProducts),
                             successMessage = getApplication<Application>().getString(R.string.product_deleted_success_list)
                         )
 
@@ -456,7 +469,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     println("DEBUG: Marcando shouldDeleteAndNavigateBack = true")
                     _uiState.value = _uiState.value.copy(
                         shouldDeleteAndNavigateBack = true,
-                        successMessage = "Lista completada y eliminada"
+                        successMessage = getApplication<Application>().getString(R.string.list_completed_and_deleted)
                     )
                     println("DEBUG: Estado actualizado, shouldDeleteAndNavigateBack=${_uiState.value.shouldDeleteAndNavigateBack}")
                 } else {
@@ -469,7 +482,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
             println("ERROR en deleteListAutomatically: ${e.message}")
             e.printStackTrace()
             _uiState.value = _uiState.value.copy(
-                error = "Error al eliminar lista completada: ${e.message}"
+                error = getApplication<Application>().getString(R.string.error_deleting_list_detail, e.message ?: "")
             )
         }
     }

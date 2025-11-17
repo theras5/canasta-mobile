@@ -290,7 +290,7 @@ fun ListDetailScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
+                            contentDescription = stringResource(R.string.back),
                             tint = Titles
                         )
                     }
@@ -314,9 +314,9 @@ fun ListDetailScreen(
                             else
                                 Icons.Default.Edit,
                             contentDescription = if (uiState.screenMode == ScreenMode.EDIT)
-                                "Guardar cambios"
+                                stringResource(R.string.save_changes_list)
                             else
-                                "Editar lista",
+                                stringResource(R.string.edit_list),
                             tint = Titles
                         )
                     }
@@ -329,7 +329,7 @@ fun ListDetailScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Compartir",
+                                contentDescription = stringResource(R.string.share),
                                 tint = Titles
                             )
                         }
@@ -342,7 +342,7 @@ fun ListDetailScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Eliminar lista",
+                                contentDescription = stringResource(R.string.delete_list),
                                 tint = Titles
                             )
                         }
@@ -358,7 +358,7 @@ fun ListDetailScreen(
             if (uiState.screenMode == ScreenMode.VIEW) {
                 CommonFab(
                     iconRes = R.drawable.add_item,
-                    contentDescription = "Agregar producto",
+                    contentDescription = stringResource(R.string.add_product_to_list),
                     onClick = { showAddProductSheet = true }
                 )
             }
@@ -367,7 +367,7 @@ fun ListDetailScreen(
         Box(modifier = Modifier.padding(innerPadding)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Chips de categorías

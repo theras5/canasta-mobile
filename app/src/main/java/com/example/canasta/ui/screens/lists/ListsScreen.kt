@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.res.painterResource
 import com.example.canasta.R
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -21,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +32,8 @@ import com.example.canasta.ui.components.lists.EmptyStateListas
 import com.example.canasta.ui.components.lists.ListsGrid
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.theme.Background
+import com.example.canasta.ui.theme.Errors
+import com.example.canasta.ui.theme.Success
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
@@ -50,6 +50,7 @@ fun ListsScreen(
     val scope = rememberCoroutineScope()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    var lastSnackbarIsSuccess by remember { mutableStateOf(false) }
 
     // Al entrar en la pantalla, cargar listas desde la API
     LaunchedEffect(Unit) {
@@ -62,10 +63,9 @@ fun ListsScreen(
             SnackbarHost(
                 hostState = snackbarHostState,
                 snackbar = { data ->
-                    // Snackbar rojo para errores
                     androidx.compose.material3.Snackbar(
                         snackbarData = data,
-                        containerColor = Color(0xFFB00020), // rojo de error
+                        containerColor = if (lastSnackbarIsSuccess) Success else Errors,
                         contentColor = Color.White
                     )
                 }
@@ -112,7 +112,14 @@ fun ListsScreen(
                     try {
                         ShoppingListService.createList(name, image)
                         // Si llega aquí, la creación fue exitosa y refreshLists() ya se llamó en el servicio
+                        lastSnackbarIsSuccess = true
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(R.string.list_created_success),
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Short
+                        )
                     } catch (e: HttpException) {
+                        lastSnackbarIsSuccess = false
                         if (e.code() == 409) {
                             snackbarHostState.showSnackbar(
                                 message = context.getString(R.string.error_list_exists),
@@ -127,6 +134,7 @@ fun ListsScreen(
                             )
                         }
                     } catch (e: Exception) {
+                        lastSnackbarIsSuccess = false
                         snackbarHostState.showSnackbar(
                             message = context.getString(R.string.error_network_list),
                             withDismissAction = true,
@@ -152,15 +160,15 @@ fun ListsScreen(
                     scope.launch {
                         try {
                             ShoppingListService.deleteList(list.id)
+                            lastSnackbarIsSuccess = true
                             snackbarHostState.showSnackbar(
                                 message = context.getString(R.string.list_deleted_success),
-                                withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         } catch (_: Exception) {
+                            lastSnackbarIsSuccess = false
                             snackbarHostState.showSnackbar(
                                 message = context.getString(R.string.error_deleting_list),
-                                withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         }

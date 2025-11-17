@@ -24,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 
@@ -53,7 +55,7 @@ fun EditProductModal(
         focusRequester.requestFocus()
     }
 
-    CustomModal(title = "Editar producto", onDismiss = onDismiss) {
+    CustomModal(title = stringResource(R.string.edit_product_quantity), onDismiss = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = productName,
@@ -66,8 +68,8 @@ fun EditProductModal(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Cantidad y unidad") },
-                placeholder = { Text("Ej: 2 kg, 3 unidades, 1 litro") },
+                label = { Text(stringResource(R.string.quantity_and_unit)) },
+                placeholder = { Text(stringResource(R.string.quantity_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
@@ -83,7 +85,7 @@ fun EditProductModal(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(text = "Cancelar", color = Color.Gray)
+                    Text(text = stringResource(R.string.cancel), color = Color.Gray)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -93,7 +95,7 @@ fun EditProductModal(
                     colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                     enabled = description.isNotBlank()
                 ) {
-                    Text(text = "Guardar", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.save), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

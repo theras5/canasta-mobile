@@ -158,6 +158,20 @@
     <string name="error_deleting_product_list">Error deleting product: %s</string>
     <string name="error_deleting_list_detail">Error deleting list: %s</string>
     <string name="error_refreshing_list">Error refreshing list: %s</string>
+    <string name="back">Back</string>
+    <string name="save_changes_list">Save changes</string>
+    <string name="edit_list">Edit list</string>
+    <string name="share">Share</string>
+    <string name="delete_list">Delete list</string>
+    <string name="add_product_to_list">Add product</string>
+    <string name="edit_product_quantity">Edit product</string>
+    <string name="quantity_and_unit">Quantity and unit</string>
+    <string name="quantity_placeholder">E.g: 2 kg, 3 units, 1 liter</string>
+    <string name="products_count">Products</string>
+    <string name="units_default">units</string>
+    <string name="list_completed_and_deleted">List completed and deleted</string>
+    <string name="list_created_success">List created successfully</string>
+    <string name="list_updated_success">List updated successfully</string>
 
     <!-- Share List Messages -->
     <string name="error_loading_users">Error loading users: %s</string>
@@ -237,4 +251,3 @@
     <!-- Network Status -->
     <string name="no_internet_connection">No Internet connection</string>
 </resources>
-
