@@ -295,13 +295,20 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     /**
-     * Actualiza la cantidad/descripción de un producto usando la API real
+     * Actualiza la cantidad y unidad de un producto usando la API real
      */
-    fun updateProductQuantity(productId: String, newQuantity: String) {
+    fun updateProductQuantity(productId: String, newQuantity: Double, newUnit: String) {
+        // Construimos una descripción amigable para mostrar en la tarjeta ("1 unidades", "2 kg", etc.)
+        val descriptionText = if (newUnit.isBlank()) {
+            newQuantity.toString()
+        } else {
+            "${newQuantity} ${newUnit}"
+        }
+
         // Primero actualizar UI optimistamente
         val updatedProducts = _uiState.value.products.map { product ->
             if (product.id == productId) {
-                product.copy(description = newQuantity)
+                product.copy(description = descriptionText)
             } else {
                 product
             }
@@ -315,15 +322,10 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 val itemId = productId.toLongOrNull()
 
                 if (listId != null && itemId != null) {
-                    // Parsear la descripción para extraer cantidad y unidad
-                    // Formato esperado: "X unidades" o solo un número
-                    val parts = newQuantity.trim().split(" ")
-                    val quantity = parts.firstOrNull()?.toDoubleOrNull() ?: 1.0
-                    val unit = if (parts.size > 1) parts.drop(1).joinToString(" ") else getApplication<Application>().getString(R.string.units_default)
-
                     val updateRequest = ListItemUpdate(
-                        quantity = quantity,
-                        unit = unit
+                        quantity = newQuantity,
+                        unit = newUnit,
+                        metadata = null
                     )
 
                     val response = ApiClient.shoppingListService.updateListItem(listId, itemId, updateRequest)
