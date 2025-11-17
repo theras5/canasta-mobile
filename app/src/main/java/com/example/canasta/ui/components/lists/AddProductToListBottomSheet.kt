@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.theme.Secondary
-import com.example.canasta.ui.theme.Titles
 
 /**
  * Bottom sheet para agregar productos a una lista
@@ -34,6 +32,7 @@ fun AddProductToListBottomSheet(
     products: List<Product>,
     categories: List<GetCategory>,
     addedProductNames: Set<String>, // Nombres de productos ya agregados
+    tempAddedProductIds: Set<String> = emptySet(), // IDs de productos agregados en esta sesión
     onDismiss: () -> Unit,
     onAddProduct: (Product) -> Unit
 ) {
@@ -41,9 +40,9 @@ fun AddProductToListBottomSheet(
     var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
 
     // Filtrar productos que NO están ya en la lista
-    // No usar remember aquí para que se recalcule automáticamente cuando cambie addedProductNames
+    // No usar remember aquí para que se recalcule automáticamente cuando cambie addedProductNames o tempAddedProductIds
     val availableProducts = products.filter { product ->
-        !addedProductNames.contains(product.name)
+        !addedProductNames.contains(product.name) && !tempAddedProductIds.contains(product.id.toString())
     }
 
 

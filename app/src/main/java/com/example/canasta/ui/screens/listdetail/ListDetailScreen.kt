@@ -98,7 +98,7 @@ fun ListDetailScreen(
     var showShareSheet by remember { mutableStateOf(false) }
 
     // Estado para agregar productos
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showAddProductSheet by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -163,10 +163,13 @@ fun ListDetailScreen(
             products = uiState.availableProducts,
             categories = uiState.availableCategories,
             addedProductNames = uiState.products.map { it.name }.toSet(),
+            tempAddedProductIds = uiState.tempAddedProductIds,
             onDismiss = {
                 scope.launch {
                     bottomSheetState.hide()
                     showAddProductSheet = false
+                    // Refrescar la lista cuando se cierra el bottom sheet
+                    viewModel.clearTempAddedProductsAndRefresh()
                 }
             },
             onAddProduct = { product ->
@@ -359,5 +362,3 @@ fun ListDetailScreen(
         }
     }
 }
-
-
