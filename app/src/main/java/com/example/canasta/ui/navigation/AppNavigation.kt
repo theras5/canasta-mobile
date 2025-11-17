@@ -3,25 +3,30 @@
 package com.example.canasta.ui.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.example.canasta.ui.components.common.BottomBar
+import com.example.canasta.ui.components.common.NetworkStatusBanner
 import com.example.canasta.ui.components.common.SideNavBar
 import com.example.canasta.ui.theme.Background
 import com.example.canasta.utils.DeviceUtils
+import com.example.canasta.utils.NetworkConnectivityManager
 
 /**
  * Punto de entrada principal de la navegación de la aplicación
@@ -30,9 +35,13 @@ import com.example.canasta.utils.DeviceUtils
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable // <-- Add this annotation to make it a Composable function
 fun AppNavigation() { // <-- Wrap the logic in a function
+    val context = LocalContext.current
     val navController = rememberNavController() // <-- Call it inside the Composable
     var currentRoute by rememberSaveable { mutableStateOf(AppDestination.LISTS) }
     val isTablet = DeviceUtils.isTablet()
+
+    // Observar el estado de conectividad
+    val isConnected by NetworkConnectivityManager.observeConnectivity(context).collectAsState(initial = true)
 
     // Observar la ruta actual para saber si mostrar el BottomBar
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -90,19 +99,25 @@ fun AppNavigation() { // <-- Wrap the logic in a function
 
     if (isTablet) {
         // Modo Tablet: Barra lateral a la izquierda
-        Row(modifier = Modifier.fillMaxSize()) {
-            if (showBottomBar) {
-                SideNavBar(
-                    currentRoute = currentRoute,
-                    onNavigate = navigationHandler
-                )
+        Column(modifier = Modifier.fillMaxSize()) {
+            NetworkStatusBanner(isConnected = isConnected)
+            Row(modifier = Modifier.fillMaxSize()) {
+                if (showBottomBar) {
+                    SideNavBar(
+                        currentRoute = currentRoute,
+                        onNavigate = navigationHandler
+                    )
+                }
+                AppNavGraph(navController = navController, contentPadding = PaddingValues(0.dp))
             }
-            AppNavGraph(navController = navController, contentPadding = PaddingValues(0.dp))
         }
     } else {
         // Modo Móvil: Barra inferior
         Scaffold(
             containerColor = Background,
+            topBar = {
+                NetworkStatusBanner(isConnected = isConnected)
+            },
             bottomBar = {
                 if (showBottomBar) {
                     BottomBar(

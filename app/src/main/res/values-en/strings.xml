@@ -14,8 +14,8 @@
     <string name="enter_first_name">Enter your first name</string>
     <string name="enter_last_name">Enter your last name</string>
     <string name="profile_updated">Profile updated successfully</string>
-    <string name="error_loading_profile">Error loading profile: %s</string>
-    <string name="error_updating_profile">Error updating profile: %s</string>
+    <string name="error_loading_profile">Could not load profile</string>
+    <string name="error_updating_profile">Could not update profile</string>
     <string name="account_information">Account Information</string>
     <string name="member_since_short">Member since</string>
 
@@ -233,5 +233,8 @@
     <string name="error_user_not_found">User not found</string>
     <string name="error_account_already_verified">The account is already verified</string>
     <string name="error_resend_generic">Error resending code. Please try again</string>
+
+    <!-- Network Status -->
+    <string name="no_internet_connection">No Internet connection</string>
 </resources>
 

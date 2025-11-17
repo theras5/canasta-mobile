@@ -83,7 +83,7 @@ fun ProfileScreen(
                     isLoading = false
                     lastSnackbarIsSuccess = false
                     snackbarHostState.showSnackbar(
-                        message = "Error al cargar el perfil: ${error.message}"
+                        message = context.getString(R.string.error_loading_profile)
                     )
                 }
             )
@@ -150,7 +150,7 @@ fun ProfileScreen(
                                     isUpdating = false
                                     lastSnackbarIsSuccess = false
                                     snackbarHostState.showSnackbar(
-                                        context.getString(R.string.error_updating_profile, error.message ?: "")
+                                        context.getString(R.string.error_updating_profile)
                                     )
                                 }
                             )

@@ -14,8 +14,8 @@
     <string name="enter_first_name">Ingresá tu nombre</string>
     <string name="enter_last_name">Ingresá tu apellido</string>
     <string name="profile_updated">Perfil actualizado exitosamente</string>
-    <string name="error_loading_profile">Error al cargar el perfil: %s</string>
-    <string name="error_updating_profile">Error al actualizar perfil: %s</string>
+    <string name="error_loading_profile">No se pudo cargar el perfil</string>
+    <string name="error_updating_profile">No se pudo actualizar el perfil</string>
     <string name="account_information">Información de la cuenta</string>
     <string name="member_since_short">Miembro desde</string>
 
@@ -233,4 +233,7 @@
     <string name="error_user_not_found">Usuario no encontrado</string>
     <string name="error_account_already_verified">La cuenta ya está verificada</string>
     <string name="error_resend_generic">Error al reenviar código. Intenta nuevamente</string>
+
+    <!-- Network Status -->
+    <string name="no_internet_connection">Sin conexión a Internet</string>
 </resources>

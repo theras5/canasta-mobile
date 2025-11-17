@@ -4,6 +4,8 @@
 
     <!-- Permiso necesario para hacer llamadas de red -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permiso para verificar el estado de la conexión -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
