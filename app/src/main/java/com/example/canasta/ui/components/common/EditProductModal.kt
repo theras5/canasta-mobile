@@ -75,7 +75,7 @@ fun EditProductModal(
                         quantityText = newValue
                     }
                 },
-                label = { Text("Cantidad") },
+                label = { Text(stringResource(R.string.quantity_label)) },
                 placeholder = { Text("Ej: 1, 2.5") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -88,7 +88,7 @@ fun EditProductModal(
 
             // Selector de unidad: fila horizontal scrolleable (como selector de emojis)
             Text(
-                text = "Unidad",
+                text = stringResource(R.string.unit_label),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = Titles,

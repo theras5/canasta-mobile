@@ -24,8 +24,9 @@ object ApiClient {
 
     // URL base del servidor
     //private const val BASE_URL = "http://192.168.1.35:8080/" //http://10.0.2.2:8080/ http://localhost:8080/
-    private const val BASE_URL = "http://192.168.1.37:8080/"
-//    private const val BASE_URL = "http://10.0.2.2:8080/"
+    //private const val BASE_URL = "http://192.168.1.37:8080/"
+    private const val BASE_URL = "http://10.0.2.2:8080/"
+
 
     // Configuración de kotlinx-serialization JSON
     private val json = Json {

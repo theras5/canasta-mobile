@@ -9,6 +9,9 @@
     <string name="choose_avatar">Elige tu avatar</string>
     <string name="save_changes">GUARDAR CAMBIOS</string>
     <string name="cancel">CANCELAR</string>
+    <string name="confirm">CONFIRMAR</string>
+    <string name="quantity_label">Cantidad</string>
+    <string name="unit_label">Unidad</string>
     <string name="first_name">Nombre *</string>
     <string name="last_name">Apellido *</string>
     <string name="enter_first_name">Ingresá tu nombre</string>

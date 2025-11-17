@@ -9,6 +9,9 @@
     <string name="choose_avatar">Choose your avatar</string>
     <string name="save_changes">SAVE CHANGES</string>
     <string name="cancel">CANCEL</string>
+    <string name="confirm">CONFIRM</string>
+    <string name="quantity_label">Quantity</string>
+    <string name="unit_label">Unit</string>
     <string name="first_name">First Name *</string>
     <string name="last_name">Last Name *</string>
     <string name="enter_first_name">Enter your first name</string>

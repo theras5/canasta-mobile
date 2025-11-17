@@ -16,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 import com.example.canasta.ui.theme.Errors
@@ -32,7 +34,7 @@ import com.example.canasta.ui.theme.Errors
  * @param onDismiss Callback al cerrar
  * @param onConfirm Callback al confirmar
  * @param confirmButtonColor Color del botón de confirmación (por defecto Errors para acciones críticas)
- * @param confirmButtonText Texto del botón de confirmación (por defecto "Confirmar")
+ * @param confirmButtonText Texto del botón de confirmación (por defecto usa string resource)
  */
 @Composable
 fun ConfirmationModal(
@@ -41,7 +43,7 @@ fun ConfirmationModal(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     confirmButtonColor: Color = Errors,
-    confirmButtonText: String = "Confirmar"
+    confirmButtonText: String? = null
 ) {
     CustomModal(title = title, onDismiss = onDismiss) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -58,7 +60,7 @@ fun ConfirmationModal(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(text = "Cancelar", color = Color.Gray)
+                    Text(text = stringResource(R.string.cancel), color = Color.Gray)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -67,7 +69,11 @@ fun ConfirmationModal(
                     onClick = onConfirm,
                     colors = ButtonDefaults.buttonColors(containerColor = confirmButtonColor)
                 ) {
-                    Text(text = confirmButtonText, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = confirmButtonText ?: stringResource(R.string.confirm),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
