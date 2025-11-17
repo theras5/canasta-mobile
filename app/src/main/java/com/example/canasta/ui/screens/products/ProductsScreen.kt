@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -53,6 +56,7 @@ import com.example.canasta.ui.components.products.EditProductModal
 import com.example.canasta.ui.components.products.RemoteProductCard
 import com.example.canasta.ui.components.common.ConfirmDeleteModal
 import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.utils.DeviceUtils
 
 @Composable
 fun ProductsScreen(
@@ -60,6 +64,7 @@ fun ProductsScreen(
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isTablet = DeviceUtils.isTablet()
 
     // Estados del ViewModel
     val uiState by viewModel.uiState.collectAsState()
@@ -135,7 +140,8 @@ fun ProductsScreen(
                     productToDelete = product
                     showDeleteModal = true
                 },
-                onRetry = { viewModel.loadProducts() }
+                onRetry = { viewModel.loadProducts() },
+                isTablet = isTablet
             )
         } else {
             // En portrait: LazyColumn con scroll eficiente
@@ -156,7 +162,8 @@ fun ProductsScreen(
                     productToDelete = product
                     showDeleteModal = true
                 },
-                onRetry = { viewModel.loadProducts() }
+                onRetry = { viewModel.loadProducts() },
+                isTablet = isTablet
             )
         }
     }
@@ -222,7 +229,8 @@ private fun ProductsScreenPortrait(
     filteredProducts: List<Product>,
     onEditClick: (Product) -> Unit,
     onDeleteClick: (Product) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    isTablet: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -267,7 +275,7 @@ private fun ProductsScreenPortrait(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Contenido principal con LazyColumn
+        // Contenido principal con LazyColumn o LazyVerticalGrid
         Box(modifier = Modifier.weight(1f)) {
             when (uiState) {
                 is ProductsUiState.Loading -> {
@@ -318,16 +326,35 @@ private fun ProductsScreenPortrait(
                             modifier = Modifier.align(Alignment.Center)
                         )
                     } else {
-                        LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(bottom = 88.dp)
-                        ) {
-                            items(filteredProducts, key = { it.id }) { product ->
-                                RemoteProductCard(
-                                    product = product,
-                                    onEditClick = onEditClick,
-                                    onDeleteClick = onDeleteClick
-                                )
+                        if (isTablet) {
+                            // Tablet: Grid de 2 columnas
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 88.dp)
+                            ) {
+                                items(filteredProducts, key = { it.id }) { product ->
+                                    RemoteProductCard(
+                                        product = product,
+                                        onEditClick = onEditClick,
+                                        onDeleteClick = onDeleteClick
+                                    )
+                                }
+                            }
+                        } else {
+                            // Móvil: Lista de 1 columna
+                            LazyColumn(
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = PaddingValues(bottom = 88.dp)
+                            ) {
+                                items(filteredProducts, key = { it.id }) { product ->
+                                    RemoteProductCard(
+                                        product = product,
+                                        onEditClick = onEditClick,
+                                        onDeleteClick = onDeleteClick
+                                    )
+                                }
                             }
                         }
                     }
@@ -350,7 +377,8 @@ private fun ProductsScreenLandscape(
     filteredProducts: List<Product>,
     onEditClick: (Product) -> Unit,
     onDeleteClick: (Product) -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    isTablet: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -459,16 +487,46 @@ private fun ProductsScreenLandscape(
                         )
                     }
                 } else {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.padding(bottom = 88.dp)
-                    ) {
-                        filteredProducts.forEach { product ->
-                            RemoteProductCard(
-                                product = product,
-                                onEditClick = onEditClick,
-                                onDeleteClick = onDeleteClick
-                            )
+                    if (isTablet) {
+                        // Tablet: Grid de 2 columnas con FlowRow
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(bottom = 88.dp)
+                        ) {
+                            filteredProducts.chunked(2).forEach { rowProducts ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    rowProducts.forEach { product ->
+                                        Box(modifier = Modifier.weight(1f)) {
+                                            RemoteProductCard(
+                                                product = product,
+                                                onEditClick = onEditClick,
+                                                onDeleteClick = onDeleteClick
+                                            )
+                                        }
+                                    }
+                                    // Si solo hay un producto en la fila, agregar un Spacer para mantener el balance
+                                    if (rowProducts.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Móvil: Lista de 1 columna
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(bottom = 88.dp)
+                        ) {
+                            filteredProducts.forEach { product ->
+                                RemoteProductCard(
+                                    product = product,
+                                    onEditClick = onEditClick,
+                                    onDeleteClick = onDeleteClick
+                                )
+                            }
                         }
                     }
                 }
