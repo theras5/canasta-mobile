@@ -8,9 +8,11 @@ import com.example.canasta.data.remote.api.UserApiService
 import com.example.canasta.data.remote.interceptors.AuthInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okio.Buffer
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
@@ -27,9 +29,12 @@ object ApiClient {
 
     // Configuración de kotlinx-serialization JSON
     private val json = Json {
-        ignoreUnknownKeys = true // Ignora campos desconocidos del JSON
-        isLenient = true // Permite JSON menos estricto
-        coerceInputValues = true // Maneja valores nulos de forma más flexible
+        ignoreUnknownKeys = true
+        isLenient = true
+        prettyPrint = true // Para hacer más legible el output en logs
+        encodeDefaults = true
+        explicitNulls = false // No serializar campos nulos explícitamente
+        coerceInputValues = true // Coerce valores inválidos a defaults
     }
 
     // Interceptor de autenticación (se puede acceder para setear el token)
@@ -41,8 +46,33 @@ object ApiClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        // Interceptor personalizado para debug
+        val debugInterceptor = Interceptor { chain ->
+            val request = chain.request()
+            if (request.method == "POST" && request.url.encodedPath.contains("/items")) {
+                val requestBody = request.body
+                if (requestBody != null) {
+                    try {
+                        val buffer = Buffer()
+                        requestBody.writeTo(buffer)
+                        val bodyString = buffer.readUtf8()
+                        println("====== REQUEST BODY DEBUG ======")
+                        println("URL: ${request.url}")
+                        println("Content-Type: ${requestBody.contentType()}")
+                        println("Body: $bodyString")
+                        println("Body length: ${bodyString.length}")
+                        println("================================")
+                    } catch (e: Exception) {
+                        println("Error reading request body: ${e.message}")
+                    }
+                }
+            }
+            chain.proceed(request)
+        }
+
         OkHttpClient.Builder()
             .addInterceptor(authInterceptor) // Añade autenticación
+            .addInterceptor(debugInterceptor) // Debug interceptor
             .addInterceptor(loggingInterceptor) // Añade logging
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)

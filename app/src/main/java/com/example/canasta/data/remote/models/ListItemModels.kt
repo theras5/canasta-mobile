@@ -1,5 +1,6 @@
 package com.example.canasta.data.remote.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -7,9 +8,13 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ListItemCreate(
+    @SerialName("product")
     val product: ProductId,
-    val quantity: Double = 1.0,
-    val unit: String = "unidades",
+    @SerialName("quantity")
+    val quantity: Double,
+    @SerialName("unit")
+    val unit: String,
+    @SerialName("metadata")
     val metadata: Map<String, String>? = null
 )
 
@@ -28,6 +33,7 @@ data class ListItemUpdate(
  */
 @Serializable
 data class ProductId(
+    @SerialName("id")
     val id: Long
 )
 

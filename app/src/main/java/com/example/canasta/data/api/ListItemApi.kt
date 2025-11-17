@@ -4,10 +4,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PATCH
 import retrofit2.http.Path
 import retrofit2.http.Query
+import com.example.canasta.data.remote.models.ListItemCreate
+import com.example.canasta.data.remote.models.TogglePurchasedRequest
 
 /**
  * DTO simplificado del producto dentro de un ListItem
@@ -35,32 +38,6 @@ data class ListItemDto(
 )
 
 /**
- * Referencia de producto para creación: { product: { id } }
- */
-@Serializable
-data class ProductRef(
-    val id: Long
-)
-
-/**
- * DTO para crear un nuevo item en una lista (según swagger: ListItemCreate)
- * Estructura esperada:
- * {
- *   "product": { "id": number },
- *   "quantity": number (>0),
- *   "unit": string (non-empty),
- *   "metadata"?: object
- * }
- */
-@Serializable
-data class ListItemCreateDto(
-    val product: ProductRef,
-    val quantity: Double,
-    val unit: String,
-    val metadata: JsonObject? = null
-)
-
-/**
  * Información de paginación devuelta por la API de items de lista.
  */
 @Serializable
@@ -81,10 +58,6 @@ data class ListItemPagedResponseDto(
     val data: List<ListItemDto>,
     val pagination: ListItemPaginationDto
 )
-
-/** Body para toggle purchased */
-@Serializable
-data class TogglePurchasedBody(val purchased: Boolean)
 
 /**
  * API para gestionar items de listas de compras
@@ -112,10 +85,11 @@ interface ListItemApi {
      * Agrega un nuevo item a una lista
      * POST /api/shopping-lists/{id}/items
      */
+    @Headers("Content-Type: application/json")
     @POST("/api/shopping-lists/{id}/items")
     suspend fun addItemToList(
         @Path("id") listId: Long,
-        @Body item: ListItemCreateDto
+        @Body item: ListItemCreate
     ): ListItemDto
 
     /**
@@ -126,6 +100,6 @@ interface ListItemApi {
     suspend fun togglePurchased(
         @Path("id") listId: Long,
         @Path("item_id") itemId: Long,
-        @Body body: TogglePurchasedBody
+        @Body body: TogglePurchasedRequest
     ): ListItemDto
 }

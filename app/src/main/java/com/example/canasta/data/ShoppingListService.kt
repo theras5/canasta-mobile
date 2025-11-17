@@ -15,9 +15,9 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import retrofit2.HttpException
-import com.example.canasta.data.api.ListItemCreateDto
-import com.example.canasta.data.api.ProductRef
-import com.example.canasta.data.api.TogglePurchasedBody
+import com.example.canasta.data.remote.models.ListItemCreate
+import com.example.canasta.data.remote.models.ProductId
+import com.example.canasta.data.remote.models.TogglePurchasedRequest
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -271,28 +271,54 @@ object ShoppingListService {
     }
 
     /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
-    suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
+    suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades", categoryId: Long? = null) {
         try {
-            val body = ListItemCreateDto(
-                product = ProductRef(id = productId),
+            println("=== DEBUG addProductToListApi ===")
+            println("listId: $listId, productId: $productId, quantity: $quantity, unit: $unit")
+            println("productId type: ${productId::class.simpleName}")
+            println("productId value: $productId")
+
+            val productIdObj = ProductId(id = productId)
+            println("ProductId object created: id=${productIdObj.id}")
+            println("ProductId.id type: ${productIdObj.id::class.simpleName}")
+
+            val body = ListItemCreate(
+                product = productIdObj,
                 quantity = quantity,
                 unit = unit,
                 metadata = null
             )
+            println("ListItemCreate object created:")
+            println("  - product: ${body.product}")
+            println("  - product.id: ${body.product.id}")
+            println("  - product.id type: ${body.product.id::class.simpleName}")
+            println("  - quantity: ${body.quantity}")
+            println("  - unit: ${body.unit}")
+
+            // Intentar serializar manualmente para ver el JSON
+            try {
+                val jsonString = kotlinx.serialization.json.Json.encodeToString(ListItemCreate.serializer(), body)
+                println("  - Serialized JSON: $jsonString")
+            } catch (e: Exception) {
+                println("  - Serialization test failed: ${e.message}")
+            }
+            println("================================")
+
             itemsApi.addItemToList(listId.toLong(), body)
-            refreshProductsForList(listId)
+            refreshProductsForList(listId, categoryId)
         } catch (e: Exception) {
             println("Error al agregar item a lista $listId en API: ${e.message}")
+            e.printStackTrace()
             throw e
         }
     }
 
     /** Toggle purchased en backend y refrescar la lista */
-    suspend fun toggleItemPurchasedApi(listId: String, itemId: String, purchased: Boolean) {
+    suspend fun toggleItemPurchasedApi(listId: String, itemId: String, purchased: Boolean, categoryId: Long? = null) {
         try {
-            itemsApi.togglePurchased(listId.toLong(), itemId.toLong(), TogglePurchasedBody(purchased))
-            // Refrescar items manteniendo el filtro actual no es trivial aquí; refrescamos sin filtro
-            refreshProductsForList(listId)
+            itemsApi.togglePurchased(listId.toLong(), itemId.toLong(), TogglePurchasedRequest(purchased))
+            // Refrescar items manteniendo el filtro de categoría actual
+            refreshProductsForList(listId, categoryId)
         } catch (e: Exception) {
             println("Error al togglear purchased del item $itemId en lista $listId: ${e.message}")
             throw e

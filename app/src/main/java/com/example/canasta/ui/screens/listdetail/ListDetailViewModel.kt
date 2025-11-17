@@ -70,6 +70,29 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
     init {
         // Cargar productos y categorías disponibles
         loadAvailableProductsAndCategories()
+
+        // Observar cambios en los productos desde el servicio
+        observeProductChanges()
+    }
+
+    /**
+     * Observa cambios en los productos del servicio y actualiza la UI automáticamente
+     */
+    private fun observeProductChanges() {
+        viewModelScope.launch {
+            ShoppingListService.productsByList.collect { productsByList ->
+                val currentListId = _uiState.value.listId
+                if (currentListId.isNotBlank()) {
+                    val products = productsByList[currentListId] ?: emptyList()
+
+                    // Actualizar la UI con los productos más recientes
+                    // El filtrado por categoría ya lo maneja el servicio
+                    _uiState.value = _uiState.value.copy(
+                        products = products
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -123,17 +146,19 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
             successMessage = getApplication<Application>().getString(R.string.product_added_success)
         )
 
-        // Enviar a la API en background SILENCIOSAMENTE (sin tocar la UI)
+        // Enviar a la API en background y refrescar inmediatamente
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                val categoryId = _uiState.value.selectedCategory?.id
                 ShoppingListService.addProductToListApi(
                     listId = currentListId,
                     productId = product.id,
                     quantity = 1.0,
-                    unit = "unidades"
+                    unit = "unidades",
+                    categoryId = categoryId
                 )
-                // ✅ Éxito: NO HACEMOS NADA, la UI ya está actualizada
-                // El refresh real será al cerrar el bottom sheet
+                // ✅ Éxito: La UI se actualizará automáticamente gracias al observer
+                // No necesitamos hacer nada más aquí
             } catch (e: Exception) {
                 // ❌ Si falla, QUITAR el producto temporal
                 _uiState.value = _uiState.value.copy(
@@ -403,18 +428,11 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 val current = _uiState.value.products.firstOrNull { it.id == productId }
                 val newPurchased = !(current?.isPurchased ?: false)
 
-                // Hacer el toggle y esperar a que se complete el refresh
-                ShoppingListService.toggleItemPurchasedApi(currentListId, productId, newPurchased)
+                // Hacer el toggle con el filtro de categoría actual
+                val categoryId = _uiState.value.selectedCategory?.id
+                ShoppingListService.toggleItemPurchasedApi(currentListId, productId, newPurchased, categoryId)
 
-                // Si hay un filtro de categoría activo, necesitamos refrescar con ese filtro para la UI
-                val currentCategoryId = _uiState.value.selectedCategory?.id
-                if (currentCategoryId != null) {
-                    ShoppingListService.refreshProductsForList(currentListId, currentCategoryId)
-                }
-
-                // Obtener los productos actualizados del cache para la UI
-                val refreshed = ShoppingListService.getProductsForList(currentListId)
-                _uiState.value = _uiState.value.copy(products = refreshed)
+                // La UI se actualizará automáticamente gracias al observer
 
                 // Para verificar si todos están comprados, necesitamos consultar TODOS los productos sin filtro
                 val allProducts = ShoppingListService.getAllProductsFromApi(currentListId)
@@ -498,9 +516,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 // Llamar a API con filtro por categoría
                 val categoryId = category?.id
                 ShoppingListService.refreshProductsForList(currentListId, categoryId)
-                // Actualizar productos en UI state tras la carga
-                val filtered = ShoppingListService.getProductsForList(currentListId)
-                _uiState.value = _uiState.value.copy(products = filtered)
+                // La UI se actualizará automáticamente gracias al observer
             }
         }
     }
@@ -642,10 +658,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     // Refrescar TODO desde la API (con filtro de categoría si existe)
                     val categoryId = _uiState.value.selectedCategory?.id
                     ShoppingListService.refreshProductsForList(currentListId, categoryId)
-                    val refreshed = ShoppingListService.getProductsForList(currentListId)
-
-                    // REEMPLAZAR completamente con los datos reales del servidor
-                    _uiState.value = _uiState.value.copy(products = refreshed)
+                    // La UI se actualizará automáticamente gracias al observer
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(
                         error = getApplication<Application>().getString(R.string.error_refreshing_list, e.message ?: "")
