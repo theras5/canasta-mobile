@@ -31,6 +31,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -44,6 +45,8 @@ import com.example.canasta.data.repository.UserRepository
 import com.example.canasta.ui.components.profile.EditProfileSheet
 import com.example.canasta.ui.components.profile.LogoutButton
 import com.example.canasta.ui.components.profile.ProfileHeader
+import com.example.canasta.ui.theme.Errors
+import com.example.canasta.ui.theme.Success
 import com.example.canasta.utils.DeviceUtils
 import kotlinx.coroutines.launch
 
@@ -62,6 +65,7 @@ fun ProfileScreen(
     var userProfile by remember { mutableStateOf<GetUser?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var isUpdating by remember { mutableStateOf(false) }
+    var lastSnackbarIsSuccess by remember { mutableStateOf(false) }
 
     // Detectar si estamos en orientación horizontal y si es tablet
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -77,6 +81,7 @@ fun ProfileScreen(
                 },
                 onFailure = { error ->
                     isLoading = false
+                    lastSnackbarIsSuccess = false
                     snackbarHostState.showSnackbar(
                         message = "Error al cargar el perfil: ${error.message}"
                     )
@@ -138,10 +143,12 @@ fun ProfileScreen(
                                 onSuccess = { updatedUser ->
                                     userProfile = updatedUser
                                     isUpdating = false
+                                    lastSnackbarIsSuccess = true
                                     snackbarHostState.showSnackbar(context.getString(R.string.profile_updated))
                                 },
                                 onFailure = { error ->
                                     isUpdating = false
+                                    lastSnackbarIsSuccess = false
                                     snackbarHostState.showSnackbar(
                                         context.getString(R.string.error_updating_profile, error.message ?: "")
                                     )
@@ -153,9 +160,16 @@ fun ProfileScreen(
             }
         }
 
-        // Snackbar para mensajes
+        // Snackbar para mensajes con colores personalizados
         SnackbarHost(
             hostState = snackbarHostState,
+            snackbar = { data ->
+                androidx.compose.material3.Snackbar(
+                    snackbarData = data,
+                    containerColor = if (lastSnackbarIsSuccess) Success else Errors,
+                    contentColor = Color.White
+                )
+            },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()

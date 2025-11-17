@@ -37,6 +37,7 @@ data class ListDetailUiState(
     val screenMode: ScreenMode = ScreenMode.VIEW,
     val isLoading: Boolean = false,
     val error: String? = null,
+    val successMessage: String? = null,
     val availableProducts: List<Product> = emptyList(),
     val availableCategories: List<GetCategory> = emptyList(),
     val sharedUsers: List<com.example.canasta.data.remote.models.SharedUser> = emptyList(),
@@ -115,7 +116,8 @@ class ListDetailViewModel : ViewModel() {
         // AGREGAR INMEDIATAMENTE Y QUEDARSE AHÍ - NO TOCAR NADA MÁS
         _uiState.value = _uiState.value.copy(
             products = _uiState.value.products + newProduct,
-            tempAddedProductIds = _uiState.value.tempAddedProductIds + product.id.toString()
+            tempAddedProductIds = _uiState.value.tempAddedProductIds + product.id.toString(),
+            successMessage = "Producto agregado exitosamente"
         )
 
         // Enviar a la API en background SILENCIOSAMENTE (sin tocar la UI)
@@ -341,7 +343,10 @@ class ListDetailViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         // Actualizar UI optimistamente
                         val updatedProducts = _uiState.value.products.filter { it.id != productId }
-                        _uiState.value = _uiState.value.copy(products = updatedProducts)
+                        _uiState.value = _uiState.value.copy(
+                            products = updatedProducts,
+                            successMessage = "Producto eliminado exitosamente"
+                        )
 
                         // También eliminar del servicio local
                         ShoppingListService.deleteProductFromList(_uiState.value.listId, productId)

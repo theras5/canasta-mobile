@@ -37,6 +37,9 @@ class ProductsViewModel : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    private val _successMessage = MutableStateFlow<String?>(null)
+    val successMessage: StateFlow<String?> = _successMessage.asStateFlow()
+
     init {
         loadProducts()
     }
@@ -81,9 +84,11 @@ class ProductsViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+            _successMessage.value = null
 
             repository.createProduct(name, categoryId, metadata).fold(
                 onSuccess = {
+                    _successMessage.value = "Producto creado exitosamente"
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
@@ -106,9 +111,11 @@ class ProductsViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+            _successMessage.value = null
 
             repository.updateProduct(id, name, categoryId, metadata).fold(
                 onSuccess = {
+                    _successMessage.value = "Producto actualizado exitosamente"
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
@@ -126,9 +133,11 @@ class ProductsViewModel : ViewModel() {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+            _successMessage.value = null
 
             repository.deleteProduct(id).fold(
                 onSuccess = {
+                    _successMessage.value = "Producto eliminado exitosamente"
                     loadProducts() // Recargar la lista
                 },
                 onFailure = { error ->
@@ -144,5 +153,12 @@ class ProductsViewModel : ViewModel() {
      */
     fun clearError() {
         _errorMessage.value = null
+    }
+
+    /**
+     * Limpia el mensaje de éxito
+     */
+    fun clearSuccess() {
+        _successMessage.value = null
     }
 }

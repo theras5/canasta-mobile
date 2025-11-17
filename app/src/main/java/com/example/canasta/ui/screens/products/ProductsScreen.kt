@@ -53,6 +53,8 @@ import com.example.canasta.ui.components.common.ConfirmDeleteModal
 import com.example.canasta.ui.components.common.CommonFab
 import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.theme.Background
+import com.example.canasta.ui.theme.Success
+import com.example.canasta.ui.theme.Errors
 import com.example.canasta.utils.DeviceUtils
 
 @Composable
@@ -67,6 +69,7 @@ fun ProductsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val products by viewModel.products.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val successMessage by viewModel.successMessage.collectAsState()
 
     // Estados locales de UI
     var showCreateModal by remember { mutableStateOf(false) }
@@ -96,6 +99,14 @@ fun ProductsScreen(
         }
     }
 
+    // Mostrar mensajes de éxito en Snackbar
+    LaunchedEffect(successMessage) {
+        successMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearSuccess()
+        }
+    }
+
     // Filtrar productos
     val filteredProducts = products.filter { product ->
         val matchesSearch = searchQuery.isBlank() ||
@@ -107,7 +118,18 @@ fun ProductsScreen(
 
     Scaffold(
         containerColor = Background,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    androidx.compose.material3.Snackbar(
+                        snackbarData = data,
+                        containerColor = if (successMessage != null) Success else Errors,
+                        contentColor = androidx.compose.ui.graphics.Color.White
+                    )
+                }
+            )
+        },
         floatingActionButton = {
             CommonFab(
                 icon = Icons.Filled.Add,

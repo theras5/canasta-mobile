@@ -84,7 +84,7 @@ fun ShareListBottomSheet(
                 Icon(
                     imageVector = Icons.Default.Share,
                     contentDescription = null,
-                    tint = Primary,
+                    tint = Secondary,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(

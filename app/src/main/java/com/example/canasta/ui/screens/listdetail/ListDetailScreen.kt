@@ -8,22 +8,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
@@ -44,15 +43,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.canasta.data.remote.models.SharedUser
+import com.example.canasta.R
 import com.example.canasta.ui.components.common.CategoryChipsApi
+import com.example.canasta.ui.components.common.CommonFab
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.EditProductModal
 import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Background
+import com.example.canasta.ui.theme.Errors
 import com.example.canasta.ui.theme.Secondary
+import com.example.canasta.ui.theme.Success
 import com.example.canasta.ui.theme.Titles
 import kotlinx.coroutines.launch
 
@@ -82,6 +84,26 @@ fun ListDetailScreen(
     // Cargar la lista al iniciar la pantalla
     LaunchedEffect(listId) {
         viewModel.loadList(listId, listName)
+    }
+
+    // Snackbar state
+    val snackbarHostState = remember { SnackbarHostState() }
+    var lastMessageWasSuccess by remember { mutableStateOf(false) }
+
+    // Mostrar mensajes de error
+    LaunchedEffect(uiState.error) {
+        uiState.error?.let { message ->
+            lastMessageWasSuccess = false
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    // Mostrar mensajes de éxito
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let { message ->
+            lastMessageWasSuccess = true
+            snackbarHostState.showSnackbar(message)
+        }
     }
 
     // Estado para el modal de confirmación de eliminación de producto
@@ -202,6 +224,18 @@ fun ListDetailScreen(
 
     Scaffold(
         containerColor = Background,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    androidx.compose.material3.Snackbar(
+                        snackbarData = data,
+                        containerColor = if (lastMessageWasSuccess) Success else Errors,
+                        contentColor = Color.White
+                    )
+                }
+            )
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -239,7 +273,7 @@ fun ListDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Titles
                         )

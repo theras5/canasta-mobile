@@ -41,7 +41,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.canasta.ui.theme.Primary
+import com.example.canasta.ui.theme.Secondary
 
 /**
  * Bottom Sheet para editar un producto existente con datos de la API.
@@ -80,7 +80,7 @@ fun EditProductModal(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
-                    tint = Primary,
+                    tint = Secondary,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
@@ -143,7 +143,7 @@ fun EditProductModal(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = productName.isNotBlank() && selectedCategory != null
             ) {
                 Text(text = "Guardar")

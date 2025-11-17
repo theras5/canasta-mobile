@@ -76,7 +76,7 @@ fun EditProfileSheet(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
-                    tint = Primary,
+                    tint = Secondary,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(

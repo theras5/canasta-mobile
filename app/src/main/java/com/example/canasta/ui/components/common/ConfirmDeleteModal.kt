@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.canasta.ui.theme.Errors
 
 @Composable
 fun ConfirmDeleteModal(
@@ -24,12 +25,14 @@ fun ConfirmDeleteModal(
             onClick = {
                 onConfirm()
                 onDismiss()
-            }
+            },
+            backgroundColor = Errors  // Botón rojo para acción crítica
         )
         Spacer(modifier = Modifier.height(8.dp))
         ModalActionButton(
             text = dismissText,
-            onClick = { onDismiss() }
+            onClick = { onDismiss() },
+            isSecondary = true
         )
     }
 }

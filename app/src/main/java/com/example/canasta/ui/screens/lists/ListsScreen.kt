@@ -146,7 +146,20 @@ fun ListsScreen(
             onConfirm = {
                 listToDelete?.let { list ->
                     scope.launch {
-                        ShoppingListService.deleteList(list.id)
+                        try {
+                            ShoppingListService.deleteList(list.id)
+                            snackbarHostState.showSnackbar(
+                                message = "Lista eliminada exitosamente",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        } catch (_: Exception) {
+                            snackbarHostState.showSnackbar(
+                                message = "Error al eliminar la lista",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
                     }
                 }
                 showDeleteConfirmation = false

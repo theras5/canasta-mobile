@@ -122,33 +122,57 @@ fun CustomModal(
  * @param onClick Callback cuando se presiona el botón
  * @param modifier Modificador opcional
  * @param enabled Si el botón está habilitado
+ * @param backgroundColor Color de fondo del botón (por defecto Secondary)
+ * @param isSecondary Si es un botón secundario (con borde, sin relleno)
  */
 @Composable
 fun ModalActionButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    backgroundColor: Color = Secondary,
+    isSecondary: Boolean = false
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Secondary,
-            contentColor = Color.White,
-            disabledContainerColor = Secondary.copy(alpha = 0.5f),
-            disabledContentColor = Color.White.copy(alpha = 0.7f)
-        ),
-        enabled = enabled
-    ) {
-        Text(
-            text = text,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
+    if (isSecondary) {
+        androidx.compose.material3.OutlinedButton(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                contentColor = Color.Gray
+            ),
+            enabled = enabled
+        ) {
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    } else {
+        Button(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = backgroundColor,
+                contentColor = Color.White,
+                disabledContainerColor = backgroundColor.copy(alpha = 0.5f),
+                disabledContentColor = Color.White.copy(alpha = 0.7f)
+            ),
+            enabled = enabled
+        ) {
+            Text(
+                text = text,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 

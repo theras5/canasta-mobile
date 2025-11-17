@@ -28,7 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.canasta.ui.theme.Primary
+import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 
 /**
@@ -90,7 +90,7 @@ fun EditProductModal(
 
                 Button(
                     onClick = { onConfirm(description) },
-                    colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                    colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                     enabled = description.isNotBlank()
                 ) {
                     Text(text = "Guardar", color = Color.White, fontWeight = FontWeight.Bold)

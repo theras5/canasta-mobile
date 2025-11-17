@@ -51,6 +51,8 @@ import com.example.canasta.ui.components.common.CommonFab
 import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Background
+import com.example.canasta.ui.theme.Errors
+import com.example.canasta.ui.theme.Success
 import com.example.canasta.utils.DeviceUtils
 
 @Composable
@@ -61,6 +63,8 @@ fun CategoriesScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
     val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    // Reemplazamos collectAsStateWithLifecycle por collectAsState para successMessage para evitar errores de inferencia
+    val successMessage by viewModel.successMessage.collectAsState()
     val isTablet = DeviceUtils.isTablet()
 
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -68,8 +72,42 @@ fun CategoriesScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var selectedCategory by remember { mutableStateOf<GetCategory?>(null) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    // Bandera para el color del último snackbar
+    var lastSnackbarIsSuccess by remember { mutableStateOf(false) }
+
+    // Mostrar mensajes de error
+    LaunchedEffect(errorMessage) {
+        errorMessage?.let { message ->
+            lastSnackbarIsSuccess = false
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearError()
+        }
+    }
+
+    // Mostrar mensajes de éxito
+    LaunchedEffect(successMessage) {
+        successMessage?.let { message ->
+            lastSnackbarIsSuccess = true
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearSuccess()
+        }
+    }
+
     Scaffold(
         containerColor = Background,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = if (lastSnackbarIsSuccess) Success else Errors,
+                        contentColor = Color.White
+                    )
+                }
+            )
+        },
         floatingActionButton = {
             CommonFab(
                 icon = Icons.Filled.Add,
@@ -92,7 +130,7 @@ fun CategoriesScreen(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Mensaje de error
+            // Mensaje de error persistente (además del snackbar)
             errorMessage?.let { message ->
                 Card(
                     modifier = Modifier
@@ -116,9 +154,7 @@ fun CategoriesScreen(
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    ) { CircularProgressIndicator() }
                 }
                 is CategoriesUiState.Error -> {
                     Box(
@@ -131,9 +167,7 @@ fun CategoriesScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = { viewModel.loadCategories() }) {
-                                Text("Reintentar")
-                            }
+                            Button(onClick = { viewModel.loadCategories() }) { Text("Reintentar") }
                         }
                     }
                 }
@@ -245,18 +279,12 @@ fun CategoriesScreen(
                         viewModel.deleteCategory(selectedCategory!!.id)
                         showDeleteDialog = false
                         selectedCategory = null
-                    }
-                ) {
-                    Text("Eliminar", color = MaterialTheme.colorScheme.error)
-                }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = Errors)
+                ) { Text("Eliminar") }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        selectedCategory = null
-                    }
-                ) {
+                TextButton(onClick = { showDeleteDialog = false; selectedCategory = null }) {
                     Text("Cancelar")
                 }
             }

@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.components.common.ModalTextField
-import com.example.canasta.ui.theme.Primary
+import com.example.canasta.ui.theme.Secondary
 
 /**
  * Bottom Sheet para crear un nuevo producto con datos de la API.
@@ -85,7 +85,7 @@ fun CreateProductModalApi(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = Primary,
+                    tint = Secondary,
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
@@ -148,7 +148,7 @@ fun CreateProductModalApi(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = productName.isNotBlank() && selectedCategory != null
             ) {
                 Text(text = "Crear")
