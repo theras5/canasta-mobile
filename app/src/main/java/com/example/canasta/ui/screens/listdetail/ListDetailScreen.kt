@@ -8,14 +8,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,12 +28,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,14 +44,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.canasta.data.remote.models.SharedUser
 import com.example.canasta.ui.components.common.CategoryChipsApi
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.EditProductModal
+import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Background
 import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
+import kotlinx.coroutines.launch
 
 /**
  * Pantalla de detalle de una lista con sus productos
@@ -87,10 +95,13 @@ fun ListDetailScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var productToEdit by remember { mutableStateOf<ListProduct?>(null) }
 
-    // TODO: Implementar bottom sheet de agregar productos cuando esté disponible
-    // val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    // var showAddProductSheet by remember { mutableStateOf(false) }
-    // val scope = rememberCoroutineScope()
+    // Estado para el bottom sheet de compartir
+    var showShareSheet by remember { mutableStateOf(false) }
+
+    // Estado para agregar productos
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showAddProductSheet by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Mostrar modal de confirmación si hay producto para eliminar
     if (showDeleteDialog && productToDelete != null) {
@@ -146,19 +157,20 @@ fun ListDetailScreen(
         )
     }
 
-    // TODO: Implementar bottom sheet de agregar productos
     // Mostrar bottom sheet de agregar productos
-    /*
     if (showAddProductSheet) {
         AddProductToListBottomSheet(
             sheetState = bottomSheetState,
             products = uiState.availableProducts,
             categories = uiState.availableCategories,
             addedProductNames = uiState.products.map { it.name }.toSet(),
+            tempAddedProductIds = uiState.tempAddedProductIds,
             onDismiss = {
                 scope.launch {
                     bottomSheetState.hide()
                     showAddProductSheet = false
+                    // Refrescar la lista cuando se cierra el bottom sheet
+                    viewModel.clearTempAddedProductsAndRefresh()
                 }
             },
             onAddProduct = { product ->
@@ -167,7 +179,25 @@ fun ListDetailScreen(
             }
         )
     }
-    */
+
+    // Mostrar bottom sheet de compartir
+    if (showShareSheet) {
+        com.example.canasta.ui.components.lists.ShareListBottomSheet(
+            sharedUsers = uiState.sharedUsers,
+            isLoading = uiState.isSharing,
+            errorMessage = uiState.shareError,
+            onDismissRequest = {
+                showShareSheet = false
+                viewModel.clearShareError()
+            },
+            onShareWithEmail = { email ->
+                viewModel.shareListWithEmail(email)
+            },
+            onRevokeAccess = { user ->
+                viewModel.revokeShareAccess(user)
+            }
+        )
+    }
 
 
     Scaffold(
@@ -175,8 +205,8 @@ fun ListDetailScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    // Si estamos en modo edición, mostrar TextField editable
-                    if (uiState.screenMode == ScreenMode.EDIT) {
+                    // Si estamos en modo edición Y somos owner, mostrar TextField editable
+                    if (uiState.screenMode == ScreenMode.EDIT && uiState.isOwner) {
                         OutlinedTextField(
                             value = uiState.listName,
                             onValueChange = { viewModel.updateListName(it) },
@@ -197,7 +227,7 @@ fun ListDetailScreen(
                             )
                         )
                     } else {
-                        // Modo vista - solo texto
+                        // Modo vista o no es owner - solo texto
                         Text(
                             text = uiState.listName,
                             fontSize = 24.sp,
@@ -216,13 +246,14 @@ fun ListDetailScreen(
                     }
                 },
                 actions = {
-                    // Botón de Editar/Guardar
+                    // Botón de Editar/Guardar (visible para todos)
                     IconButton(onClick = {
                         if (uiState.screenMode == ScreenMode.EDIT) {
-                            // Validar antes de guardar
-                            if (viewModel.validateListName()) {
-                                viewModel.toggleEditMode()
+                            // Si es owner, validar antes de guardar
+                            if (uiState.isOwner && !viewModel.validateListName()) {
+                                return@IconButton
                             }
+                            viewModel.toggleEditMode()
                         } else {
                             viewModel.toggleEditMode()
                         }
@@ -240,9 +271,12 @@ fun ListDetailScreen(
                         )
                     }
 
-                    // Botón de Compartir (solo visible en modo vista)
-                    if (uiState.screenMode == ScreenMode.VIEW) {
-                        IconButton(onClick = onShareClick) {
+                    // Botón de Compartir (solo visible en modo vista y si es owner)
+                    if (uiState.screenMode == ScreenMode.VIEW && uiState.isOwner) {
+                        IconButton(onClick = {
+                            viewModel.loadSharedUsers()
+                            showShareSheet = true
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Share,
                                 contentDescription = "Compartir",
@@ -251,8 +285,8 @@ fun ListDetailScreen(
                         }
                     }
 
-                    // Botón de Eliminar (solo visible en modo vista)
-                    if (uiState.screenMode == ScreenMode.VIEW) {
+                    // Botón de Eliminar (solo visible en modo vista y si es owner)
+                    if (uiState.screenMode == ScreenMode.VIEW && uiState.isOwner) {
                         IconButton(onClick = {
                             showDeleteListDialog = true
                         }) {
@@ -270,8 +304,6 @@ fun ListDetailScreen(
             )
         },
         floatingActionButton = {
-            // TODO: Re-enable FAB when AddProductBottomSheet is implemented
-            /*
             // FAB solo visible en modo vista
             if (uiState.screenMode == ScreenMode.VIEW) {
                 FloatingActionButton(
@@ -285,7 +317,6 @@ fun ListDetailScreen(
                     Icon(Icons.Filled.Add, "Agregar producto")
                 }
             }
-            */
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -333,14 +364,3 @@ fun ListDetailScreen(
         }
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun ListDetailScreenPreview() {
-//    MaterialTheme {
-//        ListDetailScreen(
-//            listId = "preview-list-id",
-//            listName = "Mi Lista de Compras"
-//        )
-//    }
-//}
