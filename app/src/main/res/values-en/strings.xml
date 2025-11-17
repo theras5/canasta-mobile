@@ -191,6 +191,23 @@
     <string name="register">Sign up</string>
     <string name="already_have_account">Already have an account?</string>
     <string name="login_link">Log in</string>
+    <string name="forgot_password">Forgot your password?</string>
+
+    <!-- Password Recovery -->
+    <string name="recover_password_title">Recover Password</string>
+    <string name="recover_password_message">Enter your email and we will send you a code to reset your password.</string>
+    <string name="send_code_button">SEND</string>
+    <string name="reset_password_title">Reset Password</string>
+    <string name="reset_code_label">Verification code *</string>
+    <string name="reset_code_placeholder">e.g: 098acc849b7cc56c</string>
+    <string name="reset_password_label">New password *</string>
+    <string name="reset_password_button">RESET PASSWORD</string>
+    <string name="back_button">BACK</string>
+    <string name="code_sent_to_email">Code sent to %s. Check your email (including spam).</string>
+    <string name="password_reset_success">Password reset successfully. Please log in</string>
+    <string name="error_sending_reset_code">Error sending recovery code</string>
+    <string name="error_invalid_reset_code">Invalid or expired verification code</string>
+    <string name="error_reset_password_failed">Error resetting password</string>
 
     <!-- Validation Errors -->
     <string name="error_email_required">Email is required</string>

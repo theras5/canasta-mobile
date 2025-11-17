@@ -37,5 +37,19 @@ interface AuthApiService {
      */
     @POST("api/users/send-verification")
     suspend fun sendVerification(@Query("email") email: String)
+
+    /**
+     * Envía código de recuperación de contraseña
+     * POST /api/users/forgot-password
+     */
+    @POST("api/users/forgot-password")
+    suspend fun sendPasswordResetCode(@Query("email") email: String)
+
+    /**
+     * Resetea la contraseña usando el código recibido
+     * POST /api/users/reset-password
+     */
+    @POST("api/users/reset-password")
+    suspend fun resetPassword(@Body data: PasswordResetData)
 }
 

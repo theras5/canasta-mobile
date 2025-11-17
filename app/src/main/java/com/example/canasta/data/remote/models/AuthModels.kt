@@ -86,3 +86,12 @@ data class PasswordChange(
     val newPassword: String
 )
 
+/**
+ * Datos para resetear contraseña
+ */
+@Serializable
+data class PasswordResetData(
+    val code: String,
+    val password: String
+)
+

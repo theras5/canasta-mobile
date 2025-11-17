@@ -19,11 +19,15 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val isLoginMode: Boolean = false,
     val isVerificationMode: Boolean = false,
+    val isPasswordRecoveryMode: Boolean = false,
+    val isPasswordResetMode: Boolean = false,
     val email: String = "",
     val password: String = "",
     val name: String = "",
     val surname: String = "",
     val verificationCode: String = "",
+    val resetCode: String = "",
+    val newPassword: String = "",
     val errorMessage: String? = null,
     val isAuthenticated: Boolean = false,
     // Errores específicos por campo
@@ -31,7 +35,9 @@ data class AuthUiState(
     val passwordError: String? = null,
     val nameError: String? = null,
     val surnameError: String? = null,
-    val verificationCodeError: String? = null
+    val verificationCodeError: String? = null,
+    val resetCodeError: String? = null,
+    val newPasswordError: String? = null
 )
 
 /**
@@ -63,6 +69,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun updateVerificationCode(code: String) {
         _uiState.value = _uiState.value.copy(verificationCode = code, verificationCodeError = null, errorMessage = null)
+    }
+
+    fun updateResetCode(code: String) {
+        _uiState.value = _uiState.value.copy(resetCode = code, resetCodeError = null, errorMessage = null)
+    }
+
+    fun updateNewPassword(password: String) {
+        _uiState.value = _uiState.value.copy(newPassword = password, newPasswordError = null, errorMessage = null)
     }
 
     fun toggleMode() {
@@ -308,6 +322,137 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             isLoginMode = false,
             verificationCode = "",
             errorMessage = null
+        )
+    }
+
+    // Password Recovery Functions
+    fun startPasswordRecovery() {
+        _uiState.value = _uiState.value.copy(
+            isPasswordRecoveryMode = true,
+            isLoginMode = false,
+            isPasswordResetMode = false,
+            errorMessage = null,
+            emailError = null
+        )
+    }
+
+    fun sendPasswordResetCode() {
+        val state = _uiState.value
+        val context = getApplication<Application>()
+
+        // Validar email
+        val emailError = ValidationUtils.getEmailError(state.email, context)
+        if (emailError != null) {
+            _uiState.value = state.copy(emailError = emailError)
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = state.copy(
+                isLoading = true,
+                errorMessage = null,
+                emailError = null
+            )
+
+            repository.sendPasswordResetCode(state.email)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isPasswordRecoveryMode = false,
+                        isPasswordResetMode = true,
+                        errorMessage = context.getString(R.string.code_sent_to_email, state.email)
+                    )
+                }
+                .onFailure { error ->
+                    val friendlyMessage = when {
+                        error.message?.contains("404") == true -> context.getString(R.string.error_user_not_found)
+                        else -> context.getString(R.string.error_sending_reset_code)
+                    }
+
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = friendlyMessage
+                    )
+                }
+        }
+    }
+
+    fun resetPassword() {
+        val state = _uiState.value
+        val context = getApplication<Application>()
+
+        // Validar campos
+        if (state.resetCode.isBlank()) {
+            _uiState.value = state.copy(resetCodeError = context.getString(R.string.error_verification_code_required))
+            return
+        }
+
+        val passwordError = ValidationUtils.getPasswordError(state.newPassword, context)
+        if (passwordError != null) {
+            _uiState.value = state.copy(newPasswordError = passwordError)
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = state.copy(
+                isLoading = true,
+                errorMessage = null,
+                resetCodeError = null,
+                newPasswordError = null
+            )
+
+            repository.resetPassword(state.resetCode, state.newPassword)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        isPasswordResetMode = false,
+                        isPasswordRecoveryMode = false,
+                        isLoginMode = true,
+                        resetCode = "",
+                        newPassword = "",
+                        password = "",
+                        errorMessage = context.getString(R.string.password_reset_success)
+                    )
+                }
+                .onFailure { error ->
+                    val friendlyMessage = when {
+                        error.message?.contains("400") == true || error.message?.contains("invalid") == true ->
+                            context.getString(R.string.error_invalid_reset_code)
+                        error.message?.contains("404") == true -> context.getString(R.string.error_user_not_found)
+                        else -> context.getString(R.string.error_reset_password_failed)
+                    }
+
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        errorMessage = friendlyMessage
+                    )
+                }
+        }
+    }
+
+    fun backToLogin() {
+        _uiState.value = _uiState.value.copy(
+            isPasswordRecoveryMode = false,
+            isPasswordResetMode = false,
+            isLoginMode = true,
+            resetCode = "",
+            newPassword = "",
+            errorMessage = null,
+            emailError = null,
+            resetCodeError = null,
+            newPasswordError = null
+        )
+    }
+
+    fun backToPasswordRecovery() {
+        _uiState.value = _uiState.value.copy(
+            isPasswordResetMode = false,
+            isPasswordRecoveryMode = true,
+            resetCode = "",
+            newPassword = "",
+            errorMessage = null,
+            resetCodeError = null,
+            newPasswordError = null
         )
     }
 }

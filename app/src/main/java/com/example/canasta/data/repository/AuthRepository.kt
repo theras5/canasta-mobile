@@ -77,6 +77,30 @@ class AuthRepository(context: Context) {
     }
 
     /**
+     * Envía código de recuperación de contraseña
+     */
+    suspend fun sendPasswordResetCode(email: String): Result<Unit> {
+        return try {
+            authApi.sendPasswordResetCode(email)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Resetea la contraseña con el código recibido
+     */
+    suspend fun resetPassword(code: String, newPassword: String): Result<Unit> {
+        return try {
+            authApi.resetPassword(PasswordResetData(code, newPassword))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Cierra sesión eliminando el token
      */
     fun logout() {

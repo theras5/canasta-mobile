@@ -191,6 +191,23 @@
     <string name="register">Registrarse</string>
     <string name="already_have_account">¿Ya tienes cuenta?</string>
     <string name="login_link">Iniciar sesión</string>
+    <string name="forgot_password">¿Olvidaste tu contraseña?</string>
+
+    <!-- Password Recovery -->
+    <string name="recover_password_title">Recuperar Contraseña</string>
+    <string name="recover_password_message">Ingresa tu email y te enviaremos un código para resetear tu contraseña.</string>
+    <string name="send_code_button">ENVIAR</string>
+    <string name="reset_password_title">Resetear Contraseña</string>
+    <string name="reset_code_label">Código de verificación *</string>
+    <string name="reset_code_placeholder">ej: 098acc849b7cc56c</string>
+    <string name="reset_password_label">Nueva contraseña *</string>
+    <string name="reset_password_button">RESETEAR CONTRASEÑA</string>
+    <string name="back_button">VOLVER</string>
+    <string name="code_sent_to_email">Código enviado a %s. Revisa tu email (incluyendo spam).</string>
+    <string name="password_reset_success">Contraseña restablecida exitosamente. Por favor, inicia sesión</string>
+    <string name="error_sending_reset_code">Error al enviar código de recuperación</string>
+    <string name="error_invalid_reset_code">Código de verificación inválido o expirado</string>
+    <string name="error_reset_password_failed">Error al resetear contraseña</string>
 
     <!-- Validation Errors -->
     <string name="error_email_required">El correo electrónico es obligatorio</string>

@@ -7,11 +7,17 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -109,6 +115,35 @@ fun LoginScreen(
                             keyboardController = keyboardController,
                             focusManager = focusManager
                         )
+                    } else if (uiState.isPasswordRecoveryMode) {
+                        PasswordRecoveryContent(
+                            email = uiState.email,
+                            onEmailChange = viewModel::updateEmail,
+                            onSendCode = viewModel::sendPasswordResetCode,
+                            onCancel = viewModel::backToLogin,
+                            errorMessage = uiState.errorMessage,
+                            emailError = uiState.emailError,
+                            isLoading = uiState.isLoading,
+                            keyboardController = keyboardController,
+                            focusManager = focusManager
+                        )
+                    } else if (uiState.isPasswordResetMode) {
+                        PasswordResetContent(
+                            email = uiState.email,
+                            resetCode = uiState.resetCode,
+                            newPassword = uiState.newPassword,
+                            onResetCodeChange = viewModel::updateResetCode,
+                            onNewPasswordChange = viewModel::updateNewPassword,
+                            onResetPassword = viewModel::resetPassword,
+                            onBack = viewModel::backToPasswordRecovery,
+                            onCancel = viewModel::backToLogin,
+                            errorMessage = uiState.errorMessage,
+                            resetCodeError = uiState.resetCodeError,
+                            newPasswordError = uiState.newPasswordError,
+                            isLoading = uiState.isLoading,
+                            keyboardController = keyboardController,
+                            focusManager = focusManager
+                        )
                     } else {
                         AuthContent(
                             isLoginMode = uiState.isLoginMode,
@@ -123,6 +158,7 @@ fun LoginScreen(
                             onToggleMode = viewModel::toggleMode,
                             onLogin = viewModel::login,
                             onRegister = viewModel::register,
+                            onForgotPassword = viewModel::startPasswordRecovery,
                             errorMessage = uiState.errorMessage,
                             emailError = uiState.emailError,
                             passwordError = uiState.passwordError,
@@ -290,6 +326,7 @@ private fun AuthContent(
     onToggleMode: () -> Unit,
     onLogin: () -> Unit,
     onRegister: () -> Unit,
+    onForgotPassword: () -> Unit,
     errorMessage: String?,
     emailError: String?,
     passwordError: String?,
@@ -303,6 +340,7 @@ private fun AuthContent(
     keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
     focusManager: FocusManager
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
     Text(
         text = if (isLoginMode) stringResource(R.string.login) else stringResource(R.string.create_account),
         style = MaterialTheme.typography.headlineMedium,
@@ -419,7 +457,22 @@ private fun AuthContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible)
+                            Icons.Default.Visibility
+                        else
+                            Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible)
+                            stringResource(R.string.hide_password)
+                        else
+                            stringResource(R.string.show_password),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
             enabled = !isLoading,
             isError = passwordError != null,
             keyboardOptions = KeyboardOptions(
@@ -493,6 +546,15 @@ private fun AuthContent(
                 .padding(top = 4.dp)
                 .clickable(enabled = !isLoading) { onToggleMode() }
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.forgot_password),
+            style = MaterialTheme.typography.bodySmall,
+            color = Secondary,
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .clickable(enabled = !isLoading) { onForgotPassword() }
+        )
     } else {
         Text(
             text = stringResource(R.string.already_have_account),
@@ -509,3 +571,299 @@ private fun AuthContent(
         )
     }
 }
+
+@Composable
+private fun PasswordRecoveryContent(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    onSendCode: () -> Unit,
+    onCancel: () -> Unit,
+    errorMessage: String?,
+    emailError: String?,
+    isLoading: Boolean,
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    focusManager: FocusManager
+) {
+    Text(
+        text = stringResource(R.string.recover_password_title),
+        style = MaterialTheme.typography.headlineMedium,
+        color = Titles,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        text = stringResource(R.string.recover_password_message),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Campo de email
+    Column {
+        OutlinedTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            label = { Text(stringResource(R.string.email_label)) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = emailError != null,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }
+            ),
+            singleLine = true
+        )
+
+        if (emailError != null) {
+            Text(
+                text = emailError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+
+    if (errorMessage != null) {
+        Text(
+            text = errorMessage,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Botones
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedButton(
+            onClick = onCancel,
+            modifier = Modifier.weight(1f),
+            enabled = !isLoading
+        ) {
+            Text(stringResource(R.string.cancel))
+        }
+
+        Button(
+            onClick = onSendCode,
+            modifier = Modifier.weight(1f),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+            enabled = !isLoading,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.send_code_button),
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PasswordResetContent(
+    email: String,
+    resetCode: String,
+    newPassword: String,
+    onResetCodeChange: (String) -> Unit,
+    onNewPasswordChange: (String) -> Unit,
+    onResetPassword: () -> Unit,
+    onBack: () -> Unit,
+    onCancel: () -> Unit,
+    errorMessage: String?,
+    resetCodeError: String?,
+    newPasswordError: String?,
+    isLoading: Boolean,
+    keyboardController: androidx.compose.ui.platform.SoftwareKeyboardController?,
+    focusManager: FocusManager
+) {
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    Text(
+        text = stringResource(R.string.reset_password_title),
+        style = MaterialTheme.typography.headlineMedium,
+        color = Titles,
+        textAlign = TextAlign.Center
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+
+    // Mensaje de éxito o info
+    if (errorMessage != null && errorMessage.contains("enviado")) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = android.R.drawable.ic_dialog_info),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    // Campo de código de verificación
+    Column {
+        OutlinedTextField(
+            value = resetCode,
+            onValueChange = onResetCodeChange,
+            label = { Text(stringResource(R.string.reset_code_label)) },
+            placeholder = { Text(stringResource(R.string.reset_code_placeholder)) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading,
+            isError = resetCodeError != null,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            ),
+            singleLine = true
+        )
+
+        if (resetCodeError != null) {
+            Text(
+                text = resetCodeError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    // Campo de nueva contraseña
+    Column {
+        OutlinedTextField(
+            value = newPassword,
+            onValueChange = onNewPasswordChange,
+            label = { Text(stringResource(R.string.reset_password_label)) },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible)
+                            Icons.Default.Visibility
+                        else
+                            Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible)
+                            stringResource(R.string.hide_password)
+                        else
+                            stringResource(R.string.show_password),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            enabled = !isLoading,
+            isError = newPasswordError != null,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }
+            ),
+            singleLine = true
+        )
+
+        if (newPasswordError != null) {
+            Text(
+                text = newPasswordError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+
+    if (errorMessage != null && !errorMessage.contains("enviado")) {
+        Text(
+            text = errorMessage,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Botones
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Button(
+            onClick = onResetPassword,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Primary),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(stringResource(R.string.reset_password_button))
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = onBack,
+                modifier = Modifier.weight(1f),
+                enabled = !isLoading
+            ) {
+                Text(stringResource(R.string.back_button))
+            }
+
+            OutlinedButton(
+                onClick = onCancel,
+                modifier = Modifier.weight(1f),
+                enabled = !isLoading
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    }
+}
+
