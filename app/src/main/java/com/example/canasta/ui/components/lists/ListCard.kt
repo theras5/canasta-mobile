@@ -10,8 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,8 +35,10 @@ import com.example.canasta.ui.theme.Primary
  * @param listName Nombre de la lista
  * @param productCount Cantidad de productos en la lista
  * @param icon Emoji o ícono de la lista
+ * @param isRecurring Indica si la lista es recurrente
  * @param onClick Callback cuando se hace clic en la tarjeta
  * @param onDelete Callback cuando se elimina la lista
+ * @param onToggleRecurring Callback cuando se cambia el estado de recurrente
  * @param modifier Modificador opcional
  */
 @Composable
@@ -39,9 +46,11 @@ fun ListCard(
     listName: String,
     productCount: Int,
     icon: String = "🏠",
+    isRecurring: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onToggleRecurring: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -95,6 +104,21 @@ fun ListCard(
                     text = "$productCount ${stringResource(R.string.products_count)}",
                     fontSize = 14.sp,
                     color = Color.White.copy(alpha = 0.9f)
+                )
+            }
+
+            // Estrella de recurrencia
+            IconButton(
+                onClick = onToggleRecurring
+            ) {
+                Icon(
+                    imageVector = if (isRecurring) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                    contentDescription = if (isRecurring)
+                        stringResource(R.string.recurring_list)
+                    else
+                        stringResource(R.string.not_recurring_list),
+                    tint = Color(0xFFFFC107), // Color amarillo
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }

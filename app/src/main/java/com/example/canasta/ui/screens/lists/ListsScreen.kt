@@ -97,6 +97,29 @@ fun ListsScreen(
                         onDeleteList = { list ->
                             listToDelete = list
                             showDeleteConfirmation = true
+                        },
+                        onToggleRecurring = { list ->
+                            scope.launch {
+                                try {
+                                    ShoppingListService.toggleRecurring(list.id, !list.isRecurring)
+                                    lastSnackbarIsSuccess = true
+                                    val message = if (!list.isRecurring) {
+                                        context.getString(R.string.list_marked_recurring)
+                                    } else {
+                                        context.getString(R.string.list_unmarked_recurring)
+                                    }
+                                    snackbarHostState.showSnackbar(
+                                        message = message,
+                                        duration = SnackbarDuration.Short
+                                    )
+                                } catch (e: Exception) {
+                                    lastSnackbarIsSuccess = false
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.error_updating_list),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
                         }
                     )
                 }
@@ -115,7 +138,6 @@ fun ListsScreen(
                         lastSnackbarIsSuccess = true
                         snackbarHostState.showSnackbar(
                             message = context.getString(R.string.list_created_success),
-                            withDismissAction = true,
                             duration = SnackbarDuration.Short
                         )
                     } catch (e: HttpException) {
@@ -123,13 +145,11 @@ fun ListsScreen(
                         if (e.code() == 409) {
                             snackbarHostState.showSnackbar(
                                 message = context.getString(R.string.error_list_exists),
-                                withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         } else {
                             snackbarHostState.showSnackbar(
                                 message = context.getString(R.string.error_creating_list, e.code()),
-                                withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         }
@@ -137,7 +157,6 @@ fun ListsScreen(
                         lastSnackbarIsSuccess = false
                         snackbarHostState.showSnackbar(
                             message = context.getString(R.string.error_network_list),
-                            withDismissAction = true,
                             duration = SnackbarDuration.Short
                         )
                     }

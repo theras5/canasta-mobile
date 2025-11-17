@@ -62,7 +62,8 @@ object ShoppingListService {
                     name = dto.name,
                     productCount = 0, // La API no devuelve conteo directo
                     icon = icon,
-                    isFavorite = false
+                    isFavorite = false,
+                    isRecurring = dto.recurring ?: false
                 )
             }
 
@@ -323,6 +324,30 @@ object ShoppingListService {
             refreshProductsForList(listId, categoryId)
         } catch (e: Exception) {
             println("Error al togglear purchased del item $itemId en lista $listId: ${e.message}")
+            throw e
+        }
+    }
+
+    /**
+     * Actualiza el estado de recurrente de una lista
+     */
+    suspend fun toggleRecurring(listId: String, isRecurring: Boolean) {
+        try {
+            val listIdLong = listId.toLongOrNull() ?: return
+            val updateRequest = com.example.canasta.data.remote.models.ShoppingListUpdate(
+                recurring = isRecurring
+            )
+            val response = ApiClient.shoppingListService.updateShoppingList(listIdLong, updateRequest)
+            if (response.isSuccessful) {
+                // Actualizar el estado local
+                _listsState.value = _listsState.value.map { list ->
+                    if (list.id == listId) list.copy(isRecurring = isRecurring) else list
+                }
+            } else {
+                throw Exception("Error al actualizar recurring status: ${response.code()}")
+            }
+        } catch (e: Exception) {
+            println("Error al actualizar recurring para lista $listId: ${e.message}")
             throw e
         }
     }

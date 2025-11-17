@@ -170,8 +170,15 @@
     <string name="products_count">Productos</string>
     <string name="units_default">unidades</string>
     <string name="list_completed_and_deleted">Lista completada y eliminada</string>
+    <string name="list_completed_and_reset">Lista completada y reiniciada</string>
     <string name="list_created_success">Lista creada exitosamente</string>
     <string name="list_updated_success">Lista actualizada exitosamente</string>
+    <string name="list_marked_recurring">Lista marcada como recurrente</string>
+    <string name="list_unmarked_recurring">Lista desmarcada como recurrente</string>
+    <string name="recurring_list">Lista recurrente</string>
+    <string name="not_recurring_list">Lista no recurrente</string>
+    <string name="error_resetting_list">Error al reiniciar la lista: %s</string>
+    <string name="error_updating_list">Error al actualizar la lista</string>
 
     <!-- Share List Messages -->
     <string name="error_loading_users">Error al cargar usuarios: %s</string>

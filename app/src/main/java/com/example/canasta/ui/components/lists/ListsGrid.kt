@@ -23,7 +23,8 @@ data class ShoppingList(
     val name: String,
     val productCount: Int,
     val icon: String,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val isRecurring: Boolean = false
 )
 
 /**
@@ -33,6 +34,7 @@ data class ShoppingList(
  * @param onListClick Callback cuando se hace clic en una lista
  * @param onToggleFavorite Callback cuando se marca/desmarca como favorito
  * @param onDeleteList Callback cuando se elimina una lista
+ * @param onToggleRecurring Callback cuando se cambia el estado de recurrente
  * @param modifier Modificador opcional
  */
 @Composable
@@ -41,6 +43,7 @@ fun ListsGrid(
     onListClick: (ShoppingList) -> Unit = {},
     onToggleFavorite: (ShoppingList) -> Unit = {},
     onDeleteList: (ShoppingList) -> Unit = {},
+    onToggleRecurring: (ShoppingList) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isTablet = DeviceUtils.isTablet()
@@ -59,8 +62,10 @@ fun ListsGrid(
                     listName = list.name,
                     productCount = list.productCount,
                     icon = list.icon,
+                    isRecurring = list.isRecurring,
                     onClick = { onListClick(list) },
-                    onDelete = { onDeleteList(list) }
+                    onDelete = { onDeleteList(list) },
+                    onToggleRecurring = { onToggleRecurring(list) }
                 )
             }
         }
@@ -76,8 +81,10 @@ fun ListsGrid(
                     listName = list.name,
                     productCount = list.productCount,
                     icon = list.icon,
+                    isRecurring = list.isRecurring,
                     onClick = { onListClick(list) },
-                    onDelete = { onDeleteList(list) }
+                    onDelete = { onDeleteList(list) },
+                    onToggleRecurring = { onToggleRecurring(list) }
                 )
             }
         }

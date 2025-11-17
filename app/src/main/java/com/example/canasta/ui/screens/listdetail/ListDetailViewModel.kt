@@ -47,7 +47,8 @@ data class ListDetailUiState(
     val isSharing: Boolean = false,
     val isOwner: Boolean = true, // Por defecto true para mostrar todos los botones
     val currentUserId: Long? = null,
-    val shouldDeleteAndNavigateBack: Boolean = false // Indica que la lista debe ser eliminada y volver atrás
+    val shouldDeleteAndNavigateBack: Boolean = false, // Indica que la lista debe ser eliminada y volver atrás
+    val isRecurring: Boolean = false // Indica si la lista es recurrente
 )
 
 /**
@@ -191,6 +192,7 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                 val list = lists.firstOrNull { it.id == listId }
                 val effectiveName = listDetails?.name ?: list?.name ?: listName
                 val products = ShoppingListService.getProductsForList(listId)
+                val isRecurring = listDetails?.recurring ?: list?.isRecurring ?: false
 
                 _uiState.value = _uiState.value.copy(
                     listId = listId,
@@ -198,7 +200,8 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
                     products = sortProducts(products),
                     isLoading = false,
                     isOwner = isOwner,
-                    currentUserId = currentUser?.id
+                    currentUserId = currentUser?.id,
+                    isRecurring = isRecurring
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -433,9 +436,16 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
 
                 // Verificar si todos los productos (sin filtro) están comprados
                 if (allProducts.isNotEmpty() && allProducts.all { it.purchased == true }) {
-                    println("DEBUG: Todos los productos están comprados, eliminando lista automáticamente")
-                    // Todos los productos están comprados, eliminar la lista
-                    deleteListAutomatically()
+                    val isRecurring = _uiState.value.isRecurring
+                    println("DEBUG: Todos los productos están comprados. Lista recurrente: $isRecurring")
+
+                    if (isRecurring) {
+                        // Lista recurrente: desmarcar todos los productos y navegar de vuelta
+                        resetAllItemsAndNavigateBack()
+                    } else {
+                        // Lista no recurrente: eliminar la lista
+                        deleteListAutomatically()
+                    }
                 }
             } catch (e: Exception) {
                 println("ERROR en toggleProductCheck: ${e.message}")
@@ -494,6 +504,52 @@ class ListDetailViewModel(application: Application) : AndroidViewModel(applicati
      */
     fun resetDeleteAndNavigateBack() {
         _uiState.value = _uiState.value.copy(shouldDeleteAndNavigateBack = false)
+    }
+
+    /**
+     * Desmarca todos los productos de una lista recurrente y navega de vuelta
+     */
+    private suspend fun resetAllItemsAndNavigateBack() {
+        try {
+            println("DEBUG: Iniciando reset de items para lista recurrente")
+            val listId = _uiState.value.listId
+
+            // Indicar que se debe navegar de vuelta INMEDIATAMENTE
+            // Esto hace que la UI navegue primero, mejorando la experiencia del usuario
+            println("DEBUG: Marcando shouldDeleteAndNavigateBack = true")
+            _uiState.value = _uiState.value.copy(
+                shouldDeleteAndNavigateBack = true,
+                successMessage = getApplication<Application>().getString(R.string.list_completed_and_reset)
+            )
+            println("DEBUG: Estado actualizado, shouldDeleteAndNavigateBack=${_uiState.value.shouldDeleteAndNavigateBack}")
+
+            // Desmarcar todos los productos en background
+            val allProducts = ShoppingListService.getAllProductsFromApi(listId)
+            println("DEBUG: Desmarcando ${allProducts.size} productos en background")
+            allProducts.forEach { product ->
+                try {
+                    ShoppingListService.toggleItemPurchasedApi(
+                        listId = listId,
+                        itemId = product.id.toString(),
+                        purchased = false,
+                        categoryId = null
+                    )
+                } catch (e: Exception) {
+                    println("ERROR al desmarcar producto ${product.id}: ${e.message}")
+                }
+            }
+
+            // Refrescar las listas al final
+            println("DEBUG: Refrescando listas")
+            ShoppingListService.refreshLists()
+
+        } catch (e: Exception) {
+            println("ERROR en resetAllItemsAndNavigateBack: ${e.message}")
+            e.printStackTrace()
+            _uiState.value = _uiState.value.copy(
+                error = getApplication<Application>().getString(R.string.error_resetting_list, e.message ?: "")
+            )
+        }
     }
 
     /**
