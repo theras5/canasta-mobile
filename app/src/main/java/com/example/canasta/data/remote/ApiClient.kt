@@ -2,6 +2,7 @@ package com.example.canasta.data.remote
 
 import com.example.canasta.data.remote.api.AuthApiService
 import com.example.canasta.data.remote.api.CategoryApiService
+import com.example.canasta.data.remote.api.ListsApiService
 import com.example.canasta.data.remote.api.ProductApiService
 import com.example.canasta.data.remote.api.UserApiService
 import com.example.canasta.data.remote.interceptors.AuthInterceptor
@@ -67,6 +68,10 @@ object ApiClient {
         retrofit.create(CategoryApiService::class.java)
     }
 
+    val listsService: ListsApiService by lazy {
+        retrofit.create(ListsApiService::class.java)
+    }
+
     // Servicio de API para autenticación
     val authService: AuthApiService by lazy {
         retrofit.create(AuthApiService::class.java)
@@ -97,4 +102,3 @@ object ApiClient {
         return retrofit.create(serviceClass)
     }
 }
-

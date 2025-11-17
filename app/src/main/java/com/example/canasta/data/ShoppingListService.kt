@@ -1,10 +1,12 @@
 package com.example.canasta.data
 
 import com.example.canasta.data.remote.ApiClient
-import com.example.canasta.data.api.ShoppingListApi
-import com.example.canasta.data.api.ShoppingListCreateDto
-import com.example.canasta.data.api.ListItemApi
-import com.example.canasta.data.api.ListItemPagedResponseDto
+import com.example.canasta.data.remote.api.ListsApiService
+import com.example.canasta.data.remote.models.ListItemCreateDto
+import com.example.canasta.data.remote.models.ListItemPagedResponseDto
+import com.example.canasta.data.remote.models.ProductRef
+import com.example.canasta.data.remote.models.ShoppingListCreateDto
+import com.example.canasta.data.remote.models.TogglePurchasedBody
 import com.example.canasta.ui.components.lists.ShoppingList
 import com.example.canasta.ui.components.products.ListProduct
 import kotlinx.coroutines.delay
@@ -14,9 +16,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.buildJsonObject
 import java.util.UUID
 import retrofit2.HttpException
-import com.example.canasta.data.api.ListItemCreateDto
-import com.example.canasta.data.api.ProductRef
-import com.example.canasta.data.api.TogglePurchasedBody
 
 /**
  * Servicio singleton in-memory para gestionar listas de compras y sus ítems.
@@ -28,8 +27,8 @@ import com.example.canasta.data.api.TogglePurchasedBody
 object ShoppingListService {
 
     // Usar el ApiClient correcto que tiene autenticación configurada
-    private val api: ShoppingListApi = ApiClient.createService(ShoppingListApi::class.java)
-    private val itemsApi: ListItemApi = ApiClient.createService(ListItemApi::class.java)
+    private val api: ListsApiService = ApiClient.listsService
+    private val itemsApi: ListsApiService = ApiClient.listsService
 
     // Estado in-memory de las listas
     private val _listsState = MutableStateFlow<List<ShoppingList>>(emptyList())
@@ -83,7 +82,7 @@ object ShoppingListService {
                     val unit = dto.unit ?: "unidades"
                     "${q.toInt()} $unit"
                 } ?: ""
-                com.example.canasta.ui.components.products.ListProduct(
+                ListProduct(
                     id = dto.id.toString(),
                     name = dto.product.name,
                     description = quantityPart,
@@ -121,7 +120,7 @@ object ShoppingListService {
             name = name,
             description = "",  // Backend requiere string, no null
             recurring = false,
-            metadata = kotlinx.serialization.json.buildJsonObject { } // Objeto vacío
+            metadata = buildJsonObject { } // Objeto vacío
         )
         try {
             println("DEBUG: Creando lista con body: $body")
@@ -215,7 +214,7 @@ object ShoppingListService {
     /** Agrega un producto (ListItem) a una lista en backend y refresca la lista */
     suspend fun addProductToListApi(listId: String, productId: Long, quantity: Double = 1.0, unit: String = "unidades") {
         try {
-            val body = com.example.canasta.data.api.ListItemCreateDto(
+            val body = ListItemCreateDto(
                 product = ProductRef(id = productId),
                 quantity = quantity,
                 unit = unit,

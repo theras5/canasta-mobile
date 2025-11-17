@@ -1,19 +1,8 @@
-package com.example.canasta.data.api
+package com.example.canasta.data.remote.models
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
 
-/**
- * DTOs alineados con swagger para listas de compras.
- */
-
-/**
- * Usuario simplificado (owner de la lista)
- */
 @Serializable
 data class UserDto(
     val id: Long,
@@ -25,9 +14,6 @@ data class UserDto(
     val updatedAt: String? = null
 )
 
-/**
- * ShoppingList completo según swagger
- */
 @Serializable
 data class ShoppingListDto(
     val id: Long,
@@ -42,9 +28,6 @@ data class ShoppingListDto(
     val updatedAt: String? = null
 )
 
-/**
- * Información de paginación devuelta por la API de listas de compras.
- */
 @Serializable
 data class ShoppingListPaginationDto(
     val total: Int,
@@ -55,18 +38,12 @@ data class ShoppingListPaginationDto(
     val has_prev: Boolean
 )
 
-/**
- * Respuesta paginada de la API de listas de compras.
- */
 @Serializable
 data class ShoppingListPagedResponseDto(
     val data: List<ShoppingListDto>,
     val pagination: ShoppingListPaginationDto
 )
 
-/**
- * DTO para crear una shopping list
- */
 @Serializable
 data class ShoppingListCreateDto(
     val name: String,
@@ -75,18 +52,54 @@ data class ShoppingListCreateDto(
     val metadata: JsonObject? = null
 )
 
+@Serializable
+data class ProductDto(
+    val id: Long,
+    val name: String
+)
 
-interface ShoppingListApi {
+@Serializable
+data class ListItemDto(
+    val id: Long,
+    val quantity: Double? = null,
+    val unit: String? = null,
+    val purchased: Boolean? = null,
+    val metadata: JsonObject? = null,
+    val lastPurchasedAt: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
+    val product: ProductDto
+)
 
-    @GET("/api/shopping-lists")
-    suspend fun getShoppingLists(
-        @Query("name") name: String? = null,
-        @Query("page") page: Int? = null,
-        @Query("per_page") perPage: Int? = null
-    ): ShoppingListPagedResponseDto
+@Serializable
+data class ProductRef(
+    val id: Long
+)
 
-    @POST("/api/shopping-lists")
-    suspend fun createShoppingList(
-        @Body body: ShoppingListCreateDto
-    ): ShoppingListDto
-}
+@Serializable
+data class ListItemCreateDto(
+    val product: ProductRef,
+    val quantity: Double,
+    val unit: String,
+    val metadata: JsonObject? = null
+)
+
+@Serializable
+data class ListItemPaginationDto(
+    val total: Int,
+    val page: Int,
+    val per_page: Int,
+    val total_pages: Int,
+    val has_next: Boolean,
+    val has_prev: Boolean
+)
+
+@Serializable
+data class ListItemPagedResponseDto(
+    val data: List<ListItemDto>,
+    val pagination: ListItemPaginationDto
+)
+
+@Serializable
+data class TogglePurchasedBody(val purchased: Boolean)
+
