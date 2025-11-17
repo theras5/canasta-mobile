@@ -107,6 +107,67 @@
     <string name="select_category">Seleccione una categoría</string>
     <string name="all_categories">Todos</string>
 
+    <!-- Lists Screen -->
+    <string name="lists_title">Listas</string>
+    <string name="create_new_list">Crear nueva lista</string>
+    <string name="error_list_exists">Ya existe una lista con ese nombre.</string>
+    <string name="error_creating_list">Error al crear la lista (%d). Intenta de nuevo.</string>
+    <string name="error_network_list">Error de red al crear la lista. Revisa tu conexión.</string>
+    <string name="list_deleted_success">Lista eliminada exitosamente</string>
+    <string name="error_deleting_list">Error al eliminar la lista</string>
+    <string name="delete_list_title">Eliminar Lista</string>
+    <string name="delete_list_message">¿Estás seguro de que deseas eliminar la lista \"%s\"? Esta acción no se puede deshacer.</string>
+    <string name="empty_lists_title">Parece que no tienes listas todavía...</string>
+    <string name="empty_lists_subtitle">Pulsa el botón \"+\" para crear una nueva lista.</string>
+
+    <!-- Create List Modal -->
+    <string name="add_list_title">Agregar</string>
+    <string name="list_name_label">Nombre de la lista</string>
+    <string name="list_name_placeholder">Ej: Casa</string>
+    <string name="list_icon_label">Ícono de la lista</string>
+    <string name="add_button">Agregar</string>
+
+    <!-- Share List Bottom Sheet -->
+    <string name="share_list_title">Compartir lista</string>
+    <string name="user_email_label">Email del usuario</string>
+    <string name="user_email_placeholder">ejemplo@correo.com</string>
+    <string name="email_required_error">El email es requerido</string>
+    <string name="email_invalid_error">Email inválido</string>
+    <string name="share_button">Compartir</string>
+    <string name="shared_with_title">Compartido con:</string>
+    <string name="revoke_access">Revocar acceso</string>
+    <string name="no_shared_users">Aún no has compartido esta lista con nadie.</string>
+
+    <!-- Add Product to List Bottom Sheet -->
+    <string name="find_products">Encontrá tus Productos</string>
+    <string name="no_available_products">No hay productos disponibles para agregar.</string>
+    <string name="add_product_button">Agregar</string>
+
+    <!-- List Detail Screen -->
+    <string name="delete_product_title_list">Eliminar producto</string>
+    <string name="delete_product_message_list">¿Estás seguro de que quieres eliminar %s?</string>
+    <string name="delete_list_confirm_message">¿Estás seguro de que quieres eliminar la lista \"%s\"? Esta acción no se puede deshacer.</string>
+    <string name="product_added_success">Producto agregado exitosamente</string>
+    <string name="product_deleted_success_list">Producto eliminado exitosamente</string>
+    <string name="error_loading_products_list">Error al cargar productos: %s</string>
+    <string name="error_adding_product">Error al agregar %s</string>
+    <string name="error_loading_list">Error al cargar lista: %s</string>
+    <string name="error_saving_list">Error al guardar: %s</string>
+    <string name="error_invalid_list_id">ID de lista inválido</string>
+    <string name="error_updating_product_list">Error al actualizar producto: %s</string>
+    <string name="error_deleting_product_list">Error al eliminar producto: %s</string>
+    <string name="error_deleting_list_detail">Error al eliminar lista: %s</string>
+    <string name="error_refreshing_list">Error al refrescar lista: %s</string>
+
+    <!-- Share List Messages -->
+    <string name="error_loading_users">Error al cargar usuarios: %s</string>
+    <string name="user_not_found">Usuario no encontrado</string>
+    <string name="list_already_shared">Ya compartiste esta lista con este usuario</string>
+    <string name="cannot_share_with_yourself">No puedes compartir la lista contigo mismo</string>
+    <string name="error_sharing_list">Error al compartir: %s</string>
+    <string name="error_invalid_list_id_share">ID de lista inválido</string>
+    <string name="error_revoking_access">Error al revocar acceso: %s</string>
+
     <!-- General -->
     <string name="verify_your_account">Verificar tu cuenta</string>
     <string name="verification_code_sent_to">código de verificación enviado a</string>

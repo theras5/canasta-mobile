@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.canasta.R
@@ -32,18 +33,18 @@ fun EmptyStateListas() {
         // Por ahora usaré un placeholder si no la tienes.
         Image(
             painter = painterResource(id = R.drawable.fridge),
-            contentDescription = "Refrigerador vacío",
+            contentDescription = stringResource(R.string.empty_lists_title),
             modifier = Modifier.fillMaxWidth(0.7f)
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Parece que no tienes listas todavía...",
+            text = stringResource(R.string.empty_lists_title),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Pulsa el botón \"+\" para crear una nueva lista.",
+            text = stringResource(R.string.empty_lists_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             textAlign = TextAlign.Center

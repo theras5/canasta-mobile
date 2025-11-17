@@ -25,12 +25,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.ui.components.common.CustomModal
 import com.example.canasta.ui.components.common.ModalActionButton
 import com.example.canasta.ui.components.common.ModalTextField
@@ -60,15 +62,15 @@ fun CreateListModal(
     )
 
     CustomModal(
-        title = "Agregar",
+        title = stringResource(R.string.add_list_title),
         onDismiss = onDismiss
     ) {
         // Campo de nombre
         ModalTextField(
-            label = "Nombre de la lista",
+            label = stringResource(R.string.list_name_label),
             value = listName,
             onValueChange = { listName = it },
-            placeholder = "Ej: Casa"
+            placeholder = stringResource(R.string.list_name_placeholder)
         )
         
         Spacer(modifier = Modifier.height(20.dp))
@@ -76,7 +78,7 @@ fun CreateListModal(
         // Selector de emoji - fila horizontal scrolleable
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Ícono de la lista",
+                text = stringResource(R.string.list_icon_label),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 fontStyle = FontStyle.Italic,
@@ -125,7 +127,7 @@ fun CreateListModal(
         
         // Botón de acción
         ModalActionButton(
-            text = "Agregar",
+            text = stringResource(R.string.add_button),
             onClick = {
                 if (listName.isNotBlank()) {
                     onCreateList(listName, selectedEmoji)

@@ -37,9 +37,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.SharedUser
 import com.example.canasta.ui.components.common.ModalTextField
 import com.example.canasta.ui.theme.Primary
@@ -59,6 +61,10 @@ fun ShareListBottomSheet(
 
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf<String?>(null) }
+
+    // Obtener strings de recursos al inicio para evitar problemas en lambdas
+    val emailRequiredText = stringResource(R.string.email_required_error)
+    val emailInvalidText = stringResource(R.string.email_invalid_error)
 
     // Función para validar email
     fun validateEmail(email: String): Boolean {
@@ -88,7 +94,7 @@ fun ShareListBottomSheet(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Compartir lista",
+                    text = stringResource(R.string.share_list_title),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -98,13 +104,13 @@ fun ShareListBottomSheet(
 
             // Campo Email
             ModalTextField(
-                label = "Email del usuario",
+                label = stringResource(R.string.user_email_label),
                 value = email,
                 onValueChange = {
                     email = it
                     emailError = null
                 },
-                placeholder = "ejemplo@correo.com"
+                placeholder = stringResource(R.string.user_email_placeholder)
             )
 
             // Error de validación del campo email
@@ -131,8 +137,8 @@ fun ShareListBottomSheet(
             Button(
                 onClick = {
                     when {
-                        email.isBlank() -> emailError = "El email es requerido"
-                        !validateEmail(email) -> emailError = "Email inválido"
+                        email.isBlank() -> emailError = emailRequiredText
+                        !validateEmail(email) -> emailError = emailInvalidText
                         else -> {
                             onShareWithEmail(email)
                             email = ""
@@ -151,7 +157,7 @@ fun ShareListBottomSheet(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(text = "Compartir")
+                    Text(text = stringResource(R.string.share_button))
                 }
             }
 
@@ -159,14 +165,14 @@ fun ShareListBottomSheet(
 
             // Sección de usuarios compartidos
             Text(
-                text = "Compartido con:",
+                text = stringResource(R.string.shared_with_title),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold
             )
 
             if (sharedUsers.isEmpty()) {
                 Text(
-                    text = "Aún no has compartido esta lista con nadie",
+                    text = stringResource(R.string.no_shared_users),
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -197,7 +203,7 @@ fun ShareListBottomSheet(
                     contentColor = Color.Gray
                 )
             ) {
-                Text(text = "Cerrar")
+                Text(text = stringResource(R.string.cancel))
             }
         }
     }
@@ -255,7 +261,7 @@ private fun SharedUserItem(
         IconButton(onClick = onRevokeAccess) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Revocar acceso",
+                contentDescription = stringResource(R.string.revoke_access),
                 tint = MaterialTheme.colorScheme.error
             )
         }

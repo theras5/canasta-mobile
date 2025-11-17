@@ -38,10 +38,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.canasta.R
 import com.example.canasta.ui.components.common.CategoryChipsApi
@@ -74,7 +77,11 @@ import kotlinx.coroutines.launch
 fun ListDetailScreen(
     listId: String,
     listName: String,
-    viewModel: ListDetailViewModel = viewModel(),
+    viewModel: ListDetailViewModel = viewModel(
+        factory = ViewModelProvider.AndroidViewModelFactory.getInstance(
+            LocalContext.current.applicationContext as android.app.Application
+        )
+    ),
     onBackClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     onDeleteClick: () -> Unit = {}
@@ -128,8 +135,8 @@ fun ListDetailScreen(
     // Mostrar modal de confirmación si hay producto para eliminar
     if (showDeleteDialog && productToDelete != null) {
         ConfirmationModal(
-            title = "Eliminar producto",
-            message = "¿Estás seguro de que quieres eliminar ${productToDelete?.name}?",
+            title = stringResource(R.string.delete_product_title_list),
+            message = stringResource(R.string.delete_product_message_list, productToDelete?.name ?: ""),
             onDismiss = {
                 showDeleteDialog = false
                 productToDelete = null
@@ -147,8 +154,8 @@ fun ListDetailScreen(
     // Mostrar modal de confirmación para eliminar lista
     if (showDeleteListDialog) {
         ConfirmationModal(
-            title = "Eliminar lista",
-            message = "¿Estás seguro de que quieres eliminar la lista \"${uiState.listName}\"? Esta acción no se puede deshacer.",
+            title = stringResource(R.string.delete_list_title),
+            message = stringResource(R.string.delete_list_confirm_message, uiState.listName),
             onDismiss = {
                 showDeleteListDialog = false
             },

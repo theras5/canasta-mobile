@@ -107,6 +107,67 @@
     <string name="select_category">Select a category</string>
     <string name="all_categories">All</string>
 
+    <!-- Lists Screen -->
+    <string name="lists_title">Lists</string>
+    <string name="create_new_list">Create new list</string>
+    <string name="error_list_exists">A list with that name already exists.</string>
+    <string name="error_creating_list">Error creating list (%d). Try again.</string>
+    <string name="error_network_list">Network error creating list. Check your connection.</string>
+    <string name="list_deleted_success">List deleted successfully</string>
+    <string name="error_deleting_list">Error deleting list</string>
+    <string name="delete_list_title">Delete List</string>
+    <string name="delete_list_message">Are you sure you want to delete the list \"%s\"? This action cannot be undone.</string>
+    <string name="empty_lists_title">Looks like you don\'t have any lists yet...</string>
+    <string name="empty_lists_subtitle">Press the \"+\" button to create a new list.</string>
+
+    <!-- Create List Modal -->
+    <string name="add_list_title">Add</string>
+    <string name="list_name_label">List name</string>
+    <string name="list_name_placeholder">E.g: Home</string>
+    <string name="list_icon_label">List icon</string>
+    <string name="add_button">Add</string>
+
+    <!-- Share List Bottom Sheet -->
+    <string name="share_list_title">Share list</string>
+    <string name="user_email_label">User email</string>
+    <string name="user_email_placeholder">example@email.com</string>
+    <string name="email_required_error">Email is required</string>
+    <string name="email_invalid_error">Invalid email</string>
+    <string name="share_button">Share</string>
+    <string name="shared_with_title">Shared with:</string>
+    <string name="revoke_access">Revoke access</string>
+    <string name="no_shared_users">You haven\'t shared this list with anyone yet.</string>
+
+    <!-- Add Product to List Bottom Sheet -->
+    <string name="find_products">Find your Products</string>
+    <string name="no_available_products">No products available to add.</string>
+    <string name="add_product_button">Add</string>
+
+    <!-- List Detail Screen -->
+    <string name="delete_product_title_list">Delete product</string>
+    <string name="delete_product_message_list">Are you sure you want to delete %s?</string>
+    <string name="delete_list_confirm_message">Are you sure you want to delete the list \"%s\"? This action cannot be undone.</string>
+    <string name="product_added_success">Product added successfully</string>
+    <string name="product_deleted_success_list">Product deleted successfully</string>
+    <string name="error_loading_products_list">Error loading products: %s</string>
+    <string name="error_adding_product">Error adding %s</string>
+    <string name="error_loading_list">Error loading list: %s</string>
+    <string name="error_saving_list">Error saving: %s</string>
+    <string name="error_invalid_list_id">Invalid list ID</string>
+    <string name="error_updating_product_list">Error updating product: %s</string>
+    <string name="error_deleting_product_list">Error deleting product: %s</string>
+    <string name="error_deleting_list_detail">Error deleting list: %s</string>
+    <string name="error_refreshing_list">Error refreshing list: %s</string>
+
+    <!-- Share List Messages -->
+    <string name="error_loading_users">Error loading users: %s</string>
+    <string name="user_not_found">User not found</string>
+    <string name="list_already_shared">You already shared this list with this user</string>
+    <string name="cannot_share_with_yourself">You cannot share the list with yourself</string>
+    <string name="error_sharing_list">Error sharing: %s</string>
+    <string name="error_invalid_list_id_share">Invalid list ID</string>
+    <string name="error_revoking_access">Error revoking access: %s</string>
+
     <!-- General -->
     <string name="verify_your_account">Verify your account</string>
     <string name="verification_code_sent_to">verification code sent to</string>

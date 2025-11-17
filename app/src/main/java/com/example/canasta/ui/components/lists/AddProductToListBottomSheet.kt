@@ -14,9 +14,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.theme.Secondary
@@ -83,14 +85,14 @@ fun AddProductToListBottomSheet(
                     .padding(bottom = 16.dp),
                 placeholder = {
                     Text(
-                        "Encontrá tus Productos",
+                        stringResource(R.string.find_products),
                         color = Color.Gray.copy(alpha = 0.6f)
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar",
+                        contentDescription = stringResource(R.string.search),
                         tint = Color.Gray
                     )
                 },
@@ -116,7 +118,7 @@ fun AddProductToListBottomSheet(
                     FilterChip(
                         selected = selectedCategory == null,
                         onClick = { selectedCategory = null },
-                        label = { Text("Todos") },
+                        label = { Text(stringResource(R.string.all_categories)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = Secondary.copy(alpha = 0.3f),
                             selectedLabelColor = Secondary,
@@ -169,7 +171,7 @@ fun AddProductToListBottomSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No se encontraron productos",
+                                text = stringResource(R.string.no_available_products),
                                 color = Color.Gray,
                                 fontSize = 16.sp
                             )
@@ -223,7 +225,7 @@ private fun ProductItemRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar ${product.name}",
+                    contentDescription = stringResource(R.string.add_product_button),
                     tint = Secondary,
                     modifier = Modifier.size(28.dp)
                 )

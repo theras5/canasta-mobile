@@ -20,6 +20,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.canasta.data.ShoppingListService
@@ -38,6 +41,7 @@ import retrofit2.HttpException
 fun ListsScreen(
     onNavigateToListDetail: (ShoppingList) -> Unit = {}
 ) {
+    val context = LocalContext.current
     var showCreateModal by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var listToDelete by remember { mutableStateOf<ShoppingList?>(null) }
@@ -70,7 +74,7 @@ fun ListsScreen(
         floatingActionButton = {
             CommonFab(
                 iconRes = R.drawable.add_list,
-                contentDescription = "Crear nueva lista",
+                contentDescription = stringResource(R.string.create_new_list),
                 onClick = { showCreateModal = true }
             )
         }
@@ -81,7 +85,7 @@ fun ListsScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            CommonScreenHeader(title = "Listas")
+            CommonScreenHeader(title = stringResource(R.string.lists_title))
 
             Box(modifier = Modifier.weight(1f)) {
                 if (lists.isEmpty()) {
@@ -111,20 +115,20 @@ fun ListsScreen(
                     } catch (e: HttpException) {
                         if (e.code() == 409) {
                             snackbarHostState.showSnackbar(
-                                message = "Ya existe una lista con ese nombre.",
+                                message = context.getString(R.string.error_list_exists),
                                 withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         } else {
                             snackbarHostState.showSnackbar(
-                                message = "Error al crear la lista (${e.code()}). Intenta de nuevo.",
+                                message = context.getString(R.string.error_creating_list, e.code()),
                                 withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         }
                     } catch (e: Exception) {
                         snackbarHostState.showSnackbar(
-                            message = "Error de red al crear la lista. Revisa tu conexión.",
+                            message = context.getString(R.string.error_network_list),
                             withDismissAction = true,
                             duration = SnackbarDuration.Short
                         )
@@ -137,8 +141,8 @@ fun ListsScreen(
 
     if (showDeleteConfirmation && listToDelete != null) {
         ConfirmationModal(
-            title = "Eliminar Lista",
-            message = "¿Estás seguro de que deseas eliminar la lista \"${listToDelete?.name}\"? Esta acción no se puede deshacer.",
+            title = stringResource(R.string.delete_list_title),
+            message = stringResource(R.string.delete_list_message, listToDelete?.name ?: ""),
             onDismiss = {
                 showDeleteConfirmation = false
                 listToDelete = null
@@ -149,13 +153,13 @@ fun ListsScreen(
                         try {
                             ShoppingListService.deleteList(list.id)
                             snackbarHostState.showSnackbar(
-                                message = "Lista eliminada exitosamente",
+                                message = context.getString(R.string.list_deleted_success),
                                 withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )
                         } catch (_: Exception) {
                             snackbarHostState.showSnackbar(
-                                message = "Error al eliminar la lista",
+                                message = context.getString(R.string.error_deleting_list),
                                 withDismissAction = true,
                                 duration = SnackbarDuration.Short
                             )

@@ -1,7 +1,9 @@
 package com.example.canasta.ui.screens.listdetail
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.canasta.R
 import com.example.canasta.data.ShoppingListService
 import com.example.canasta.data.remote.ApiClient
 import com.example.canasta.data.remote.models.ListItemUpdate
@@ -52,7 +54,7 @@ data class ListDetailUiState(
  * ViewModel para la pantalla de detalle de lista
  * Gestiona el estado de UI y la lógica de negocio
  */
-class ListDetailViewModel : ViewModel() {
+class ListDetailViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(ListDetailUiState())
     val uiState: StateFlow<ListDetailUiState> = _uiState.asStateFlow()
@@ -91,7 +93,7 @@ class ListDetailViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al cargar productos: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_loading_products_list, e.message ?: "")
                 )
             }
         }
@@ -117,7 +119,7 @@ class ListDetailViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             products = _uiState.value.products + newProduct,
             tempAddedProductIds = _uiState.value.tempAddedProductIds + product.id.toString(),
-            successMessage = "Producto agregado exitosamente"
+            successMessage = getApplication<Application>().getString(R.string.product_added_success)
         )
 
         // Enviar a la API en background SILENCIOSAMENTE (sin tocar la UI)
@@ -136,7 +138,7 @@ class ListDetailViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(
                     products = _uiState.value.products.filter { it.id != "temp_${product.id}" },
                     tempAddedProductIds = _uiState.value.tempAddedProductIds - product.id.toString(),
-                    error = "Error al agregar ${product.name}"
+                    error = getApplication<Application>().getString(R.string.error_adding_product, product.name)
                 )
             }
         }
@@ -192,7 +194,7 @@ class ListDetailViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Error al cargar lista: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_loading_list, e.message ?: "")
                 )
             }
         }
@@ -264,19 +266,19 @@ class ListDetailViewModel : ViewModel() {
                     } else {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
-                            error = "Error al guardar: ${response.code()}"
+                            error = getApplication<Application>().getString(R.string.error_saving_list, response.code().toString())
                         )
                     }
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        error = "ID de lista inválido"
+                        error = getApplication<Application>().getString(R.string.error_invalid_list_id)
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = "Error al guardar: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_saving_list, e.message ?: "")
                 )
             }
         }
@@ -317,13 +319,13 @@ class ListDetailViewModel : ViewModel() {
                     val response = ApiClient.shoppingListService.updateListItem(listId, itemId, updateRequest)
                     if (!response.isSuccessful) {
                         _uiState.value = _uiState.value.copy(
-                            error = "Error al actualizar producto: ${response.code()}"
+                            error = getApplication<Application>().getString(R.string.error_updating_product_list, response.code().toString())
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al actualizar producto: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_updating_product_list, e.message ?: "")
                 )
             }
         }
@@ -342,23 +344,22 @@ class ListDetailViewModel : ViewModel() {
                     val response = ApiClient.shoppingListService.deleteListItem(listId, itemId)
                     if (response.isSuccessful) {
                         // Actualizar UI optimistamente
-                        val updatedProducts = _uiState.value.products.filter { it.id != productId }
                         _uiState.value = _uiState.value.copy(
-                            products = updatedProducts,
-                            successMessage = "Producto eliminado exitosamente"
+                            products = _uiState.value.products.filter { it.id != productId },
+                            successMessage = getApplication<Application>().getString(R.string.product_deleted_success_list)
                         )
 
                         // También eliminar del servicio local
                         ShoppingListService.deleteProductFromList(_uiState.value.listId, productId)
                     } else {
                         _uiState.value = _uiState.value.copy(
-                            error = "Error al eliminar producto: ${response.code()}"
+                            error = getApplication<Application>().getString(R.string.error_deleting_product_list, response.code().toString())
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al eliminar producto: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_deleting_product_list, e.message ?: "")
                 )
             }
         }
@@ -378,13 +379,13 @@ class ListDetailViewModel : ViewModel() {
                         ShoppingListService.deleteList(_uiState.value.listId)
                     } else {
                         _uiState.value = _uiState.value.copy(
-                            error = "Error al eliminar lista: ${response.code()}"
+                            error = getApplication<Application>().getString(R.string.error_deleting_list_detail, response.code().toString())
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al eliminar lista: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_deleting_list_detail, e.message ?: "")
                 )
             }
         }
@@ -405,7 +406,7 @@ class ListDetailViewModel : ViewModel() {
                 _uiState.value = _uiState.value.copy(products = refreshed)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    error = "Error al actualizar producto: ${e.message}"
+                    error = getApplication<Application>().getString(R.string.error_updating_product_list, e.message ?: "")
                 )
             }
         }
@@ -454,13 +455,13 @@ class ListDetailViewModel : ViewModel() {
                         )
                     } else {
                         _uiState.value = _uiState.value.copy(
-                            shareError = "Error al cargar usuarios: ${response.code()}"
+                            shareError = getApplication<Application>().getString(R.string.error_loading_users, response.code().toString())
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    shareError = "Error al cargar usuarios: ${e.message}"
+                    shareError = getApplication<Application>().getString(R.string.error_loading_users, e.message ?: "")
                 )
             }
         }
@@ -487,10 +488,10 @@ class ListDetailViewModel : ViewModel() {
                         )
                     } else {
                         val errorMsg = when (response.code()) {
-                            404 -> "Usuario no encontrado"
-                            409 -> "Ya compartiste esta lista con este usuario"
-                            400 -> "No puedes compartir la lista contigo mismo"
-                            else -> "Error al compartir: ${response.code()}"
+                            404 -> getApplication<Application>().getString(R.string.user_not_found)
+                            409 -> getApplication<Application>().getString(R.string.list_already_shared)
+                            400 -> getApplication<Application>().getString(R.string.cannot_share_with_yourself)
+                            else -> getApplication<Application>().getString(R.string.error_sharing_list, response.code().toString())
                         }
                         _uiState.value = _uiState.value.copy(
                             isSharing = false,
@@ -500,13 +501,13 @@ class ListDetailViewModel : ViewModel() {
                 } else {
                     _uiState.value = _uiState.value.copy(
                         isSharing = false,
-                        shareError = "ID de lista inválido"
+                        shareError = getApplication<Application>().getString(R.string.error_invalid_list_id_share)
                     )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isSharing = false,
-                    shareError = "Error al compartir: ${e.message}"
+                    shareError = getApplication<Application>().getString(R.string.error_sharing_list, e.message ?: "")
                 )
             }
         }
@@ -529,15 +530,16 @@ class ListDetailViewModel : ViewModel() {
                             sharedUsers = updatedUsers,
                             shareError = null
                         )
+                        loadSharedUsers() // Recargar la lista de usuarios
                     } else {
                         _uiState.value = _uiState.value.copy(
-                            shareError = "Error al revocar acceso: ${response.code()}"
+                            shareError = getApplication<Application>().getString(R.string.error_revoking_access, response.code().toString())
                         )
                     }
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
-                    shareError = "Error al revocar acceso: ${e.message}"
+                    shareError = getApplication<Application>().getString(R.string.error_revoking_access, e.message ?: "")
                 )
             }
         }
@@ -571,7 +573,7 @@ class ListDetailViewModel : ViewModel() {
                     _uiState.value = _uiState.value.copy(products = refreshed)
                 } catch (e: Exception) {
                     _uiState.value = _uiState.value.copy(
-                        error = "Error al refrescar lista: ${e.message}"
+                        error = getApplication<Application>().getString(R.string.error_refreshing_list, e.message ?: "")
                     )
                 }
             }
