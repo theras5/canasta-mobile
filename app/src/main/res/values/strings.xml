@@ -58,6 +58,30 @@
     <string name="nav_more">Más</string>
     <string name="categories">Categorías</string>
 
+    <!-- Categories Screen -->
+    <string name="categories_title">Categorías</string>
+    <string name="categories_subtitle">Gestiona las categorías de productos</string>
+    <string name="add_category">Agregar categoría</string>
+    <string name="retry">Reintentar</string>
+    <string name="no_categories_message">No hay categorías. Presiona + para crear una.</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="delete_category_title">Eliminar categoría</string>
+    <string name="delete_category_message">¿Estás seguro de que deseas eliminar \"%s\"?</string>
+    <string name="new_category">Nueva categoría</string>
+    <string name="edit_category">Editar categoría</string>
+    <string name="category_name">Nombre</string>
+    <string name="select_icon">Selecciona un ícono:</string>
+    <string name="create">Crear</string>
+    <string name="save">Guardar</string>
+    <string name="category_created_success">Categoría creada exitosamente</string>
+    <string name="category_updated_success">Categoría actualizada exitosamente</string>
+    <string name="category_deleted_success">Categoría eliminada exitosamente</string>
+    <string name="error_loading_categories">Error al cargar categorías</string>
+    <string name="error_creating_category">Error al crear categoría</string>
+    <string name="error_updating_category">Error al actualizar categoría</string>
+    <string name="error_deleting_category">Error al eliminar categoría</string>
+
     <!-- Products Screen -->
     <string name="products">Productos</string>
 

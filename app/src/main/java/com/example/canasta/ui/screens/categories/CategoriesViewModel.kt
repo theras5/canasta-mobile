@@ -2,6 +2,7 @@ package com.example.canasta.ui.screens.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.repository.CategoryRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,7 @@ import kotlinx.coroutines.launch
 sealed class CategoriesUiState {
     object Loading : CategoriesUiState()
     data class Success(val categories: List<GetCategory>) : CategoriesUiState()
-    data class Error(val message: String) : CategoriesUiState()
+    data class Error(val messageResId: Int) : CategoriesUiState()
 }
 
 /**
@@ -34,12 +35,12 @@ class CategoriesViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _errorMessageResId = MutableStateFlow<Int?>(null)
+    val errorMessageResId: StateFlow<Int?> = _errorMessageResId.asStateFlow()
 
-    // Flujo para mensajes de éxito (faltaba la declaración)
-    private val _successMessage = MutableStateFlow<String?>(null)
-    val successMessage: StateFlow<String?> = _successMessage.asStateFlow()
+    // Flujo para mensajes de éxito usando resource ID
+    private val _successMessageResId = MutableStateFlow<Int?>(null)
+    val successMessageResId: StateFlow<Int?> = _successMessageResId.asStateFlow()
 
     init {
         loadCategories()
@@ -51,7 +52,7 @@ class CategoriesViewModel : ViewModel() {
     fun loadCategories() {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
+            _errorMessageResId.value = null
             _uiState.value = CategoriesUiState.Loading
 
             repository.getCategories().fold(
@@ -61,9 +62,9 @@ class CategoriesViewModel : ViewModel() {
                     _isLoading.value = false
                 },
                 onFailure = { error ->
-                    val message = error.message ?: "Error al cargar categorías"
-                    _errorMessage.value = message
-                    _uiState.value = CategoriesUiState.Error(message)
+                    val messageResId = R.string.error_loading_categories
+                    _errorMessageResId.value = messageResId
+                    _uiState.value = CategoriesUiState.Error(messageResId)
                     _isLoading.value = false
                 }
             )
@@ -76,16 +77,16 @@ class CategoriesViewModel : ViewModel() {
     fun createCategory(name: String, metadata: Map<String, String>? = null) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.createCategory(name, metadata).fold(
                 onSuccess = {
-                    _successMessage.value = "Categoría creada exitosamente"
+                    _successMessageResId.value = R.string.category_created_success
                     loadCategories() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al crear categoría"
+                    _errorMessageResId.value = R.string.error_creating_category
                     _isLoading.value = false
                 }
             )
@@ -102,16 +103,16 @@ class CategoriesViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.updateCategory(id, name, metadata).fold(
                 onSuccess = {
-                    _successMessage.value = "Categoría actualizada exitosamente"
+                    _successMessageResId.value = R.string.category_updated_success
                     loadCategories() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al actualizar categoría"
+                    _errorMessageResId.value = R.string.error_updating_category
                     _isLoading.value = false
                 }
             )
@@ -124,16 +125,16 @@ class CategoriesViewModel : ViewModel() {
     fun deleteCategory(id: Long) {
         viewModelScope.launch {
             _isLoading.value = true
-            _errorMessage.value = null
-            _successMessage.value = null
+            _errorMessageResId.value = null
+            _successMessageResId.value = null
 
             repository.deleteCategory(id).fold(
                 onSuccess = {
-                    _successMessage.value = "Categoría eliminada exitosamente"
+                    _successMessageResId.value = R.string.category_deleted_success
                     loadCategories() // Recargar la lista
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "Error al eliminar categoría"
+                    _errorMessageResId.value = R.string.error_deleting_category
                     _isLoading.value = false
                 }
             )
@@ -144,13 +145,13 @@ class CategoriesViewModel : ViewModel() {
      * Limpia el mensaje de error
      */
     fun clearError() {
-        _errorMessage.value = null
+        _errorMessageResId.value = null
     }
 
     /**
      * Limpia el mensaje de éxito
      */
     fun clearSuccess() {
-        _successMessage.value = null
+        _successMessageResId.value = null
     }
 }

@@ -40,11 +40,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.canasta.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
 import com.example.canasta.data.remote.models.CategoryIcons
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.ui.components.common.CommonFab
@@ -60,11 +63,11 @@ fun CategoriesScreen(
     onBackClick: () -> Unit = {},
     viewModel: CategoriesViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val categories by viewModel.categories.collectAsStateWithLifecycle()
-    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
-    // Reemplazamos collectAsStateWithLifecycle por collectAsState para successMessage para evitar errores de inferencia
-    val successMessage by viewModel.successMessage.collectAsState()
+    val errorMessageResId by viewModel.errorMessageResId.collectAsStateWithLifecycle()
+    val successMessageResId by viewModel.successMessageResId.collectAsStateWithLifecycle()
     val isTablet = DeviceUtils.isTablet()
 
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -77,19 +80,19 @@ fun CategoriesScreen(
     var lastSnackbarIsSuccess by remember { mutableStateOf(false) }
 
     // Mostrar mensajes de error
-    LaunchedEffect(errorMessage) {
-        errorMessage?.let { message ->
+    LaunchedEffect(errorMessageResId) {
+        errorMessageResId?.let { resId ->
             lastSnackbarIsSuccess = false
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(context.getString(resId))
             viewModel.clearError()
         }
     }
 
     // Mostrar mensajes de éxito
-    LaunchedEffect(successMessage) {
-        successMessage?.let { message ->
+    LaunchedEffect(successMessageResId) {
+        successMessageResId?.let { resId ->
             lastSnackbarIsSuccess = true
-            snackbarHostState.showSnackbar(message)
+            snackbarHostState.showSnackbar(context.getString(resId))
             viewModel.clearSuccess()
         }
     }
@@ -111,7 +114,7 @@ fun CategoriesScreen(
         floatingActionButton = {
             CommonFab(
                 icon = Icons.Filled.Add,
-                contentDescription = "Agregar categoría",
+                contentDescription = stringResource(R.string.add_category),
                 onClick = { showCreateDialog = true }
             )
         }
@@ -122,16 +125,16 @@ fun CategoriesScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            CommonScreenHeader(title = "Categorías")
+            CommonScreenHeader(title = stringResource(R.string.categories_title))
             Text(
-                text = "Gestiona las categorías de productos",
+                text = stringResource(R.string.categories_subtitle),
                 fontSize = 16.sp,
                 color = Color(0xFF666666),
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
             // Mensaje de error persistente (además del snackbar)
-            errorMessage?.let { message ->
+            errorMessageResId?.let { resId ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -141,7 +144,7 @@ fun CategoriesScreen(
                     )
                 ) {
                     Text(
-                        text = message,
+                        text = stringResource(resId),
                         modifier = Modifier.padding(16.dp),
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
@@ -163,11 +166,13 @@ fun CategoriesScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = (uiState as CategoriesUiState.Error).message,
+                                text = stringResource((uiState as CategoriesUiState.Error).messageResId),
                                 color = MaterialTheme.colorScheme.error
                             )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = { viewModel.loadCategories() }) { Text("Reintentar") }
+                            Button(onClick = { viewModel.loadCategories() }) {
+                                Text(stringResource(R.string.retry))
+                            }
                         }
                     }
                 }
@@ -178,7 +183,7 @@ fun CategoriesScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "No hay categorías. Presiona + para crear una.",
+                                text = stringResource(R.string.no_categories_message),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = Color.Gray
                             )
@@ -271,8 +276,8 @@ fun CategoriesScreen(
                 showDeleteDialog = false
                 selectedCategory = null
             },
-            title = { Text("Eliminar categoría") },
-            text = { Text("¿Estás seguro de que deseas eliminar \"${selectedCategory!!.name}\"?") },
+            title = { Text(stringResource(R.string.delete_category_title)) },
+            text = { Text(stringResource(R.string.delete_category_message, selectedCategory!!.name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -281,11 +286,11 @@ fun CategoriesScreen(
                         selectedCategory = null
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = Errors)
-                ) { Text("Eliminar") }
+                ) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false; selectedCategory = null }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -340,12 +345,12 @@ fun CategoryItem(
 
             Row {
                 IconButton(onClick = onEditClick) {
-                    Icon(Icons.Default.Edit, contentDescription = "Editar")
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
                 }
                 IconButton(onClick = onDeleteClick) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Eliminar",
+                        contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -416,7 +421,7 @@ fun CreateCategoryDialog(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Nueva categoría",
+                    text = stringResource(R.string.new_category),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -428,13 +433,13 @@ fun CreateCategoryDialog(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nombre") },
+                label = { Text(stringResource(R.string.category_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Text(
-                text = "Selecciona un ícono:",
+                text = stringResource(R.string.select_icon),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -467,7 +472,7 @@ fun CreateCategoryDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = name.isNotBlank()
             ) {
-                Text("Crear")
+                Text(stringResource(R.string.create))
             }
 
             OutlinedButton(
@@ -477,7 +482,7 @@ fun CreateCategoryDialog(
                     contentColor = Color.Gray
                 )
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
@@ -516,7 +521,7 @@ fun EditCategoryDialog(
                     modifier = Modifier.size(24.dp)
                 )
                 Text(
-                    text = "Editar categoría",
+                    text = stringResource(R.string.edit_category),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -528,13 +533,13 @@ fun EditCategoryDialog(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nombre") },
+                label = { Text(stringResource(R.string.category_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
 
             Text(
-                text = "Selecciona un ícono:",
+                text = stringResource(R.string.select_icon),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -567,7 +572,7 @@ fun EditCategoryDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = Secondary),
                 enabled = name.isNotBlank()
             ) {
-                Text("Guardar")
+                Text(stringResource(R.string.save))
             }
 
             OutlinedButton(
@@ -577,7 +582,7 @@ fun EditCategoryDialog(
                     contentColor = Color.Gray
                 )
             ) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancel))
             }
         }
     }
