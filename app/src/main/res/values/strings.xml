@@ -94,6 +94,8 @@
     <string name="error_loading_products">Error al cargar productos</string>
     <string name="no_products_available">No hay productos disponibles</string>
     <string name="no_products_found_filters">No se encontraron productos con los filtros aplicados</string>
+    <string name="empty_products_title">Parece que no tienes productos todavía...</string>
+    <string name="empty_products_subtitle">Pulsa el botón \"+\" para agregar un nuevo producto.</string>
     <string name="delete_product_title">Eliminar Producto</string>
     <string name="delete_product_message">¿Seguro que querés eliminar \"%s\"? Esta acción no se puede revertir.</string>
     <string name="product_created_success">Producto creado exitosamente</string>
@@ -122,6 +124,8 @@
     <string name="delete_list_message">¿Estás seguro de que deseas eliminar la lista \"%s\"? Esta acción no se puede deshacer.</string>
     <string name="empty_lists_title">Parece que no tienes listas todavía...</string>
     <string name="empty_lists_subtitle">Pulsa el botón \"+\" para crear una nueva lista.</string>
+    <string name="empty_list_detail_title">No tienes ningún producto en esta lista</string>
+    <string name="empty_list_detail_subtitle">Presiona el botón \"+\" para agregar productos.</string>
 
     <!-- Create List Modal -->
     <string name="add_list_title">Agregar</string>

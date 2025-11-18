@@ -52,6 +52,7 @@ import com.example.canasta.ui.components.common.CommonFab
 import com.example.canasta.ui.components.common.ConfirmationModal
 import com.example.canasta.ui.components.common.EditProductModal
 import com.example.canasta.ui.components.lists.AddProductToListBottomSheet
+import com.example.canasta.ui.components.lists.EmptyStateListDetail
 import com.example.canasta.ui.components.products.ListProduct
 import com.example.canasta.ui.components.products.ProductItemCard
 import com.example.canasta.ui.theme.Background
@@ -387,24 +388,28 @@ fun ListDetailScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Chips de categorías
-                item {
-                    CategoryChipsApi(
-                        categories = uiState.categories,
-                        selectedCategory = uiState.selectedCategory,
-                        onCategorySelected = { category ->
-                            viewModel.selectCategory(category)
-                        }
-                    )
-                }
+            if (uiState.products.isEmpty()) {
+                // Mostrar estado vacío cuando no hay productos
+                EmptyStateListDetail()
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 88.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Chips de categorías
+                    item {
+                        CategoryChipsApi(
+                            categories = uiState.categories,
+                            selectedCategory = uiState.selectedCategory,
+                            onCategorySelected = { category ->
+                                viewModel.selectCategory(category)
+                            }
+                        )
+                    }
 
-                // Lista de productos
-                items(uiState.products) { product ->
+                    // Lista de productos
+                    items(uiState.products) { product ->
                     ProductItemCard(
                         product = product,
                         isEditMode = uiState.screenMode == ScreenMode.EDIT,
@@ -427,6 +432,7 @@ fun ListDetailScreen(
                         }
                     )
                 }
+            }
             }
         }
     }

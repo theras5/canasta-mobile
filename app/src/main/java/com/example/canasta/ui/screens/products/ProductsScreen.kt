@@ -51,6 +51,7 @@ import com.example.canasta.data.repository.CategoryRepository
 import com.example.canasta.ui.components.common.CategoryChipsApi
 import com.example.canasta.ui.components.products.CreateProductModalApi
 import com.example.canasta.ui.components.products.EditProductModal
+import com.example.canasta.ui.components.products.EmptyStateProducts
 import com.example.canasta.ui.components.products.RemoteProductCard
 import com.example.canasta.ui.components.common.ConfirmDeleteModal
 import com.example.canasta.ui.components.common.CommonFab
@@ -319,16 +320,18 @@ private fun ProductsScreenPortrait(
                 }
                 is ProductsUiState.Success -> {
                     if (filteredProducts.isEmpty()) {
-                        Text(
-                            text = if (searchQuery.isBlank() && selectedCategory == null) {
-                                stringResource(R.string.no_products_available)
-                            } else {
-                                stringResource(R.string.no_products_found_filters)
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        if (searchQuery.isBlank() && selectedCategory == null) {
+                            // Sin filtros aplicados - mostrar estado vacío con imagen
+                            EmptyStateProducts()
+                        } else {
+                            // Con filtros aplicados - mensaje simple
+                            Text(
+                                text = stringResource(R.string.no_products_found_filters),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
                     } else {
                         if (isTablet) {
                             // Tablet: Grid de 2 columnas
@@ -457,21 +460,29 @@ private fun ProductsScreenLandscape(
             }
             is ProductsUiState.Success -> {
                 if (filteredProducts.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (searchQuery.isBlank() && selectedCategory == null) {
-                                stringResource(R.string.no_products_available)
-                            } else {
-                                stringResource(R.string.no_products_found_filters)
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center
-                        )
+                    if (searchQuery.isBlank() && selectedCategory == null) {
+                        // Sin filtros aplicados - mostrar estado vacío con imagen
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(400.dp)
+                        ) {
+                            EmptyStateProducts()
+                        }
+                    } else {
+                        // Con filtros aplicados - mensaje simple
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.no_products_found_filters),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 } else {
                     if (isTablet) {

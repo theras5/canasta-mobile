@@ -94,6 +94,8 @@
     <string name="error_loading_products">Error loading products</string>
     <string name="no_products_available">No products available</string>
     <string name="no_products_found_filters">No products found with the applied filters</string>
+    <string name="empty_products_title">Looks like you don\'t have any products yet...</string>
+    <string name="empty_products_subtitle">Press the \"+\" button to add a new product.</string>
     <string name="delete_product_title">Delete Product</string>
     <string name="delete_product_message">Are you sure you want to delete \"%s\"? This action cannot be undone.</string>
     <string name="product_created_success">Product created successfully</string>
@@ -122,6 +124,8 @@
     <string name="delete_list_message">Are you sure you want to delete the list \"%s\"? This action cannot be undone.</string>
     <string name="empty_lists_title">Looks like you don\'t have any lists yet...</string>
     <string name="empty_lists_subtitle">Press the \"+\" button to create a new list.</string>
+    <string name="empty_list_detail_title">You don\'t have any products in this list</string>
+    <string name="empty_list_detail_subtitle">Press the \"+\" button to add products.</string>
 
     <!-- Create List Modal -->
     <string name="add_list_title">Add</string>
