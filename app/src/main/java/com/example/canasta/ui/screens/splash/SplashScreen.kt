@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.canasta.R
 import com.example.canasta.data.local.TokenManager
+import com.example.canasta.ui.theme.Primary
 import com.example.canasta.data.remote.ApiClient
 import kotlinx.coroutines.delay
 
@@ -74,7 +74,7 @@ fun SplashScreen(
             text = "Canasta",
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = Primary
         )
     }
 }
