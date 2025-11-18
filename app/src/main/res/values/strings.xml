@@ -204,7 +204,7 @@
     <string name="login">Iniciar Sesión</string>
     <string name="create_account">Crear Cuenta</string>
     <string name="access_your_canasta_account">Accede a tu cuenta de Canasta</string>
-    <string name="organize_your_shopping">Organiza tus compras con canasta</string>
+    <string name="organize_your_shopping">Organiza tus compras con Canasta</string>
     <string name="name_label">Nombre</string>
     <string name="surname_label">Apellido</string>
     <string name="email_label">Correo electrónico</string>

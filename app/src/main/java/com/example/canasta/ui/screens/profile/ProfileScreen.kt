@@ -43,6 +43,7 @@ import com.example.canasta.R
 import com.example.canasta.data.remote.models.GetUser
 import com.example.canasta.data.repository.AuthRepository
 import com.example.canasta.data.repository.UserRepository
+import com.example.canasta.ui.components.common.CommonScreenHeader
 import com.example.canasta.ui.components.profile.EditProfileSheet
 import com.example.canasta.ui.components.profile.LogoutButton
 import com.example.canasta.ui.components.profile.ProfileHeader
@@ -204,14 +205,13 @@ private fun TabletProfileLayout(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 48.dp),
+                    .padding(bottom = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.profile),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold
+                CommonScreenHeader(
+                    title = stringResource(R.string.profile),
+                    modifier = Modifier.weight(1f)
                 )
 
                 IconButton(
@@ -276,16 +276,13 @@ private fun MobileProfileLayout(
         ) {
             // Título "Perfil" con icono de editar
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 24.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.profile),
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                CommonScreenHeader(
+                    title = stringResource(R.string.profile),
+                    modifier = Modifier.weight(1f)
                 )
 
                 IconButton(
