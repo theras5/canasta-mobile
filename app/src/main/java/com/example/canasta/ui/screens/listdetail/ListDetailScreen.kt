@@ -353,7 +353,7 @@ fun ListDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = stringResource(R.string.delete_list),
-                                tint = Titles
+                                tint = Errors
                             )
                         }
                     }

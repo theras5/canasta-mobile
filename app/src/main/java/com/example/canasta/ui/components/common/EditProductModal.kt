@@ -10,9 +10,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,8 +40,9 @@ import com.example.canasta.ui.theme.Secondary
 import com.example.canasta.ui.theme.Titles
 
 /**
- * Modal para editar cantidad y unidad de un producto, similar a la versión web.
+ * Bottom sheet para editar cantidad y unidad de un producto.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProductModal(
     productName: String,
@@ -47,6 +52,7 @@ fun EditProductModal(
     onDismiss: () -> Unit,
     onConfirm: (Double, String) -> Unit
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var quantityText by remember { mutableStateOf(if (initialQuantity == 0.0) "" else initialQuantity.toString()) }
     var selectedUnit by remember { mutableStateOf(initialUnit.ifBlank { units.firstOrNull() ?: "unidades" }) }
 
@@ -56,8 +62,39 @@ fun EditProductModal(
         focusRequester.requestFocus()
     }
 
-    CustomModal(title = stringResource(R.string.edit_product_quantity), onDismiss = onDismiss) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color.White,
+        dragHandle = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .background(Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                )
+            }
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 32.dp)
+        ) {
+            // Título
+            Text(
+                text = stringResource(R.string.edit_product_quantity),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            // Nombre del producto
             Text(
                 text = productName,
                 color = Titles,
@@ -140,7 +177,7 @@ fun EditProductModal(
                     Text(text = stringResource(R.string.cancel), color = Color.Gray)
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
                 val quantityDouble = quantityText.toDoubleOrNull()
                 val isSaveEnabled = quantityDouble != null && quantityDouble > 0 && selectedUnit.isNotBlank()
