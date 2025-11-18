@@ -297,10 +297,22 @@ fun ListDetailScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
+                    IconButton(onClick = {
+                        // Si estamos en modo edición, primero cancelar la edición (sin guardar)
+                        if (uiState.screenMode == ScreenMode.EDIT) {
+                            viewModel.cancelEdit()
+                        } else {
+                            // Si estamos en modo vista, navegar hacia atrás
+                            onBackClick()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back),
+                            contentDescription = if (uiState.screenMode == ScreenMode.EDIT) {
+                                stringResource(R.string.cancel)
+                            } else {
+                                stringResource(R.string.back)
+                            },
                             tint = Titles
                         )
                     }

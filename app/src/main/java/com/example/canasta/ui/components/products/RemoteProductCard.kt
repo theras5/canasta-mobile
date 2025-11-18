@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.example.canasta.data.remote.models.GetCategory
 import com.example.canasta.data.remote.models.Product
 import com.example.canasta.ui.theme.CanastaTheme
+import com.example.canasta.ui.theme.Errors
 import com.example.canasta.ui.theme.Secondary
 
 @Composable
@@ -89,7 +90,11 @@ fun RemoteProductCard(
                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar")
             }
             IconButton(onClick = { onDeleteClick(product) }) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Eliminar",
+                    tint = Errors
+                )
             }
         }
     }

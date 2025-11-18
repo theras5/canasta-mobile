@@ -19,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import com.example.canasta.data.repository.UserRepository
 import com.example.canasta.ui.components.profile.EditProfileSheet
 import com.example.canasta.ui.components.profile.LogoutButton
 import com.example.canasta.ui.components.profile.ProfileHeader
+import com.example.canasta.ui.theme.Background
 import com.example.canasta.ui.theme.Errors
 import com.example.canasta.ui.theme.Success
 import com.example.canasta.utils.DeviceUtils
@@ -90,91 +92,92 @@ fun ProfileScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        if (isLoading) {
-            // Mostrar indicador de carga
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
+    Scaffold(
+        containerColor = Background,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    androidx.compose.material3.Snackbar(
+                        snackbarData = data,
+                        containerColor = if (lastSnackbarIsSuccess) Success else Errors,
+                        contentColor = Color.White
+                    )
+                }
             )
-        } else {
-            if (isTablet) {
-                // Diseño para Tablet: Layout de dos columnas
-                TabletProfileLayout(
-                    userProfile = userProfile,
-                    isUpdating = isUpdating,
-                    onEditClick = { showEdit = true },
-                    onLogout = {
-                        authRepository.logout()
-                        onLogout()
-                    }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (isLoading) {
+                // Mostrar indicador de carga
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                // Diseño para Móvil: Layout vertical original
-                MobileProfileLayout(
-                    userProfile = userProfile,
-                    isUpdating = isUpdating,
-                    isLandscape = isLandscape,
-                    onEditClick = { showEdit = true },
-                    onLogout = {
-                        authRepository.logout()
-                        onLogout()
-                    }
-                )
-            }
-
-            if (showEdit) {
-                EditProfileSheet(
-                    currentFirstName = userProfile?.name ?: "",
-                    currentLastName = userProfile?.surname ?: "",
-                    currentAvatarIndex = userProfile?.metadata?.get("avatarIndex")?.toIntOrNull() ?: 0,
-                    onDismissRequest = { showEdit = false },
-                    onConfirm = { firstName, lastName, avatarIndex ->
-                        isUpdating = true
-                        scope.launch {
-                            val metadata = mapOf("avatarIndex" to avatarIndex.toString())
-                            userRepository.updateUserProfile(
-                                name = firstName,
-                                surname = lastName,
-                                metadata = metadata
-                            ).fold(
-                                onSuccess = { updatedUser ->
-                                    userProfile = updatedUser
-                                    isUpdating = false
-                                    lastSnackbarIsSuccess = true
-                                    snackbarHostState.showSnackbar(context.getString(R.string.profile_updated))
-                                },
-                                onFailure = { error ->
-                                    isUpdating = false
-                                    lastSnackbarIsSuccess = false
-                                    snackbarHostState.showSnackbar(
-                                        context.getString(R.string.error_updating_profile)
-                                    )
-                                }
-                            )
+                if (isTablet) {
+                    // Diseño para Tablet: Layout de dos columnas
+                    TabletProfileLayout(
+                        userProfile = userProfile,
+                        isUpdating = isUpdating,
+                        onEditClick = { showEdit = true },
+                        onLogout = {
+                            authRepository.logout()
+                            onLogout()
                         }
-                    }
-                )
+                    )
+                } else {
+                    // Diseño para Móvil: Layout vertical original
+                    MobileProfileLayout(
+                        userProfile = userProfile,
+                        isUpdating = isUpdating,
+                        isLandscape = isLandscape,
+                        onEditClick = { showEdit = true },
+                        onLogout = {
+                            authRepository.logout()
+                            onLogout()
+                        }
+                    )
+                }
+
+                if (showEdit) {
+                    EditProfileSheet(
+                        currentFirstName = userProfile?.name ?: "",
+                        currentLastName = userProfile?.surname ?: "",
+                        currentAvatarIndex = userProfile?.metadata?.get("avatarIndex")?.toIntOrNull() ?: 0,
+                        onDismissRequest = { showEdit = false },
+                        onConfirm = { firstName, lastName, avatarIndex ->
+                            isUpdating = true
+                            scope.launch {
+                                val metadata = mapOf("avatarIndex" to avatarIndex.toString())
+                                userRepository.updateUserProfile(
+                                    name = firstName,
+                                    surname = lastName,
+                                    metadata = metadata
+                                ).fold(
+                                    onSuccess = { updatedUser ->
+                                        userProfile = updatedUser
+                                        isUpdating = false
+                                        lastSnackbarIsSuccess = true
+                                        snackbarHostState.showSnackbar(context.getString(R.string.profile_updated))
+                                    },
+                                    onFailure = { error ->
+                                        isUpdating = false
+                                        lastSnackbarIsSuccess = false
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.error_updating_profile)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
-
-        // Snackbar para mensajes con colores personalizados
-        SnackbarHost(
-            hostState = snackbarHostState,
-            snackbar = { data ->
-                androidx.compose.material3.Snackbar(
-                    snackbarData = data,
-                    containerColor = if (lastSnackbarIsSuccess) Success else Errors,
-                    contentColor = Color.White
-                )
-            },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(bottom = 16.dp)
-        )
     }
 }
 
@@ -193,7 +196,7 @@ private fun TabletProfileLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 48.dp, vertical = 32.dp),
+                .padding(horizontal = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -201,7 +204,7 @@ private fun TabletProfileLayout(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 48.dp),
+                    .padding(top = 8.dp, bottom = 48.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -268,14 +271,14 @@ private fun MobileProfileLayout(
                         Modifier
                     }
                 )
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Título "Perfil" con icono de editar
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                    .padding(top = 8.dp, bottom = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
